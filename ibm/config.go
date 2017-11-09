@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"time"
 
@@ -30,7 +29,7 @@ var BluemixRegion string
 var (
 	errEmptySoftLayerCredentials = errors.New("softlayer_username and softlayer_api_key must be provided. Please see the documentation on how to configure them")
 	errEmptyBluemixCredentials   = errors.New("bluemix_api_key must be provided. Please see the documentation on how to configure it")
-	errEmptyOpenWhiskCredentials = errors.New("openwhisk namespace, auth_key and end_point must be provided. Please see the documentation on how to configure them")
+	errEmptyOpenWhiskCredentials = errors.New("openwhisk_host and openwhisk_auth_key must be provided. Please see the documentation on how to configure them")
 )
 
 //Config stores user provider input
@@ -54,11 +53,11 @@ type Config struct {
 	// Softlayer API Key
 	SoftLayerAPIKey string
 
-	// OpenWhiskNameSpace ...
-	OpenWhiskNameSpace string
-
 	// OpenWhiskAuthKey ...
 	OpenWhiskAuthKey string
+
+	// OpenWhiskHost ...
+	OpenWhiskHost string
 
 	//Retry Count for API calls
 	//Unexposed in the schema at this point as they are used only during session creation for a few calls
@@ -162,17 +161,15 @@ func (c *Config) ClientSession() (interface{}, error) {
 		session: sess,
 	}
 
-	if c.OpenWhiskAuthKey == "" || c.OpenWhiskNameSpace == "" {
+	if c.OpenWhiskAuthKey == "" || c.OpenWhiskHost == "" {
 		session.wskConfigErr = errEmptyOpenWhiskCredentials
 	} else {
-		u, _ := url.Parse("https://openwhisk.ng.bluemix.net/api")
 		if os.Getenv("TF_LOG") != "" {
 			whisk.SetDebug(true)
 		}
 		wskClient, err := whisk.NewClient(http.DefaultClient, &whisk.Config{
-			Namespace: c.OpenWhiskNameSpace,
 			AuthToken: c.OpenWhiskAuthKey,
-			BaseURL:   u,
+			Host:      c.OpenWhiskHost,
 		})
 		if err != nil {
 			session.wskConfigErr = err

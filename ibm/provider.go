@@ -53,17 +53,11 @@ func Provider() terraform.ResourceProvider {
 				Description: "The Openwhisk API Key",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{"WSK_AUTH_KEY", "OPENWHISK_AUTH_KEY"}, ""),
 			},
-			"openwhisk_namespace": {
+			"openwhisk_host": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The Openwhisk API Key",
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{"WSK_NAMESPACE", "OPENWHISK_NAMESPACE"}, "_"),
-			},
-			"openwhisk_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The Openwhisk endpoint",
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{"WSK_NAMESPACE", "OPENWHISK_NAMESPACE"}, "openwhisk.ng.bluemix.net"),
+				Description: "The Openwhisk host",
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{"WSK_HOST", "OPENWHISK_HOST"}, "openwhisk.ng.bluemix.net"),
 			},
 		},
 
@@ -122,6 +116,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_network_vlan":              resourceIBMNetworkVlan(),
 			"ibm_object_storage_account":    resourceIBMObjectStorageAccount(),
 			"ibm_openwhisk_action":          resourceIBMOpenWhiskAction(),
+			"ibm_openwhisk_package":         resourceIBMOpenWhiskPackage(),
 			"ibm_service_instance":          resourceIBMServiceInstance(),
 			"ibm_service_key":               resourceIBMServiceKey(),
 			"ibm_space":                     resourceIBMSpace(),
@@ -141,7 +136,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	bluemixTimeout := d.Get("bluemix_timeout").(int)
 	region := d.Get("region").(string)
 
-	wskNameSpace := d.Get("openwhisk_namespace").(string)
+	wskHost := d.Get("openwhisk_host").(string)
 	wskAuthKey := d.Get("openwhisk_auth_key").(string)
 
 	config := Config{
@@ -151,7 +146,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		SoftLayerTimeout:     time.Duration(softlayerTimeout) * time.Second,
 		SoftLayerUserName:    softlayerUsername,
 		SoftLayerAPIKey:      softlayerAPIKey,
-		OpenWhiskNameSpace:   wskNameSpace,
+		OpenWhiskHost:        wskHost,
 		OpenWhiskAuthKey:     wskAuthKey,
 		RetryCount:           3,
 		RetryDelay:           30 * time.Millisecond,

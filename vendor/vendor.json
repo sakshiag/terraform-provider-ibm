@@ -93,16 +93,16 @@
 			"revisionTime": "2017-07-05T11:30:55Z"
 		},
 		{
-			"checksumSHA1": "YuGwC5cf8p4B4AE/eYGY2gMxfBU=",
+			"checksumSHA1": "zyBNTWb3CtsEdpf7Toc9z8k3slA=",
 			"path": "github.com/apache/incubator-openwhisk-client-go/whisk",
-			"revision": "a75fb9114e60a10b42dcc351ffba280fc989caa6",
-			"revisionTime": "2017-06-27T17:58:48Z"
+			"revision": "ad5aa3402b033edd8b30aec7f33434a253aa35ed",
+			"revisionTime": "2017-10-18T17:54:01Z"
 		},
 		{
-			"checksumSHA1": "QL3aXqqjIzICzEjYDT9GSoptyNc=",
+			"checksumSHA1": "68IA1o7TDhiUA+Ok+zeTy0E2EVI=",
 			"path": "github.com/apache/incubator-openwhisk-client-go/wski18n",
-			"revision": "a75fb9114e60a10b42dcc351ffba280fc989caa6",
-			"revisionTime": "2017-06-27T17:58:48Z"
+			"revision": "ad5aa3402b033edd8b30aec7f33434a253aa35ed",
+			"revisionTime": "2017-10-18T17:54:01Z"
 		},
 		{
 			"checksumSHA1": "FIL83loX9V9APvGQIjJpbxq53F0=",
