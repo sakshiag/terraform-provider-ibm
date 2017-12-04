@@ -63,6 +63,27 @@ func TestAccOpenWhiskAction_With_Annotations(t *testing.T) {
 	})
 }
 
+func TestAccOpenWhiskAction_With_Sequence(t *testing.T) {
+	var conf whisk.Action
+	name := fmt.Sprintf("terraform_%d", acctest.RandInt())
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckOpenWhiskActionDestroy,
+		Steps: []resource.TestStep{
+
+			resource.TestStep{
+				Config: testAccCheckOpenWhiskActionCreateWithSequence(name),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckOpenWhiskActionExists("ibm_openwhisk_action.action", &conf),
+					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "name", name),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckOpenWhiskActionExists(n string, obj *whisk.Action) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
@@ -116,7 +137,7 @@ func testAccCheckOpenWhiskActionCreate(name string) string {
 resource "ibm_openwhisk_action" "action" {
    	name = "%s"
 	exec = {
-	 kind = "nodejs"
+	 kind = "nodejs:6"
      code = "${file("test-fixtures/wsk-create-cat.js")}"
   	}
 	limits = {
@@ -172,6 +193,19 @@ resource "ibm_openwhisk_action" "action" {
     }
 ]
 EOF
+
+}`, name)
+
+}
+
+func testAccCheckOpenWhiskActionCreateWithSequence(name string) string {
+	return fmt.Sprintf(`
+	
+resource "ibm_openwhisk_action" "action" {
+   	name = "%s"
+	exec = {
+	 components = ["/whisk.system/utils/split", "/whisk.system/utils/sort"]
+	}
 
 }`, name)
 

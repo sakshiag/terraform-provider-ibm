@@ -1,10 +1,8 @@
 package ibm
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/apache/incubator-openwhisk-client-go/whisk"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -26,56 +24,75 @@ func resourceIBMOpenWhiskAction() *schema.Resource {
 				ForceNew:    true,
 				Description: "The name of the action",
 			},
-			"overwrite": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Overwrite item if it exists. Default is false.",
-			},
 			"limits": {
-				Type:     schema.TypeList,
-				Required: true,
+				Type:     schema.TypeSet,
+				Optional: true,
 				MaxItems: 1,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"timeout": {
 							Type:        schema.TypeInt,
-							Required:    true,
-							Description: "Timeout in milliseconds",
+							Optional:    true,
+							Default:     60000,
+							Description: "The timeout LIMIT in milliseconds after which the action is terminated.",
 						},
 						"memory": {
 							Type:        schema.TypeInt,
-							Required:    true,
-							Description: "Memory.",
+							Optional:    true,
+							Default:     256,
+							Description: "The maximum memory LIMIT in MB for the action (default 256.",
+						},
+						"log_size": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Default:     10,
+							Description: "The maximum log size LIMIT in MB for the action.",
 						},
 					},
 				},
 			},
 			"exec": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"image": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Container image name when kind is 'blackbox'.",
+							Type:          schema.TypeString,
+							Optional:      true,
+							Description:   "Container image name when kind is 'blackbox'.",
+							ConflictsWith: []string{"exec.components", "exec.code"},
 						},
 						"init": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Optional zipfile reference when code kind is 'nodejs'.",
+							Type:          schema.TypeString,
+							Optional:      true,
+							Description:   "Optional zipfile reference when code kind is 'nodejs'.",
+							ConflictsWith: []string{"exec.image", "exec.components"},
 						},
 						"code": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Javascript or Swift code to execute when kind is 'nodejs' or 'swift'.",
+							Type:          schema.TypeString,
+							Optional:      true,
+							Description:   "The code to execute when kind is not ‘blackbox’",
+							ConflictsWith: []string{"exec.image", "exec.components"},
 						},
 						"kind": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "The type of action. Possible values: nodejs, blackbox, swift.",
+							Description: "The type of action. Possible values: nodejs, blackbox, swift, sequence",
+						},
+						"main": {
+							Type:          schema.TypeString,
+							Optional:      true,
+							Description:   "The name of the action entry point (function or fully-qualified method name when applicable)",
+							ConflictsWith: []string{"exec.image", "exec.components"},
+						},
+						"components": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							Elem:          &schema.Schema{Type: schema.TypeString},
+							Description:   "The List of fully qualified action",
+							ConflictsWith: []string{"exec.image", "exec.code"},
 						},
 					},
 				},
@@ -87,13 +104,13 @@ func resourceIBMOpenWhiskAction() *schema.Resource {
 			},
 			"version": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "0.0.1",
+				Computed:    true,
 				Description: "Semantic version of the item.",
 			},
 			"annotations": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Default:          "[]",
 				Description:      "Annotations on the item.",
 				ValidateFunc:     validateJSONString,
 				DiffSuppressFunc: suppressEquivalentJSON,
@@ -125,8 +142,7 @@ func resourceIBMOpenWhiskActionCreate(d *schema.ResourceData, meta interface{}) 
 	}
 	actionService := wskClient.Actions
 
-	limits := d.Get("limits").([]interface{})
-	exec := d.Get("exec").([]interface{})
+	exec := d.Get("exec").(*schema.Set)
 
 	payload := whisk.Action{
 		Name:      d.Get("name").(string),
@@ -149,25 +165,19 @@ func resourceIBMOpenWhiskActionCreate(d *schema.ResourceData, meta interface{}) 
 		}
 	}
 
+	if v := d.Get("limits").(*schema.Set); len(v.List()) > 0 {
+		payload.Limits = expandLimits(v.List())
+	}
+
 	if publish, ok := d.GetOk("publish"); ok {
 		p := publish.(bool)
 		payload.Publish = &p
 	}
 
-	if version, ok := d.GetOk("version"); ok {
-		payload.Version = version.(string)
-	}
-
-	payload.Limits = expandLimits(limits)
 	payload.Exec = expandExec(exec)
 
-	var overwrite = false
-	if ow, ok := d.GetOk("overwrite"); ok {
-		overwrite = ow.(bool)
-	}
-
 	log.Println("[INFO] Creating OpenWhisk Action")
-	action, _, err := actionService.Insert(&payload, overwrite)
+	action, _, err := actionService.Insert(&payload, false)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenWhisk Action: %s", err)
 	}
@@ -215,26 +225,21 @@ func resourceIBMOpenWhiskActionUpdate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	actionService := wskClient.Actions
-	payload := whisk.Action{}
+	payload := whisk.Action{
+		Name:      d.Get("name").(string),
+		Namespace: wskClient.Namespace,
+	}
 
 	if d.HasChange("publish") {
 		p := d.Get("publish").(bool)
 		payload.Publish = &p
-	}
 
-	if d.HasChange("version") {
-		payload.Version = d.Get("version").(string)
-	}
-	var overwrite = false
-	if ow, ok := d.GetOk("overwrite"); ok {
-		overwrite = ow.(bool)
-	}
+		log.Println("[INFO] Update OpenWhisk Action")
 
-	log.Println("[INFO] Update OpenWhisk Action")
-
-	_, _, err = actionService.Insert(&payload, overwrite)
-	if err != nil {
-		return fmt.Errorf("Error updating OpenWhisk Action: %s", err)
+		_, _, err = actionService.Insert(&payload, true)
+		if err != nil {
+			return fmt.Errorf("Error updating OpenWhisk Action: %s", err)
+		}
 	}
 
 	return resourceIBMOpenWhiskActionRead(d, meta)
@@ -271,106 +276,4 @@ func resourceIBMOpenWhiskActionExists(d *schema.ResourceData, meta interface{}) 
 		return false, fmt.Errorf("Error communicating with OpenWhisk Client : %s", err)
 	}
 	return action.Name == id, nil
-}
-
-func expandLimits(l []interface{}) *whisk.Limits {
-	if len(l) == 0 || l[0] == nil {
-		return &whisk.Limits{}
-	}
-	in := l[0].(map[string]interface{})
-	obj := &whisk.Limits{
-		Timeout: ptrToInt(in["timeout"].(int)),
-		Memory:  ptrToInt(in["memory"].(int)),
-	}
-	return obj
-}
-
-func flattenLimits(in *whisk.Limits) []interface{} {
-	att := make(map[string]interface{})
-	if in.Timeout != nil {
-		att["timeout"] = in.Timeout
-	}
-	if in.Memory != nil {
-		att["memory"] = in.Memory
-	}
-	return []interface{}{att}
-}
-
-func expandExec(l []interface{}) *whisk.Exec {
-	if len(l) == 0 || l[0] == nil {
-		return &whisk.Exec{}
-	}
-	in := l[0].(map[string]interface{})
-	obj := &whisk.Exec{
-		Image: in["image"].(string),
-		Init:  in["init"].(string),
-		Code:  ptrToString(in["code"].(string)),
-		Kind:  in["kind"].(string),
-	}
-	return obj
-}
-
-func flattenExec(in *whisk.Exec) []interface{} {
-	att := make(map[string]interface{})
-	if in.Image != "" {
-		att["image"] = in.Image
-	}
-	if in.Init != "" {
-		att["init"] = in.Init
-	}
-	if in.Code != nil {
-		att["code"] = *in.Code
-	}
-	if in.Kind != "" {
-		att["kind"] = in.Kind
-	}
-
-	return []interface{}{att}
-}
-
-func expandAnnotations(annotations string) (whisk.KeyValueArr, error) {
-	var result whisk.KeyValueArr
-	dc := json.NewDecoder(strings.NewReader(annotations))
-	dc.UseNumber()
-	err := dc.Decode(&result)
-	return result, err
-}
-
-func flattenAnnotations(in whisk.KeyValueArr) (string, error) {
-	noExec := make(whisk.KeyValueArr, 0, len(in))
-	for _, v := range in {
-		if v.Key == "exec" {
-			continue
-		}
-		noExec = append(noExec, v)
-	}
-	b, err := json.Marshal(noExec)
-	if err != nil {
-		return "", err
-	}
-	return string(b[:]), nil
-}
-
-func expandParameters(annotations string) (whisk.KeyValueArr, error) {
-	var result whisk.KeyValueArr
-	dc := json.NewDecoder(strings.NewReader(annotations))
-	dc.UseNumber()
-	err := dc.Decode(&result)
-	return result, err
-}
-
-func flattenParameters(in whisk.KeyValueArr) (string, error) {
-	b, err := json.Marshal(in)
-	if err != nil {
-		return "", err
-	}
-	return string(b[:]), nil
-}
-
-func ptrToInt(i int) *int {
-	return &i
-}
-
-func ptrToString(s string) *string {
-	return &s
 }
