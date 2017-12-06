@@ -70,9 +70,17 @@ func resourceIBMOpenWhiskPackageCreate(d *schema.ResourceData, meta interface{})
 	}
 	packageService := wskClient.Packages
 
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(d.Get("name").(string)); err != nil {
+		return NewQualifiedNameError(d.Get("name").(string), err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	payload := whisk.Package{
-		Name:      d.Get("name").(string),
-		Namespace: wskClient.Namespace,
+		Name:      qualifiedName.GetEntityName(),
+		Namespace: qualifiedName.GetNamespace(),
 	}
 	if v, ok := d.GetOk("annotations"); ok {
 		var err error
@@ -118,6 +126,14 @@ func resourceIBMOpenWhiskPackageRead(d *schema.ResourceData, meta interface{}) e
 	packageService := wskClient.Packages
 	id := d.Id()
 
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(id); err != nil {
+		return NewQualifiedNameError(id, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	pkg, _, err := packageService.Get(id)
 	if err != nil {
 		return fmt.Errorf("Error retrieving OpenWhisk package %s : %s", id, err)
@@ -146,9 +162,18 @@ func resourceIBMOpenWhiskPackageUpdate(d *schema.ResourceData, meta interface{})
 		return err
 	}
 	packageService := wskClient.Packages
+
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(d.Get("name").(string)); err != nil {
+		return NewQualifiedNameError(d.Get("name").(string), err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	payload := whisk.Package{
-		Name:      d.Get("name").(string),
-		Namespace: wskClient.Namespace,
+		Name:      qualifiedName.GetEntityName(),
+		Namespace: qualifiedName.GetNamespace(),
 	}
 	ischanged := false
 	if d.HasChange("publish") {
@@ -194,6 +219,13 @@ func resourceIBMOpenWhiskPackageDelete(d *schema.ResourceData, meta interface{})
 	}
 	packageService := wskClient.Packages
 	id := d.Id()
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(id); err != nil {
+		return NewQualifiedNameError(id, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
 	_, err = packageService.Delete(id)
 	if err != nil {
 		return fmt.Errorf("Error deleting OpenWhisk Package: %s", err)
@@ -210,6 +242,14 @@ func resourceIBMOpenWhiskPackageExists(d *schema.ResourceData, meta interface{})
 	}
 	packageService := wskClient.Packages
 	id := d.Id()
+
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(id); err != nil {
+		return false, NewQualifiedNameError(id, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
 	pkg, resp, err := packageService.Get(id)
 	if err != nil {
 		if resp.StatusCode == 404 {

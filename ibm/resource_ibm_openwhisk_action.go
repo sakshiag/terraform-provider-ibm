@@ -144,9 +144,19 @@ func resourceIBMOpenWhiskActionCreate(d *schema.ResourceData, meta interface{}) 
 
 	exec := d.Get("exec").(*schema.Set)
 
+	name := d.Get("name").(string)
+
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(name); err != nil {
+		return NewQualifiedNameError(name, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	payload := whisk.Action{
-		Name:      d.Get("name").(string),
-		Namespace: wskClient.Namespace,
+		Name:      qualifiedName.GetEntityName(),
+		Namespace: qualifiedName.GetNamespace(),
 	}
 
 	if v, ok := d.GetOk("annotations"); ok {
@@ -195,6 +205,14 @@ func resourceIBMOpenWhiskActionRead(d *schema.ResourceData, meta interface{}) er
 	actionService := wskClient.Actions
 	id := d.Id()
 
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(id); err != nil {
+		return NewQualifiedNameError(id, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	action, _, err := actionService.Get(id)
 	if err != nil {
 		return fmt.Errorf("Error retrieving OpenWhisk Action %s : %s", id, err)
@@ -225,9 +243,19 @@ func resourceIBMOpenWhiskActionUpdate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	actionService := wskClient.Actions
+	name := d.Get("name").(string)
+
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(name); err != nil {
+		return NewQualifiedNameError(name, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	payload := whisk.Action{
-		Name:      d.Get("name").(string),
-		Namespace: wskClient.Namespace,
+		Name:      qualifiedName.GetEntityName(),
+		Namespace: qualifiedName.GetNamespace(),
 	}
 
 	if d.HasChange("publish") {
@@ -252,6 +280,15 @@ func resourceIBMOpenWhiskActionDelete(d *schema.ResourceData, meta interface{}) 
 	}
 	actionService := wskClient.Actions
 	id := d.Id()
+
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(id); err != nil {
+		return NewQualifiedNameError(id, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	_, err = actionService.Delete(id)
 	if err != nil {
 		return fmt.Errorf("Error deleting OpenWhisk Action: %s", err)
@@ -268,6 +305,14 @@ func resourceIBMOpenWhiskActionExists(d *schema.ResourceData, meta interface{}) 
 	}
 	actionService := wskClient.Actions
 	id := d.Id()
+	var qualifiedName = new(QualifiedName)
+
+	if qualifiedName, err = NewQualifiedName(id); err != nil {
+		return false, NewQualifiedNameError(id, err)
+	}
+
+	wskClient.Namespace = qualifiedName.GetNamespace()
+
 	action, resp, err := actionService.Get(id)
 	if err != nil {
 		if resp.StatusCode == 404 {

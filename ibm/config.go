@@ -166,10 +166,13 @@ func (c *Config) ClientSession() (interface{}, error) {
 	} else {
 		if os.Getenv("TF_LOG") != "" {
 			whisk.SetDebug(true)
+			whisk.SetVerbose(true)
 		}
 		wskClient, err := whisk.NewClient(http.DefaultClient, &whisk.Config{
 			AuthToken: c.OpenWhiskAuthKey,
 			Host:      c.OpenWhiskHost,
+			Debug:     true,
+			Verbose:   true,
 		})
 		if err != nil {
 			session.wskConfigErr = err
