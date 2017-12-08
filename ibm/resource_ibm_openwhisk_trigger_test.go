@@ -182,6 +182,30 @@ func TestAccOpenWhiskTrigger_Import(t *testing.T) {
 	})
 }
 
+func TestAccOpenWhiskTrigger_With_Feed(t *testing.T) {
+	var conf whisk.Trigger
+	name := fmt.Sprintf("terraform_%d", acctest.RandInt())
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckOpenWhiskTriggerDestroy,
+		Steps: []resource.TestStep{
+
+			resource.TestStep{
+				Config: testAccCheckOpenWhiskTriggerWithFeed(name),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckOpenWhiskTriggerExists("ibm_openwhisk_trigger.trigger", &conf),
+					resource.TestCheckResourceAttr("ibm_openwhisk_trigger.trigger", "name", name),
+					resource.TestCheckResourceAttr("ibm_openwhisk_trigger.trigger", "version", "0.0.1"),
+					resource.TestCheckResourceAttr("ibm_openwhisk_trigger.trigger", "publish", "false"),
+					resource.TestCheckResourceAttr("ibm_openwhisk_trigger.trigger", "feed", "/whisk.system/alarms/alarm"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckOpenWhiskTriggerExists(n string, obj *whisk.Trigger) resource.TestCheckFunc {
 
 	return func(s *terraform.State) error {
@@ -375,4 +399,51 @@ resource "ibm_openwhisk_trigger" "trigger" {
 	   name = "%s"
 	   publish = true
 }`, name)
+}
+
+func testAccCheckOpenWhiskTriggerWithFeed(name string) string {
+	return fmt.Sprintf(`
+	
+resource "ibm_openwhisk_trigger" "trigger" {
+	   name = "%s"
+	   feed = "/whisk.system/alarms/alarm"
+	parameters = <<EOF
+	[
+    {
+        "key":"place",
+        "value":"city"
+    },
+    {
+        "key":"parameter",
+        "value": {
+			"count": 3
+		}
+    },
+    {
+        "key":"final",
+        "value": [
+			{
+				"description": "Set of Values",
+				"name": "payload",
+				"required": true
+			}
+		]
+	},
+	{
+        "key":"cron",
+        "value":"0 */2 * * *"
+    }
+]
+EOF
+
+annotations = <<EOF
+[
+{
+	"key":"description",
+	"value":"Alaram feed"
+}
+]
+EOF
+}`, name)
+
 }

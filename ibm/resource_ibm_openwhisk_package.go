@@ -108,7 +108,7 @@ func resourceIBMOpenWhiskPackageCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	log.Println("[INFO] Creating OpenWhisk pkg")
-	result, _, err := packageService.Insert(&payload, true)
+	result, _, err := packageService.Insert(&payload, false)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenWhisk pkg: %s", err)
 	}

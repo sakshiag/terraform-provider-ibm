@@ -144,7 +144,7 @@ func resourceIBMOpenWhiskTriggerCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	log.Println("[INFO] Creating OpenWhisk trigger")
-	result, _, err := TriggerService.Insert(&payload, true)
+	result, _, err := TriggerService.Insert(&payload, false)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenWhisk trigger: %s", err)
 	}
@@ -167,9 +167,9 @@ func resourceIBMOpenWhiskTriggerCreate(d *schema.ResourceData, meta interface{})
 
 		wskClient.Namespace = feedQualifiedName.GetNamespace()
 		ActionService := wskClient.Actions
-		log.Println("******", feedPayload)
 		_, _, err := ActionService.Invoke(feedQualifiedName.GetEntityName(), feedPayload, true, false)
 		if err != nil {
+			wskClient.Namespace = qualifiedName.GetNamespace()
 			_, _, delerr := TriggerService.Delete(name)
 			if delerr != nil {
 				return fmt.Errorf("Error creating OpenWhisk trigger with feed: %s", err)
