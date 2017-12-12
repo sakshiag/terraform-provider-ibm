@@ -63,8 +63,7 @@ func resourceIBMComputeProvisioningHookCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceIBMComputeProvisioningHookRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetProvisioningHookService(sess)
+	service := services.GetProvisioningHookService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	hookId, _ := strconv.Atoi(d.Id())
 
@@ -126,8 +125,7 @@ func resourceIBMComputeProvisioningHookDelete(d *schema.ResourceData, meta inter
 }
 
 func resourceIBMComputeProvisioningHookExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetProvisioningHookService(sess)
+	service := services.GetProvisioningHookService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	hookId, err := strconv.Atoi(d.Id())
 	if err != nil {

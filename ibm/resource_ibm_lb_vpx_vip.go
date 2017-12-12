@@ -123,7 +123,7 @@ func resourceIBMLbVpxVip() *schema.Resource {
 }
 
 func resourceIBMLbVpxVipCreate(d *schema.ResourceData, meta interface{}) error {
-	version, err := getVPXVersion(d.Get("nad_controller_id").(int), meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(d.Get("nad_controller_id").(int), meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error creating Virtual Ip Address: %s", err)
 	}
@@ -141,7 +141,7 @@ func resourceIBMLbVpxVipRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error Reading Virtual IP Address: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error Reading Virtual Ip Address: %s", err)
 	}
@@ -159,7 +159,7 @@ func resourceIBMLbVpxVipUpdate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error updating Virtual IP Address: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error updating Virtual Ip Address: %s", err)
 	}
@@ -177,7 +177,7 @@ func resourceIBMLbVpxVipDelete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error deleting Virtual Ip Address: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error deleting Virtual Ip Address: %s", err)
 	}
@@ -195,7 +195,7 @@ func resourceIBMLbVpxVipExists(d *schema.ResourceData, meta interface{}) (bool, 
 		return false, fmt.Errorf("Error in exists: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return false, fmt.Errorf("Error in exists: %s", err)
 	}
@@ -287,7 +287,7 @@ func resourceIBMLbVpxVipCreate101(d *schema.ResourceData, meta interface{}) erro
 
 func resourceIBMLbVpxVipCreate105(d *schema.ResourceData, meta interface{}) error {
 	nadcId := d.Get("nad_controller_id").(int)
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}
@@ -339,7 +339,7 @@ func resourceIBMLbVpxVipCreate105(d *schema.ResourceData, meta interface{}) erro
 		// Delete the previous security certificate.
 		deleteSecurityCertificate(nClient, vipName, securityCertificateId)
 
-		err = configureSecurityCertificate(nClient, meta.(ClientSession).SoftLayerSession(), vipName, securityCertificateId)
+		err = configureSecurityCertificate(nClient, meta.(ClientSession).SoftLayerSessionWithRetry(), vipName, securityCertificateId)
 
 		if err != nil {
 			// Rollback VIP creation and return an error.
@@ -356,7 +356,7 @@ func resourceIBMLbVpxVipCreate105(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMLbVpxVipRead101(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	nadcId, vipName, err := parseId(d.Id())
 	if err != nil {
@@ -398,7 +398,7 @@ func resourceIBMLbVpxVipRead105(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("ibm_lb_vpx : %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}
@@ -499,7 +499,7 @@ func resourceIBMLbVpxVipUpdate101(d *schema.ResourceData, meta interface{}) erro
 
 func resourceIBMLbVpxVipUpdate105(d *schema.ResourceData, meta interface{}) error {
 	nadcId := d.Get("nad_controller_id").(int)
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}
@@ -584,7 +584,7 @@ func resourceIBMLbVpxVipDelete105(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("ibm_lb_vpx : %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error deleting Virtual Ip Address %s: %s", vipName, err)
 	}
@@ -605,14 +605,13 @@ func resourceIBMLbVpxVipDelete105(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMLbVpxVipExists101(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
 
 	nadcId, vipName, err := parseId(d.Id())
 	if err != nil {
 		return false, fmt.Errorf("ibm_lb_vpx : %s", err)
 	}
 
-	vip, err := network.GetNadcLbVipByName(sess, nadcId, vipName)
+	vip, err := network.GetNadcLbVipByName(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId, vipName)
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
 			if apiErr.StatusCode == 404 {
@@ -630,7 +629,7 @@ func resourceIBMLbVpxVipExists105(d *schema.ResourceData, meta interface{}) (boo
 		return false, fmt.Errorf("ibm_lb_vpx : %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return false, err
 	}
@@ -648,8 +647,8 @@ func resourceIBMLbVpxVipExists105(d *schema.ResourceData, meta interface{}) (boo
 	return true, nil
 }
 
-func getNitroClient(sess *session.Session, nadcId int) (*client.NitroClient, error) {
-	service := services.GetNetworkApplicationDeliveryControllerService(sess)
+func getNitroClient(sessWithRetry *session.Session, nadcId int) (*client.NitroClient, error) {
+	service := services.GetNetworkApplicationDeliveryControllerService(sessWithRetry)
 	nadc, err := service.Id(nadcId).Mask("managementIpAddress,password[password]").GetObject()
 	if err != nil {
 		return nil, fmt.Errorf("Error retrieving netscaler: %s", err)
@@ -658,10 +657,10 @@ func getNitroClient(sess *session.Session, nadcId int) (*client.NitroClient, err
 		"root", *nadc.Password.Password, true), nil
 }
 
-func configureSecurityCertificate(nClient *client.NitroClient, sess *session.Session, vipName string, securityCertificateId int) error {
+func configureSecurityCertificate(nClient *client.NitroClient, sessWithRetry *session.Session, vipName string, securityCertificateId int) error {
 	// Read security_certificate
-	service := services.GetSecurityCertificateService(sess)
-	cert, err := service.Id(securityCertificateId).GetObject()
+
+	cert, err := services.GetSecurityCertificateService(sessWithRetry).Id(securityCertificateId).GetObject()
 	if err != nil {
 		return fmt.Errorf("Unable to get Security Certificate: %s", err)
 	}

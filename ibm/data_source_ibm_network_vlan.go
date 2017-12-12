@@ -67,7 +67,7 @@ func dataSourceIBMNetworkVlan() *schema.Resource {
 }
 
 func dataSourceIBMNetworkVlanRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetAccountService(sess)
 
 	name := d.Get("name").(string)
@@ -140,7 +140,7 @@ func dataSourceIBMNetworkVlanRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func getVlan(vlanNumber int, primaryRouterHostname string, name string, meta interface{}) (*datatypes.Network_Vlan, error) {
-	service := services.GetAccountService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	filters := filter.New(filter.Path("networkVlans.primaryRouter.hostname").Eq(primaryRouterHostname),
 		filter.Path("networkVlans.vlanNumber").Eq(vlanNumber))

@@ -61,15 +61,14 @@ func resourceIBMNetworkInterfaceSGAttachmentCreate(d *schema.ResourceData, meta 
 	// If user has not explicity disabled soft reboot
 	if ok := d.Get("soft_reboot").(bool); ok {
 		//Check if a soft reboot is required and perform it
-		ncs := services.GetVirtualGuestNetworkComponentService(sess)
-		ready, err := ncs.Id(interfaceID).SecurityGroupsReady()
+		ready, err := services.GetVirtualGuestNetworkComponentService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(interfaceID).SecurityGroupsReady()
 		if err != nil {
 			return err
 		}
 		if !ready {
 			log.Println("Soft reboot the VSI whose network component is", interfaceID)
 		}
-		guest, err := ncs.Id(interfaceID).GetGuest()
+		guest, err := services.GetVirtualGuestNetworkComponentService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(interfaceID).GetGuest()
 		if err != nil {
 			return fmt.Errorf("Couldn't retrieve the virtual guest on interface %d", interfaceID)
 		}
@@ -86,7 +85,7 @@ func resourceIBMNetworkInterfaceSGAttachmentCreate(d *schema.ResourceData, meta 
 			Target:  []string{"true"},
 			Pending: []string{"false"},
 			Timeout: 5 * time.Minute,
-			Refresh: securityGroupReadyRefreshStateFunc(sess, interfaceID),
+			Refresh: securityGroupReadyRefreshStateFunc(meta.(ClientSession).SoftLayerSessionWithRetry(), interfaceID),
 		}
 		_, err = stateConf.WaitForState()
 		if err != nil {
@@ -98,7 +97,7 @@ func resourceIBMNetworkInterfaceSGAttachmentCreate(d *schema.ResourceData, meta 
 }
 
 func resourceIBMNetworkInterfaceSGAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSecurityGroupService(sess)
 	sgID, interfaceID, err := decomposeNetworkSGAttachmentID(d.Id())
 	if err != nil {
@@ -135,7 +134,7 @@ func resourceIBMNetworkInterfaceSGAttachmentDelete(d *schema.ResourceData, meta 
 }
 
 func resourceIBMNetworkInterfaceSGAttachmentExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSecurityGroupService(sess)
 
 	sgID, interfaceID, err := decomposeNetworkSGAttachmentID(d.Id())
@@ -177,9 +176,9 @@ func decomposeNetworkSGAttachmentID(attachmentID string) (sgID, interfaceID int,
 	return
 }
 
-func securityGroupReadyRefreshStateFunc(sess *slsession.Session, ifcID int) resource.StateRefreshFunc {
+func securityGroupReadyRefreshStateFunc(sessWithRetry *slsession.Session, ifcID int) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		ncs := services.GetVirtualGuestNetworkComponentService(sess)
+		ncs := services.GetVirtualGuestNetworkComponentService(sessWithRetry)
 		ready, err := ncs.Id(ifcID).SecurityGroupsReady()
 		if err != nil {
 			return ready, "false", err

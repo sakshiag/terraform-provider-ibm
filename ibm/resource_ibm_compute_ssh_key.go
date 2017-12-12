@@ -74,7 +74,7 @@ func resourceIBMComputeSSHKeyCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	keys, err := services.GetAccountService(sess).
+	keys, err := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Filter(filter.Path("sshKeys.fingerprint").Eq(fingerprint).Build()).
 		GetSshKeys()
 	if err == nil && len(keys) > 0 {
@@ -128,8 +128,7 @@ func resourceIBMComputeSSHKeyCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMComputeSSHKeyRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetSecuritySshKeyService(sess)
+	service := services.GetSecuritySshKeyService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	keyID, _ := strconv.Atoi(d.Id())
 	key, err := service.Id(keyID).GetObject()
@@ -197,8 +196,7 @@ func resourceIBMComputeSSHKeyDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMComputeSSHKeyExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetSecuritySshKeyService(sess)
+	service := services.GetSecuritySshKeyService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	keyID, err := strconv.Atoi(d.Id())
 	if err != nil {

@@ -145,12 +145,12 @@ func resourceIBMComputeUserCreate(d *schema.ResourceData, meta interface{}) erro
 	sess := meta.(ClientSession).SoftLayerSession()
 	service := services.GetUserCustomerService(sess)
 
-	timezoneID, err := getTimezoneIDByName(sess, d.Get("timezone").(string))
+	timezoneID, err := getTimezoneIDByName(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("timezone").(string))
 	if err != nil {
 		return err
 	}
 
-	userStatusID, err := getUserStatusIDByName(sess, d.Get("user_status").(string))
+	userStatusID, err := getUserStatusIDByName(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("user_status").(string))
 	if err != nil {
 		return err
 	}
@@ -228,8 +228,7 @@ func resourceIBMComputeUserCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMComputeUserRead(d *schema.ResourceData, meta interface{}) error {
-	service := services.GetUserCustomerService(meta.(ClientSession).SoftLayerSession())
-
+	service := services.GetUserCustomerService(meta.(ClientSession).SoftLayerSessionWithRetry())
 	userID, _ := strconv.Atoi(d.Id())
 
 	mask := strings.Join([]string{
@@ -300,8 +299,8 @@ func resourceIBMComputeUserRead(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceIBMComputeUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetUserCustomerService(sess)
+
+	service := services.GetUserCustomerService(meta.(ClientSession).SoftLayerSession())
 
 	sluid, _ := strconv.Atoi(d.Id())
 
@@ -325,7 +324,7 @@ func resourceIBMComputeUserUpdate(d *schema.ResourceData, meta interface{}) erro
 	}, ";")
 
 	service = service.Id(sluid)
-	userObj, err := service.Mask(mask).GetObject()
+	userObj, err := services.GetUserCustomerService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(sluid).Mask(mask).GetObject()
 
 	// Some fields cannot be updated such as username. Computed fields also cannot be updated
 	// by explicitly providing a value. So only update the fields that are editable.
@@ -358,14 +357,14 @@ func resourceIBMComputeUserUpdate(d *schema.ResourceData, meta interface{}) erro
 		userObj.Country = sl.String(d.Get("country").(string))
 	}
 	if d.HasChange("timezone") {
-		tzID, err := getTimezoneIDByName(sess, d.Get("timezone").(string))
+		tzID, err := getTimezoneIDByName(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("timezone").(string))
 		if err != nil {
 			return err
 		}
 		userObj.TimezoneId = &tzID
 	}
 	if d.HasChange("user_status") {
-		userStatusID, err := getUserStatusIDByName(sess, d.Get("user_status").(string))
+		userStatusID, err := getUserStatusIDByName(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("user_status").(string))
 		if err != nil {
 			return err
 		}
@@ -472,7 +471,7 @@ func resourceIBMComputeUserDelete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMComputeUserExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	service := services.GetUserCustomerService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetUserCustomerService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	id, err := strconv.Atoi(d.Id())
 
@@ -481,8 +480,8 @@ func resourceIBMComputeUserExists(d *schema.ResourceData, meta interface{}) (boo
 	return result.Id != nil && *result.Id == id && err == nil, nil
 }
 
-func getTimezoneIDByName(sess *session.Session, shortName string) (int, error) {
-	zones, err := services.GetLocaleTimezoneService(sess).
+func getTimezoneIDByName(sessWithRetry *session.Session, shortName string) (int, error) {
+	zones, err := services.GetLocaleTimezoneService(sessWithRetry).
 		Mask("id,shortName").
 		GetAllObjects()
 
@@ -500,8 +499,8 @@ func getTimezoneIDByName(sess *session.Session, shortName string) (int, error) {
 
 }
 
-func getUserStatusIDByName(sess *session.Session, name string) (int, error) {
-	statuses, err := services.GetUserCustomerStatusService(sess).
+func getUserStatusIDByName(sessWithRetry *session.Session, name string) (int, error) {
+	statuses, err := services.GetUserCustomerStatusService(sessWithRetry).
 		Mask("id,keyName").
 		GetAllObjects()
 

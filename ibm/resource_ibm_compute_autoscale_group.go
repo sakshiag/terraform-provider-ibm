@@ -269,7 +269,7 @@ func resourceIBMComputeAutoScaleGroupCreate(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error while parsing network vlan values: %s", err)
 	}
 
-	locationGroupRegionalId, err := getLocationGroupRegionalId(sess, d.Get("regional_group").(string))
+	locationGroupRegionalId, err := getLocationGroupRegionalId(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("regional_group").(string))
 	if err != nil {
 		return err
 	}
@@ -349,8 +349,8 @@ func buildLoadBalancers(d *schema.ResourceData, ids ...int) ([]datatypes.Scale_L
 }
 
 func resourceIBMComputeAutoScaleGroupRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetScaleGroupService(sess)
+
+	service := services.GetScaleGroupService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	groupId, _ := strconv.Atoi(d.Id())
 
@@ -464,8 +464,8 @@ func populateMemberTemplateResourceData(template datatypes.Virtual_Guest) []map[
 }
 
 func resourceIBMComputeAutoScaleGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+
 	sess := meta.(ClientSession).SoftLayerSession()
-	scaleGroupService := services.GetScaleGroupService(sess)
 	scaleNetworkVlanService := services.GetScaleNetworkVlanService(sess)
 	scaleLoadBalancerService := services.GetScaleLoadBalancerService(sess)
 
@@ -476,7 +476,7 @@ func resourceIBMComputeAutoScaleGroupUpdate(d *schema.ResourceData, meta interfa
 
 	// Fetch the complete object from SoftLayer, update with current values from the configuration, and send the
 	// whole thing back to SoftLayer (effectively, a PUT)
-	groupObj, err := scaleGroupService.Id(groupId).Mask(strings.Join(IBMComputeAutoScaleGroupObjectMask, ",")).GetObject()
+	groupObj, err := services.GetScaleGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(groupId).Mask(strings.Join(IBMComputeAutoScaleGroupObjectMask, ",")).GetObject()
 	if err != nil {
 		return fmt.Errorf("Error retrieving autoscale_group resource: %s", err)
 	}
@@ -508,7 +508,7 @@ func resourceIBMComputeAutoScaleGroupUpdate(d *schema.ResourceData, meta interfa
 		newIds := newValue.(*schema.Set).List()
 
 		// Delete all Vlans
-		oldScaleVlans, err := scaleGroupService.
+		oldScaleVlans, err := services.GetScaleGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 			Id(groupId).
 			GetNetworkVlans()
 		if err != nil {
@@ -541,7 +541,7 @@ func resourceIBMComputeAutoScaleGroupUpdate(d *schema.ResourceData, meta interfa
 		groupObj.VirtualGuestMemberTemplate = &virtualGuestTemplateOpts
 
 	}
-	_, err = scaleGroupService.Id(groupId).EditObject(&groupObj)
+	_, err = services.GetScaleGroupService(meta.(ClientSession).SoftLayerSession()).Id(groupId).EditObject(&groupObj)
 	if err != nil {
 		return fmt.Errorf("Error received while editing autoscale_group: %s", err)
 	}
@@ -586,8 +586,8 @@ func resourceIBMComputeAutoScaleGroupDelete(d *schema.ResourceData, meta interfa
 }
 
 func waitForActiveStatus(d *schema.ResourceData, meta interface{}) (interface{}, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	scaleGroupService := services.GetScaleGroupService(sess)
+
+	scaleGroupService := services.GetScaleGroupService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	log.Printf("Waiting for scale group (%s) to become active", d.Id())
 	id, err := strconv.Atoi(d.Id())
@@ -648,8 +648,8 @@ func waitForActiveStatus(d *schema.ResourceData, meta interface{}) (interface{},
 }
 
 func resourceIBMComputeAutoScaleGroupExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	scaleGroupService := services.GetScaleGroupService(sess)
+
+	scaleGroupService := services.GetScaleGroupService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	groupId, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -668,8 +668,8 @@ func resourceIBMComputeAutoScaleGroupExists(d *schema.ResourceData, meta interfa
 	return result.Id != nil && *result.Id == groupId, nil
 }
 
-func getLocationGroupRegionalId(sess *session.Session, locationGroupRegionalName string) (int, error) {
-	locationGroupRegionals, err := services.GetLocationGroupRegionalService(sess).
+func getLocationGroupRegionalId(sessWithRetry *session.Session, locationGroupRegionalName string) (int, error) {
+	locationGroupRegionals, err := services.GetLocationGroupRegionalService(sessWithRetry).
 		Mask("id,name").
 		// FIXME: Someday, filters may actually work in SoftLayer
 		//Filter(filter.Build(

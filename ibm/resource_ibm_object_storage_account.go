@@ -46,10 +46,9 @@ func resourceIBMObjectStorageAccount() *schema.Resource {
 
 func resourceIBMObjectStorageAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
-	accountService := services.GetAccountService(sess)
 
 	// Check if an object storage account exists
-	objectStorageAccounts, err := accountService.GetHubNetworkStorage()
+	objectStorageAccounts, err := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry()).GetHubNetworkStorage()
 	if err != nil {
 		return fmt.Errorf("resource_ibm_object_storage_account: Error on create: %s", err)
 	}
@@ -78,7 +77,7 @@ func resourceIBMObjectStorageAccountCreate(d *schema.ResourceData, meta interfac
 		}
 
 		// Get accountName using filter on hub network storage
-		objectStorageAccounts, err = accountService.Filter(
+		objectStorageAccounts, err = services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry()).Filter(
 			filter.Path("billingItem.id").Eq(billingOrderItem.BillingItem.Id).Build(),
 		).GetNetworkStorage()
 		if err != nil {
@@ -110,8 +109,7 @@ func WaitForOrderCompletion(
 			var err error
 			var completed bool
 
-			sess := meta.(ClientSession).SoftLayerSession()
-			completed, billingOrderItem, err = order.CheckBillingOrderComplete(sess, receipt)
+			completed, billingOrderItem, err = order.CheckBillingOrderComplete(meta.(ClientSession).SoftLayerSessionWithRetry(), receipt)
 			if err != nil {
 				return nil, "", err
 			}
@@ -132,7 +130,7 @@ func WaitForOrderCompletion(
 }
 
 func resourceIBMObjectStorageAccountRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	accountService := services.GetAccountService(sess)
 	accountName := d.Id()
 	d.Set("name", accountName)

@@ -75,7 +75,7 @@ func dataSourceIBMComputeVmInstance() *schema.Resource {
 }
 
 func dataSourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetAccountService(sess)
 
 	hostname := d.Get("hostname").(string)

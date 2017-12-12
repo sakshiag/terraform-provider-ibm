@@ -155,7 +155,7 @@ func resourceIBMLbVpx() *schema.Resource {
 }
 
 func getSubnetId(subnet string, meta interface{}) (int, error) {
-	service := services.GetAccountService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	subnetInfo := strings.Split(subnet, "/")
 	if len(subnetInfo) != 2 {
@@ -188,8 +188,8 @@ func getSubnetId(subnet string, meta interface{}) (int, error) {
 	return *subnets[0].Id, nil
 }
 
-func getVPXVersion(id int, sess *session.Session) (string, error) {
-	service := services.GetNetworkApplicationDeliveryControllerService(sess)
+func getVPXVersion(id int, sessWithRetry *session.Session) (string, error) {
+	service := services.GetNetworkApplicationDeliveryControllerService(sessWithRetry)
 	getObjectResult, err := service.Id(id).Mask("description").GetObject()
 
 	if err != nil {
@@ -216,16 +216,15 @@ func getPublicIpItemKeyName(ipCount int) string {
 }
 
 func findVPXPriceItems(version string, speed int, plan string, ipCount int, meta interface{}) ([]datatypes.Product_Item_Price, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
 
 	// Get VPX package type.
-	productPackage, err := product.GetPackageByType(sess, "ADDITIONAL_SERVICES_APPLICATION_DELIVERY_APPLIANCE")
+	productPackage, err := product.GetPackageByType(meta.(ClientSession).SoftLayerSessionWithRetry(), "ADDITIONAL_SERVICES_APPLICATION_DELIVERY_APPLIANCE")
 	if err != nil {
 		return []datatypes.Product_Item_Price{}, err
 	}
 
 	// Get VPX product items
-	items, err := product.GetPackageProducts(sess, *productPackage.Id)
+	items, err := product.GetPackageProducts(meta.(ClientSession).SoftLayerSessionWithRetry(), *productPackage.Id)
 	if err != nil {
 		return []datatypes.Product_Item_Price{}, err
 	}
@@ -272,7 +271,7 @@ func findVPXPriceItems(version string, speed int, plan string, ipCount int, meta
 }
 
 func findVPXByOrderId(orderId int, meta interface{}) (datatypes.Network_Application_Delivery_Controller, error) {
-	service := services.GetAccountService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"pending"},
@@ -366,7 +365,6 @@ func resourceIBMLbVpxCreate(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
 
 	productOrderService := services.GetProductOrderService(sess)
-	NADCService := services.GetNetworkApplicationDeliveryControllerService(sess)
 	var err error
 
 	opts := datatypes.Container_Product_Order{
@@ -428,7 +426,7 @@ func resourceIBMLbVpxCreate(d *schema.ResourceData, meta interface{}) error {
 	IsVipReady := false
 
 	for vipWaitCount := 0; vipWaitCount < 270; vipWaitCount++ {
-		getObjectResult, err := NADCService.Id(id).Mask("subnets[ipAddresses],password[password]").GetObject()
+		getObjectResult, err := services.GetNetworkApplicationDeliveryControllerService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(id).Mask("subnets[ipAddresses],password[password]").GetObject()
 		if err != nil {
 			return fmt.Errorf("Error retrieving network application delivery controller: %s", err)
 		}
@@ -455,7 +453,7 @@ func resourceIBMLbVpxCreate(d *schema.ResourceData, meta interface{}) error {
 	IsRESTReady := false
 
 	for restWaitCount := 0; restWaitCount < 270; restWaitCount++ {
-		_, err := NADCService.Id(id).GetLoadBalancers()
+		_, err := services.GetNetworkApplicationDeliveryControllerService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(id).GetLoadBalancers()
 		// GetLoadBalancers returns an error "There was a problem processing the reply from the
 		// application tier.  Please contact development." if the VPX version is 10.5.
 		if err == nil || !strings.Contains(err.Error(), "Could not connect to host") {
@@ -477,7 +475,7 @@ func resourceIBMLbVpxCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMLbVpxRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	service := services.GetNetworkApplicationDeliveryControllerService(sess)
 	id, err := strconv.Atoi(d.Id())
@@ -578,14 +576,13 @@ func resourceIBMLbVpxUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMLbVpxDelete(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetNetworkApplicationDeliveryControllerService(sess)
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return fmt.Errorf("Not a valid ID, must be an integer: %s", err)
 	}
 
-	billingItem, err := service.Id(id).GetBillingItem()
+	billingItem, err := services.GetNetworkApplicationDeliveryControllerService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(id).GetBillingItem()
 	if err != nil {
 		return fmt.Errorf("Error deleting network application delivery controller: %s", err)
 	}
@@ -606,7 +603,7 @@ func resourceIBMLbVpxDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMLbVpxExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	service := services.GetNetworkApplicationDeliveryControllerService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetNetworkApplicationDeliveryControllerService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {

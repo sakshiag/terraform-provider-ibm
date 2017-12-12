@@ -38,7 +38,7 @@ func dataSourceIBMSecurityGroup() *schema.Resource {
 }
 
 func dataSourceIBMSecurityGroupRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	name := d.Get("name").(string)
 	mostRecent := d.Get("most_recent").(bool)
 

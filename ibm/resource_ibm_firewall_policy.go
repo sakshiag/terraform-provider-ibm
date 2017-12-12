@@ -133,8 +133,8 @@ func prepareRules(d *schema.ResourceData) []datatypes.Network_Firewall_Update_Re
 	return rules
 }
 
-func getFirewallContextAccessControlListId(fwId int, sess *session.Session) (int, error) {
-	service := services.GetNetworkVlanFirewallService(sess)
+func getFirewallContextAccessControlListId(fwId int, sessWithRetry *session.Session) (int, error) {
+	service := services.GetNetworkVlanFirewallService(sessWithRetry)
 	vlan, err := service.Id(fwId).Mask(aclMask).GetNetworkVlans()
 
 	if err != nil {
@@ -157,7 +157,7 @@ func resourceIBMFirewallPolicyCreate(d *schema.ResourceData, meta interface{}) e
 	fwId := d.Get("firewall_id").(int)
 	rules := prepareRules(d)
 
-	fwContextACLId, err := getFirewallContextAccessControlListId(fwId, sess)
+	fwContextACLId, err := getFirewallContextAccessControlListId(fwId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error during creation of dedicated hardware firewall rules: %s", err)
 	}
@@ -184,7 +184,7 @@ func resourceIBMFirewallPolicyCreate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceIBMFirewallPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	fwRulesID, _ := strconv.Atoi(d.Id())
 
@@ -258,7 +258,7 @@ func resourceIBMFirewallPolicyUpdate(d *schema.ResourceData, meta interface{}) e
 	}
 	rules := prepareRules(d)
 
-	fwContextACLId, err := getFirewallContextAccessControlListId(fwId, sess)
+	fwContextACLId, err := getFirewallContextAccessControlListId(fwId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error during updating of dedicated hardware firewall rules: %s", err)
 	}
@@ -315,7 +315,7 @@ func resourceIBMFirewallPolicyDelete(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceIBMFirewallPolicyExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	fwRulesID, err := strconv.Atoi(d.Id())
 	if err != nil {

@@ -152,7 +152,7 @@ func resourceIBMSecurityGroupRuleCreate(d *schema.ResourceData, meta interface{}
 		sgrule.PortRangeMin = sgrule.PortRangeMax
 	}
 
-	matchingrule, err := findMatchingRule(sgID, &sgrule, service)
+	matchingrule, err := findMatchingRule(sgID, &sgrule, services.GetNetworkSecurityGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()))
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func resourceIBMSecurityGroupRuleCreate(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error creating Security Group Rule: %s", err)
 	}
 
-	matchingrule, err = findMatchingRule(sgID, &sgrule, service)
+	matchingrule, err = findMatchingRule(sgID, &sgrule, services.GetNetworkSecurityGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()))
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,7 @@ func resourceIBMSecurityGroupRuleCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceIBMSecurityGroupRuleRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSecurityGroupService(sess)
 
 	sgID := d.Get("security_group_id").(int)
@@ -231,7 +231,7 @@ func resourceIBMSecurityGroupRuleUpdate(d *schema.ResourceData, meta interface{}
 	sess := meta.(ClientSession).SoftLayerSession()
 	service := services.GetNetworkSecurityGroupService(sess)
 	securityGroupID := d.Get("security_group_id").(int)
-	matchingrules, err := service.Filter(filter.Build(
+	matchingrules, err := services.GetNetworkSecurityGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()).Filter(filter.Build(
 		filter.Path("rules.id").Eq(d.Id()))).Id(securityGroupID).GetRules()
 	if err != nil {
 		return fmt.Errorf("Error retrieving Security Group Rule: %s", err)
@@ -283,7 +283,7 @@ func resourceIBMSecurityGroupRuleDelete(d *schema.ResourceData, meta interface{}
 }
 
 func resourceIBMSecurityGroupRuleExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSecurityGroupService(sess)
 
 	sgID := d.Get("security_group_id").(int)

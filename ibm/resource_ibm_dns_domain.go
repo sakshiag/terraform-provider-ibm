@@ -90,7 +90,7 @@ func resourceIBMDNSDomainCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceIBMDNSDomainRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetDnsDomainService(sess)
 
 	dnsId, _ := strconv.Atoi(d.Id())
@@ -120,8 +120,8 @@ func resourceIBMDNSDomainRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMDNSDomainUpdate(d *schema.ResourceData, meta interface{}) error {
-	// If the target has been updated, find the corresponding dns record and update its data.
-	sess := meta.(ClientSession).SoftLayerSession()
+	// If the target has been updated, find the corresponding dns record and update its data
+
 	domainId, _ := strconv.Atoi(d.Id())
 
 	if !d.HasChange("target") { // target is the only editable field
@@ -131,8 +131,7 @@ func resourceIBMDNSDomainUpdate(d *schema.ResourceData, meta interface{}) error 
 	newTarget := d.Get("target").(string)
 
 	// retrieve domain state
-	domainService := services.GetDnsDomainService(sess)
-	domain, err := domainService.Id(domainId).Mask(
+	domain, err := services.GetDnsDomainService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(domainId).Mask(
 		"id,name,updateDate,resourceRecords",
 	).GetObject()
 	if err != nil {
@@ -154,7 +153,7 @@ func resourceIBMDNSDomainUpdate(d *schema.ResourceData, meta interface{}) error 
 
 	record.Data = sl.String(newTarget)
 
-	_, err = services.GetDnsDomainResourceRecordService(sess).
+	_, err = services.GetDnsDomainResourceRecordService(meta.(ClientSession).SoftLayerSession()).
 		Id(*record.Id).EditObject(&record)
 
 	if err != nil {
@@ -189,9 +188,7 @@ func resourceIBMDNSDomainDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceIBMDNSDomainExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetDnsDomainService(sess)
-
+	service := services.GetDnsDomainService(meta.(ClientSession).SoftLayerSessionWithRetry())
 	dnsId, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return false, fmt.Errorf("Not a valid ID, must be an integer: %s", err)

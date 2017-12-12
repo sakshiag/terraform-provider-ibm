@@ -157,7 +157,7 @@ func resourceIBMLbVpxServiceCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error creating Virtual Ip Address: %s", err)
 	}
@@ -175,7 +175,7 @@ func resourceIBMLbVpxServiceRead(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error Reading Virtual Ip Address: %s", err)
 	}
@@ -193,7 +193,7 @@ func resourceIBMLbVpxServiceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error updating Virtual IP Address: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error updating Virtual Ip Address: %s", err)
 	}
@@ -211,7 +211,7 @@ func resourceIBMLbVpxServiceDelete(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error deleting Virtual Ip Address: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error deleting Virtual Ip Address: %s", err)
 	}
@@ -229,7 +229,7 @@ func resourceIBMLbVpxServiceExists(d *schema.ResourceData, meta interface{}) (bo
 		return false, fmt.Errorf("Error in exists: %s", err)
 	}
 
-	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSession())
+	version, err := getVPXVersion(nadcId, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return false, fmt.Errorf("Error in exists: %s", err)
 	}
@@ -242,8 +242,6 @@ func resourceIBMLbVpxServiceExists(d *schema.ResourceData, meta interface{}) (bo
 }
 
 func resourceIBMLbVpxServiceCreate101(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-
 	vipId := d.Get("vip_id").(string)
 	vipName, nadcId, _, err := parseServiceId(vipId)
 	serviceName := d.Get("name").(string)
@@ -271,7 +269,7 @@ func resourceIBMLbVpxServiceCreate101(d *schema.ResourceData, meta interface{}) 
 	// Check if there is an existed loadbalancer service which has same name.
 	log.Printf("[INFO] Creating LoadBalancer Service Name %s validation", serviceName)
 
-	_, err = network.GetNadcLbVipServiceByName(sess, nadcId, vipName, serviceName)
+	_, err = network.GetNadcLbVipServiceByName(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId, vipName, serviceName)
 	if err == nil {
 		return fmt.Errorf("Error creating LoadBalancer Service: The service name '%s' is already used.",
 			serviceName)
@@ -279,7 +277,7 @@ func resourceIBMLbVpxServiceCreate101(d *schema.ResourceData, meta interface{}) 
 
 	log.Printf("[INFO] Creating LoadBalancer Service %s", serviceName)
 
-	successFlag, err := updateVpxService(sess, nadcId, lbVip)
+	successFlag, err := updateVpxService(meta.(ClientSession).SoftLayerSession(), nadcId, lbVip)
 
 	if err != nil {
 		return fmt.Errorf("Error creating LoadBalancer Service: %s", err)
@@ -303,7 +301,7 @@ func resourceIBMLbVpxServiceCreate105(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}
@@ -382,14 +380,12 @@ func resourceIBMLbVpxServiceCreate105(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIBMLbVpxServiceRead101(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-
 	vipName, nadcId, serviceName, err := parseServiceId(d.Id())
 	if err != nil {
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	lbService, err := network.GetNadcLbVipServiceByName(sess, nadcId, vipName, serviceName)
+	lbService, err := network.GetNadcLbVipServiceByName(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId, vipName, serviceName)
 	if err != nil {
 		return fmt.Errorf("Unable to get load balancer service %s: %s", serviceName, err)
 	}
@@ -411,7 +407,7 @@ func resourceIBMLbVpxServiceRead105(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}
@@ -452,14 +448,13 @@ func resourceIBMLbVpxServiceRead105(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMLbVpxServiceUpdate101(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
 
 	vipName, nadcId, serviceName, err := parseServiceId(d.Id())
 	if err != nil {
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	lbService, err := network.GetNadcLbVipServiceByName(sess, nadcId, vipName, serviceName)
+	lbService, err := network.GetNadcLbVipServiceByName(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId, vipName, serviceName)
 	if err != nil {
 		return fmt.Errorf("Unable to get load balancer service: %s", err)
 	}
@@ -492,7 +487,7 @@ func resourceIBMLbVpxServiceUpdate101(d *schema.ResourceData, meta interface{}) 
 			template},
 	}
 
-	successFlag, err := updateVpxService(sess, nadcId, lbVip)
+	successFlag, err := updateVpxService(meta.(ClientSession).SoftLayerSession(), nadcId, lbVip)
 
 	if err != nil {
 		return fmt.Errorf("Error updating LoadBalancer Service: %s", err)
@@ -511,7 +506,7 @@ func resourceIBMLbVpxServiceUpdate105(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}
@@ -633,7 +628,7 @@ func resourceIBMLbVpxServiceDelete105(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}
@@ -652,9 +647,7 @@ func resourceIBMLbVpxServiceExists101(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return false, fmt.Errorf("Error parsing vip id: %s", err)
 	}
-
-	sess := meta.(ClientSession).SoftLayerSession()
-	lbService, err := network.GetNadcLbVipServiceByName(sess, nadcId, vipName, serviceName)
+	lbService, err := network.GetNadcLbVipServiceByName(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId, vipName, serviceName)
 	if err != nil {
 		if apiErr, ok := err.(sl.Error); ok {
 			if apiErr.StatusCode == 404 {
@@ -672,7 +665,7 @@ func resourceIBMLbVpxServiceExists105(d *schema.ResourceData, meta interface{}) 
 		return false, fmt.Errorf("Error parsing vip id: %s", err)
 	}
 
-	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), nadcId)
+	nClient, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), nadcId)
 	if err != nil {
 		return false, fmt.Errorf("Error getting netscaler information ID: %d", nadcId)
 	}

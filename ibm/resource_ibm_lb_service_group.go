@@ -73,12 +73,12 @@ func resourceIBMLbServiceGroupCreate(d *schema.ResourceData, meta interface{}) e
 
 	vipID := d.Get("load_balancer_id").(int)
 
-	routingMethodId, err := getRoutingMethodId(sess, d.Get("routing_method").(string))
+	routingMethodId, err := getRoutingMethodId(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("routing_method").(string))
 	if err != nil {
 		return err
 	}
 
-	routingTypeId, err := getRoutingTypeId(sess, d.Get("routing_type").(string))
+	routingTypeId, err := getRoutingTypeId(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("routing_type").(string))
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func resourceIBMLbServiceGroupCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	// Retrieve the newly created object, to obtain its ID
-	vs, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerVirtualIpAddressService(sess).
+	vs, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerVirtualIpAddressService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Id(vipID).
 		Filter(filter.New(filter.Path("virtualServers.port").Eq(d.Get("port"))).Build()).
 		Mask("id,serviceGroups[id]").
@@ -130,12 +130,12 @@ func resourceIBMLbServiceGroupUpdate(d *schema.ResourceData, meta interface{}) e
 	vsID, _ := strconv.Atoi(d.Id())
 	sgID := d.Get("service_group_id").(int)
 
-	routingMethodId, err := getRoutingMethodId(sess, d.Get("routing_method").(string))
+	routingMethodId, err := getRoutingMethodId(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("routing_method").(string))
 	if err != nil {
 		return err
 	}
 
-	routingTypeId, err := getRoutingTypeId(sess, d.Get("routing_type").(string))
+	routingTypeId, err := getRoutingTypeId(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("routing_type").(string))
 	if err != nil {
 		return err
 	}
@@ -167,7 +167,7 @@ func resourceIBMLbServiceGroupUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceIBMLbServiceGroupRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	vsID, _ := strconv.Atoi(d.Id())
 
@@ -237,7 +237,7 @@ func resourceIBMLbServiceGroupDelete(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceIBMLbServiceGroupExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	vsID, _ := strconv.Atoi(d.Id())
 
@@ -258,8 +258,8 @@ func resourceIBMLbServiceGroupExists(d *schema.ResourceData, meta interface{}) (
 	return true, nil
 }
 
-func getRoutingTypeId(sess *session.Session, routingTypeName string) (int, error) {
-	routingTypes, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerRoutingTypeService(sess).
+func getRoutingTypeId(sessWithRetry *session.Session, routingTypeName string) (int, error) {
+	routingTypes, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerRoutingTypeService(sessWithRetry).
 		Mask("id").
 		Filter(filter.Build(
 			filter.Path("keyname").Eq(routingTypeName))).
@@ -277,8 +277,8 @@ func getRoutingTypeId(sess *session.Session, routingTypeName string) (int, error
 	return *routingTypes[0].Id, nil
 }
 
-func getRoutingMethodId(sess *session.Session, routingMethodName string) (int, error) {
-	routingMethods, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerRoutingMethodService(sess).
+func getRoutingMethodId(sessWithRetry *session.Session, routingMethodName string) (int, error) {
+	routingMethods, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerRoutingMethodService(sessWithRetry).
 		Mask("id").
 		Filter(filter.Build(
 			filter.Path("keyname").Eq(routingMethodName))).

@@ -184,14 +184,14 @@ func resourceIBMStorageBlockCreate(d *schema.ResourceData, meta interface{}) err
 	capacity := d.Get("capacity").(int)
 	snapshotCapacity := d.Get("snapshot_capacity").(int)
 	osFormatType := d.Get("os_format_type").(string)
-	osType, err := network.GetOsTypeByName(sess, osFormatType)
+	osType, err := network.GetOsTypeByName(meta.(ClientSession).SoftLayerSessionWithRetry(), osFormatType)
 	hourlyBilling := d.Get("hourly_billing").(bool)
 
 	if err != nil {
 		return err
 	}
 
-	storageOrderContainer, err := buildStorageProductOrderContainer(sess, storageType, iops, capacity, snapshotCapacity, blockStorage, datacenter, hourlyBilling)
+	storageOrderContainer, err := buildStorageProductOrderContainer(meta.(ClientSession).SoftLayerSessionWithRetry(), storageType, iops, capacity, snapshotCapacity, blockStorage, datacenter, hourlyBilling)
 	if err != nil {
 		return fmt.Errorf("Error while creating storage:%s", err)
 	}
@@ -231,7 +231,7 @@ func resourceIBMStorageBlockCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Find the storage device
-	blockStorage, err := findStorageByOrderId(sess, *receipt.OrderId)
+	blockStorage, err := findStorageByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 
 	if err != nil {
 		return fmt.Errorf("Error during creation of storage: %s", err)
@@ -247,7 +247,7 @@ func resourceIBMStorageBlockCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// SoftLayer changes the device ID after completion of provisioning. It is necessary to refresh device ID.
-	blockStorage, err = findStorageByOrderId(sess, *receipt.OrderId)
+	blockStorage, err = findStorageByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 
 	if err != nil {
 		return fmt.Errorf("Error during creation of storage: %s", err)
@@ -260,7 +260,7 @@ func resourceIBMStorageBlockCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMStorageBlockRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	storageId, _ := strconv.Atoi(d.Id())
 
 	storage, err := services.GetNetworkStorageService(sess).
@@ -356,7 +356,7 @@ func resourceIBMStorageBlockUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Not a valid ID, must be an integer: %s", err)
 	}
 
-	storage, err := services.GetNetworkStorageService(sess).
+	storage, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Id(id).
 		Mask(storageDetailMask).
 		GetObject()

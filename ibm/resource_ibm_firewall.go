@@ -67,13 +67,13 @@ func resourceIBMFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 		keyName = "HARDWARE_FIREWALL_HIGH_AVAILABILITY"
 	}
 
-	pkg, err := product.GetPackageByType(sess, FwHardwareDedicatedPackageType)
+	pkg, err := product.GetPackageByType(meta.(ClientSession).SoftLayerSessionWithRetry(), FwHardwareDedicatedPackageType)
 	if err != nil {
 		return err
 	}
 
 	// Get all prices for ADDITIONAL_SERVICES_FIREWALL with the given capacity
-	productItems, err := product.GetPackageProducts(sess, *pkg.Id)
+	productItems, err := product.GetPackageProducts(meta.(ClientSession).SoftLayerSessionWithRetry(), *pkg.Id)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func resourceIBMFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error during creation of dedicated hardware firewall: %s", err)
 	}
-	vlan, err := findDedicatedFirewallByOrderId(sess, *receipt.OrderId)
+	vlan, err := findDedicatedFirewallByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 	if err != nil {
 		return fmt.Errorf("Error during creation of dedicated hardware firewall: %s", err)
 	}
@@ -136,7 +136,7 @@ func resourceIBMFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMFirewallRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	fwID, _ := strconv.Atoi(d.Id())
 
@@ -213,7 +213,7 @@ func resourceIBMFirewallDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMFirewallExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	fwID, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -234,14 +234,14 @@ func resourceIBMFirewallExists(d *schema.ResourceData, meta interface{}) (bool, 
 	return true, nil
 }
 
-func findDedicatedFirewallByOrderId(sess *session.Session, orderId int) (datatypes.Network_Vlan, error) {
+func findDedicatedFirewallByOrderId(sessWithRetry *session.Session, orderId int) (datatypes.Network_Vlan, error) {
 	filterPath := "networkVlans.networkVlanFirewall.billingItem.orderItem.order.id"
 
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"pending"},
 		Target:  []string{"complete"},
 		Refresh: func() (interface{}, string, error) {
-			vlans, err := services.GetAccountService(sess).
+			vlans, err := services.GetAccountService(sessWithRetry).
 				Filter(filter.Build(
 					filter.Path(filterPath).
 						Eq(strconv.Itoa(orderId)))).

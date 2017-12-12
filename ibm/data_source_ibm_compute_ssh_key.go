@@ -52,7 +52,7 @@ func dataSourceIBMComputeSSHKey() *schema.Resource {
 }
 
 func dataSourceIBMComputeSSHKeyRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetAccountService(sess)
 
 	label := d.Get("label").(string)

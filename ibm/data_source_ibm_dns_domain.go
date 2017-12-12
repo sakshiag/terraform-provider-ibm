@@ -29,7 +29,7 @@ func dataSourceIBMDNSDomain() *schema.Resource {
 }
 
 func dataSourceIBMDNSDomainRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetAccountService(sess)
 
 	name := d.Get("name").(string)

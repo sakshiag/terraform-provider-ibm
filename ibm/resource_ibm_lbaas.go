@@ -198,23 +198,22 @@ func resourceIBMLbaas() *schema.Resource {
 }
 
 func resourceIBMLbaasCreate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
 
 	// Find price items
-	productOrderContainer, err := buildLbaasLBProductOrderContainer(d, sess)
+	productOrderContainer, err := buildLbaasLBProductOrderContainer(d, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error creating Load balancer: %s", err)
 	}
 	log.Println("[INFO] Creating Load Balancer")
 
 	//verify order
-	_, err = services.GetProductOrderService(sess).
+	_, err = services.GetProductOrderService(meta.(ClientSession).SoftLayerSession()).
 		VerifyOrder(productOrderContainer)
 	if err != nil {
 		return fmt.Errorf("Error during creation of Load balancer: %s", err)
 	}
 	//place order
-	_, err = services.GetProductOrderService(sess).
+	_, err = services.GetProductOrderService(meta.(ClientSession).SoftLayerSession()).
 		PlaceOrder(productOrderContainer, sl.Bool(false))
 	if err != nil {
 		return fmt.Errorf("Error during creation of Load balancer: %s", err)
@@ -222,7 +221,7 @@ func resourceIBMLbaasCreate(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 
-	lbaasLB, err := findLbaasLBByOrderId(sess, name, d)
+	lbaasLB, err := findLbaasLBByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), name, d)
 	if err != nil {
 		return fmt.Errorf("Error during creation of Load balancer: %s", err)
 	}
@@ -233,7 +232,7 @@ func resourceIBMLbaasCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMLbaasRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkLBaaSLoadBalancerService(sess)
 
 	result, err := service.Mask("datacenter,members,listeners.defaultPool,listeners.defaultPool.sessionAffinity").GetLoadBalancer(sl.String(d.Id()))
@@ -386,7 +385,7 @@ func resourceIBMLbaasDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMLbaasExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkLBaaSLoadBalancerService(sess)
 
 	result, err := service.GetLoadBalancer(sl.String(d.Id()))
@@ -399,7 +398,7 @@ func resourceIBMLbaasExists(d *schema.ResourceData, meta interface{}) (bool, err
 	return result.Uuid != nil && *result.Uuid == d.Id(), nil
 }
 
-func buildLbaasLBProductOrderContainer(d *schema.ResourceData, sess *session.Session) (*datatypes.Container_Product_Order_Network_LoadBalancer_AsAService, error) {
+func buildLbaasLBProductOrderContainer(d *schema.ResourceData, sessWithRetry *session.Session) (*datatypes.Container_Product_Order_Network_LoadBalancer_AsAService, error) {
 	// 1. Get a package
 	name := d.Get("name").(string)
 	subnets := d.Get("subnets").([]interface{})
@@ -411,13 +410,13 @@ func buildLbaasLBProductOrderContainer(d *schema.ResourceData, sess *session.Ses
 		subnetsParam = append(subnetsParam, subnetItem)
 	}
 
-	pkg, err := product.GetPackageByType(sess, packageType)
+	pkg, err := product.GetPackageByType(sessWithRetry, packageType)
 	if err != nil {
 		return nil, err
 	}
 
 	// 2. Get all prices for the package
-	productItems, err := product.GetPackageProducts(sess, *pkg.Id, productItemMaskWithPriceLocationGroupID)
+	productItems, err := product.GetPackageProducts(sessWithRetry, *pkg.Id, productItemMaskWithPriceLocationGroupID)
 	if err != nil {
 		return &datatypes.Container_Product_Order_Network_LoadBalancer_AsAService{}, err
 	}
@@ -464,7 +463,7 @@ func buildLbaasLBProductOrderContainer(d *schema.ResourceData, sess *session.Ses
 	return &productOrderContainer, nil
 }
 
-func findLbaasLBByOrderId(sess *session.Session, name string, d *schema.ResourceData) (*datatypes.Network_LBaaS_LoadBalancer, error) {
+func findLbaasLBByOrderId(sessWithRetry *session.Session, name string, d *schema.ResourceData) (*datatypes.Network_LBaaS_LoadBalancer, error) {
 
 	isIDSet := false
 	stateConf := &resource.StateChangeConf{
@@ -477,7 +476,7 @@ func findLbaasLBByOrderId(sess *session.Session, name string, d *schema.Resource
 			Mask("id,activeTransaction").
 			GetLoadBalancer()*/
 			//TODO This is a temporary workaround to find lbass obj by name.Get the lbass obj from order id
-			lb, err := services.GetNetworkLBaaSLoadBalancerService(sess).Filter(filter.Build(
+			lb, err := services.GetNetworkLBaaSLoadBalancerService(sessWithRetry).Filter(filter.Build(
 				filter.Path("name").Eq(name))).GetAllObjects()
 			if err != nil {
 				return nil, "", err
@@ -516,8 +515,7 @@ func findLbaasLBByOrderId(sess *session.Session, name string, d *schema.Resource
 }
 
 func waitForLbaasLBAvailable(d *schema.ResourceData, meta interface{}) (interface{}, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetNetworkLBaaSLoadBalancerService(sess)
+	service := services.GetNetworkLBaaSLoadBalancerService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{lbUpdatePening},
@@ -546,8 +544,7 @@ func waitForLbaasLBAvailable(d *schema.ResourceData, meta interface{}) (interfac
 }
 
 func waitForLbaasLBDelete(d *schema.ResourceData, meta interface{}) (interface{}, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetNetworkLBaaSLoadBalancerService(sess)
+	service := services.GetNetworkLBaaSLoadBalancerService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{lbDeletePending},

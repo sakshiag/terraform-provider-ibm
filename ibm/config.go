@@ -30,6 +30,9 @@ import (
 //SoftlayerRestEndpoint rest endpoint of SoftLayer
 const SoftlayerRestEndpoint = "https://api.softlayer.com/rest/v3"
 
+//RetryDelay
+const RetryAPIDelay = 5
+
 //BluemixRegion ...
 var BluemixRegion string
 
@@ -86,6 +89,7 @@ type Session struct {
 // ClientSession ...
 type ClientSession interface {
 	SoftLayerSession() *slsession.Session
+	SoftLayerSessionWithRetry() *slsession.Session
 	BluemixSession() (*bxsession.Session, error)
 	ContainerAPI() (containerv1.ContainerServiceAPI, error)
 	IAMAPI() (iampapv1.IAMPAPAPI, error)
@@ -115,10 +119,22 @@ type clientSession struct {
 
 	bmxUserDetails  *UserConfig
 	bmxUserFetchErr error
+
+	retryCount int
 }
 
 // SoftLayerSession providers SoftLayer Session
 func (sess clientSession) SoftLayerSession() *slsession.Session {
+	return sess.session.SoftLayerSession
+}
+
+// SoftLayerSessionWithRetry providers SoftLayer Session with retry
+func (sess clientSession) SoftLayerSessionWithRetry() *slsession.Session {
+	return sess.session.SoftLayerSession.SetRetries(sess.retryCount).SetRetryWait(RetryAPIDelay)
+}
+
+// SoftLayerSession providers SoftLayer Session for retry
+func (sess clientSession) SoftLayerSessionRetry() *slsession.Session {
 	return sess.session.SoftLayerSession
 }
 
@@ -166,6 +182,9 @@ func (c *Config) ClientSession() (interface{}, error) {
 	session := clientSession{
 		session: sess,
 	}
+
+	session.retryCount = c.RetryCount
+
 	if sess.BluemixSession == nil {
 		//Can be nil only  if bluemix_api_key is not provided
 		log.Println("Skipping Bluemix Clients configuration")
@@ -220,7 +239,7 @@ func (c *Config) ClientSession() (interface{}, error) {
 func newSession(c *Config) (*Session, error) {
 	ibmSession := &Session{}
 
-	log.Println("Configuring SoftLayer Session ")
+	log.Println("Configuring SoftLayer Session")
 	softlayerSession := &slsession.Session{
 		Endpoint: c.SoftLayerEndpointURL,
 		Timeout:  c.SoftLayerTimeout,

@@ -196,12 +196,12 @@ func resourceIBMLbVpxHaCreate(d *schema.ResourceData, meta interface{}) error {
 		staySecondary = stay.(bool)
 	}
 
-	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), primaryId)
+	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), primaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting primary netscaler information ID: %d", primaryId)
 	}
 
-	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), secondaryId)
+	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), secondaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting secondary netscaler information ID: %d", secondaryId)
 	}
@@ -224,12 +224,12 @@ func resourceIBMLbVpxHaRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error reading HA %s", err.Error())
 	}
 
-	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), primaryId)
+	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), primaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting primary netscaler information ID: %d", primaryId)
 	}
 
-	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), secondaryId)
+	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), secondaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting primary netscaler information ID: %d", primaryId)
 	}
@@ -259,12 +259,12 @@ func resourceIBMLbVpxHaUpdate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error deleting HA %s", err.Error())
 	}
 
-	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), primaryId)
+	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), primaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting primary netscaler information ID: %d", primaryId)
 	}
 
-	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), secondaryId)
+	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), secondaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting secondary netscaler information ID: %d", secondaryId)
 	}
@@ -296,11 +296,11 @@ func resourceIBMLbVpxHaDelete(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error deleting HA %s", err.Error())
 	}
-	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), primaryId)
+	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), primaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting primary netscaler information ID: %d", primaryId)
 	}
-	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), secondaryId)
+	nClientSecondary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), secondaryId)
 	if err != nil {
 		return fmt.Errorf("Error getting secondary netscaler information ID: %d", secondaryId)
 	}
@@ -333,7 +333,7 @@ func resourceIBMLbVpxHaExists(d *schema.ResourceData, meta interface{}) (bool, e
 		return false, fmt.Errorf("Error reading HA %s", err.Error())
 	}
 
-	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSession(), primaryId)
+	nClientPrimary, err := getNitroClient(meta.(ClientSession).SoftLayerSessionWithRetry(), primaryId)
 	if err != nil {
 		return false, fmt.Errorf("Error getting primary netscaler information ID in Exist: %d", primaryId)
 	}

@@ -124,7 +124,7 @@ func dataSourceIBMLbaas() *schema.Resource {
 
 func dataSourceIBMLbaasRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkLBaaSLoadBalancerService(sess)
 	lbs, err := service.Mask("datacenter,members,listeners.defaultPool,listeners.defaultPool.sessionAffinity").Filter(filter.Build(
 		filter.Path("name").Eq(name))).GetAllObjects()

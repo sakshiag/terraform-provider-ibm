@@ -43,7 +43,7 @@ func resourceIBMSecurityGroupCreate(d *schema.ResourceData, meta interface{}) er
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 
-	groups, err := services.GetAccountService(sess).
+	groups, err := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Filter(filter.Path("securityGroups.name").Eq(name).Build()).
 		GetSecurityGroups()
 
@@ -85,7 +85,7 @@ func resourceIBMSecurityGroupCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMSecurityGroupRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSecurityGroupService(sess)
 
 	groupID, _ := strconv.Atoi(d.Id())
@@ -115,7 +115,7 @@ func resourceIBMSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Not a valid ID, must be an integer: %s", err)
 	}
 
-	group, err := service.Id(groupID).GetObject()
+	group, err := services.GetNetworkSecurityGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(groupID).GetObject()
 	if err != nil {
 		return fmt.Errorf("Error retrieving Security Group: %s", err)
 	}
@@ -153,7 +153,7 @@ func resourceIBMSecurityGroupDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMSecurityGroupExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSecurityGroupService(sess)
 
 	groupID, err := strconv.Atoi(d.Id())

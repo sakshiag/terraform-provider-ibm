@@ -313,7 +313,7 @@ func resourceIBMStorageFileCreate(d *schema.ResourceData, meta interface{}) erro
 	snapshotCapacity := d.Get("snapshot_capacity").(int)
 	hourlyBilling := d.Get("hourly_billing").(bool)
 
-	storageOrderContainer, err := buildStorageProductOrderContainer(sess, storageType, iops, capacity, snapshotCapacity, fileStorage, datacenter, hourlyBilling)
+	storageOrderContainer, err := buildStorageProductOrderContainer(meta.(ClientSession).SoftLayerSessionWithRetry(), storageType, iops, capacity, snapshotCapacity, fileStorage, datacenter, hourlyBilling)
 	if err != nil {
 		return fmt.Errorf("Error while creating storage:%s", err)
 	}
@@ -345,7 +345,7 @@ func resourceIBMStorageFileCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// Find the storage device
-	fileStorage, err := findStorageByOrderId(sess, *receipt.OrderId)
+	fileStorage, err := findStorageByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 
 	if err != nil {
 		return fmt.Errorf("Error during creation of storage: %s", err)
@@ -361,7 +361,7 @@ func resourceIBMStorageFileCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// SoftLayer changes the device ID after completion of provisioning. It is necessary to refresh device ID.
-	fileStorage, err = findStorageByOrderId(sess, *receipt.OrderId)
+	fileStorage, err = findStorageByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 
 	if err != nil {
 		return fmt.Errorf("Error during creation of storage: %s", err)
@@ -374,10 +374,10 @@ func resourceIBMStorageFileCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMStorageFileRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+
 	storageId, _ := strconv.Atoi(d.Id())
 
-	storage, err := services.GetNetworkStorageService(sess).
+	storage, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Id(storageId).
 		Mask(storageDetailMask).
 		GetObject()
@@ -446,7 +446,7 @@ func resourceIBMStorageFileRead(d *schema.ResourceData, meta interface{}) error 
 		d.Set("notes", *storage.Notes)
 	}
 
-	mountpoint, err := services.GetNetworkStorageService(sess).Id(storageId).GetFileNetworkMountAddress()
+	mountpoint, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(storageId).GetFileNetworkMountAddress()
 	if err != nil {
 		return fmt.Errorf("Error retrieving storage information: %s", err)
 	}
@@ -465,7 +465,7 @@ func resourceIBMStorageFileUpdate(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Not a valid ID, must be an integer: %s", err)
 	}
 
-	storage, err := services.GetNetworkStorageService(sess).
+	storage, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Id(id).
 		Mask(storageDetailMask).
 		GetObject()
@@ -476,7 +476,7 @@ func resourceIBMStorageFileUpdate(d *schema.ResourceData, meta interface{}) erro
 
 	// Update allowed_ip_addresses
 	if d.HasChange("allowed_ip_addresses") {
-		err := updateAllowedIpAddresses(d, sess, storage)
+		err := updateAllowedIpAddresses(d, meta, storage)
 		if err != nil {
 			return fmt.Errorf("Error updating storage information: %s", err)
 		}
@@ -484,7 +484,7 @@ func resourceIBMStorageFileUpdate(d *schema.ResourceData, meta interface{}) erro
 
 	// Update allowed_subnets
 	if d.HasChange("allowed_subnets") {
-		err := updateAllowedSubnets(d, sess, storage)
+		err := updateAllowedSubnets(d, meta, storage)
 		if err != nil {
 			return fmt.Errorf("Error updating storage information: %s", err)
 		}
@@ -492,7 +492,7 @@ func resourceIBMStorageFileUpdate(d *schema.ResourceData, meta interface{}) erro
 
 	// Update allowed_virtual_guest_ids
 	if d.HasChange("allowed_virtual_guest_ids") {
-		err := updateAllowedVirtualGuestIds(d, sess, storage)
+		err := updateAllowedVirtualGuestIds(d, meta, storage)
 		if err != nil {
 			return fmt.Errorf("Error updating storage information: %s", err)
 		}
@@ -500,7 +500,7 @@ func resourceIBMStorageFileUpdate(d *schema.ResourceData, meta interface{}) erro
 
 	// Update allowed_hardware_ids
 	if d.HasChange("allowed_hardware_ids") {
-		err := updateAllowedHardwareIds(d, sess, storage)
+		err := updateAllowedHardwareIds(d, meta, storage)
 		if err != nil {
 			return fmt.Errorf("Error updating storage information: %s", err)
 		}
@@ -527,12 +527,10 @@ func resourceIBMStorageFileUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceIBMStorageFileDelete(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
-	storageService := services.GetNetworkStorageService(sess)
-
 	storageID, _ := strconv.Atoi(d.Id())
 
 	// Get billing item associated with the storage
-	billingItem, err := storageService.Id(storageID).GetBillingItem()
+	billingItem, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(storageID).GetBillingItem()
 
 	if err != nil {
 		return fmt.Errorf("Error while looking up billing item associated with the storage: %s", err)
@@ -554,7 +552,7 @@ func resourceIBMStorageFileDelete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMStorageFileExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	storageID, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -739,14 +737,12 @@ func WaitForStorageAvailable(d *schema.ResourceData, meta interface{}) (interfac
 	if err != nil {
 		return nil, fmt.Errorf("The storage ID %s must be numeric", d.Id())
 	}
-	sess := meta.(ClientSession).SoftLayerSession()
-
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"retry", "provisioning"},
 		Target:  []string{"available"},
 		Refresh: func() (interface{}, string, error) {
 			// Check active transactions
-			service := services.GetNetworkStorageService(sess)
+			service := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSessionWithRetry())
 			result, err := service.Id(id).Mask("activeTransactions").GetObject()
 			if err != nil {
 				if apiErr, ok := err.(sl.Error); ok && apiErr.StatusCode == 404 {
@@ -763,7 +759,7 @@ func WaitForStorageAvailable(d *schema.ResourceData, meta interface{}) (interfac
 			// Check volume status.
 			log.Println("Checking volume status.")
 			resultStr := ""
-			err = sess.DoRequest(
+			err = meta.(ClientSession).SoftLayerSessionWithRetry().DoRequest(
 				"SoftLayer_Network_Storage",
 				"getObject",
 				nil,
@@ -885,7 +881,7 @@ func getIops(storage datatypes.Network_Storage, storageType string) (float64, er
 	return 0, fmt.Errorf("Invalid storage type %s", storageType)
 }
 
-func updateAllowedIpAddresses(d *schema.ResourceData, sess *session.Session, storage datatypes.Network_Storage) error {
+func updateAllowedIpAddresses(d *schema.ResourceData, meta interface{}, storage datatypes.Network_Storage) error {
 	id := *storage.Id
 	newIps := d.Get("allowed_ip_addresses").(*schema.Set).List()
 
@@ -899,7 +895,7 @@ func updateAllowedIpAddresses(d *schema.ResourceData, sess *session.Session, sto
 			}
 		}
 		if isNewIp {
-			ipObject, err := services.GetAccountService(sess).
+			ipObject, err := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 				Filter(filter.Build(
 					filter.Path("ipAddresses.ipAddress").
 						Eq(newIp.(string)))).GetIpAddresses()
@@ -910,7 +906,7 @@ func updateAllowedIpAddresses(d *schema.ResourceData, sess *session.Session, sto
 				return fmt.Errorf("Number of IP address is %d", len(ipObject))
 			}
 			for {
-				_, err = services.GetNetworkStorageService(sess).
+				_, err = services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 					Id(id).
 					AllowAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 						{
@@ -941,7 +937,7 @@ func updateAllowedIpAddresses(d *schema.ResourceData, sess *session.Session, sto
 		}
 		if isDeletedId {
 			for {
-				_, err := services.GetNetworkStorageService(sess).
+				_, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 					Id(id).
 					RemoveAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 						{
@@ -963,7 +959,7 @@ func updateAllowedIpAddresses(d *schema.ResourceData, sess *session.Session, sto
 	return nil
 }
 
-func updateAllowedSubnets(d *schema.ResourceData, sess *session.Session, storage datatypes.Network_Storage) error {
+func updateAllowedSubnets(d *schema.ResourceData, meta interface{}, storage datatypes.Network_Storage) error {
 	id := *storage.Id
 	newSubnets := d.Get("allowed_subnets").(*schema.Set).List()
 
@@ -984,7 +980,7 @@ func updateAllowedSubnets(d *schema.ResourceData, sess *session.Session, storage
 		}
 		if isNewSubnet {
 			filterStr := fmt.Sprintf("{\"subnets\":{\"networkIdentifier\":{\"operation\":\"%s\"},\"cidr\":{\"operation\":\"%d\"}}}", newNetworkIdentifier, newCidr)
-			subnetObject, err := services.GetAccountService(sess).
+			subnetObject, err := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 				Filter(filterStr).GetSubnets()
 			if err != nil {
 				return err
@@ -992,7 +988,7 @@ func updateAllowedSubnets(d *schema.ResourceData, sess *session.Session, storage
 			if len(subnetObject) != 1 {
 				return fmt.Errorf("Number of subnet is %d", len(subnetObject))
 			}
-			_, err = services.GetNetworkStorageService(sess).
+			_, err = services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 				Id(id).
 				AllowAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 					{
@@ -1023,7 +1019,7 @@ func updateAllowedSubnets(d *schema.ResourceData, sess *session.Session, storage
 			}
 		}
 		if isDeletedSubnet {
-			_, err := services.GetNetworkStorageService(sess).
+			_, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 				Id(id).
 				RemoveAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 					{
@@ -1039,7 +1035,7 @@ func updateAllowedSubnets(d *schema.ResourceData, sess *session.Session, storage
 	return nil
 }
 
-func updateAllowedVirtualGuestIds(d *schema.ResourceData, sess *session.Session, storage datatypes.Network_Storage) error {
+func updateAllowedVirtualGuestIds(d *schema.ResourceData, meta interface{}, storage datatypes.Network_Storage) error {
 	id := *storage.Id
 	newIds := d.Get("allowed_virtual_guest_ids").(*schema.Set).List()
 
@@ -1054,7 +1050,7 @@ func updateAllowedVirtualGuestIds(d *schema.ResourceData, sess *session.Session,
 		}
 		if isNewId {
 			for {
-				_, err := services.GetNetworkStorageService(sess).
+				_, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 					Id(id).
 					AllowAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 						{
@@ -1085,7 +1081,7 @@ func updateAllowedVirtualGuestIds(d *schema.ResourceData, sess *session.Session,
 		}
 		if isDeletedId {
 			for {
-				_, err := services.GetNetworkStorageService(sess).
+				_, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 					Id(id).
 					RemoveAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 						{
@@ -1107,7 +1103,7 @@ func updateAllowedVirtualGuestIds(d *schema.ResourceData, sess *session.Session,
 	return nil
 }
 
-func updateAllowedHardwareIds(d *schema.ResourceData, sess *session.Session, storage datatypes.Network_Storage) error {
+func updateAllowedHardwareIds(d *schema.ResourceData, meta interface{}, storage datatypes.Network_Storage) error {
 	id := *storage.Id
 	newIds := d.Get("allowed_hardware_ids").(*schema.Set).List()
 
@@ -1121,7 +1117,7 @@ func updateAllowedHardwareIds(d *schema.ResourceData, sess *session.Session, sto
 			}
 		}
 		if isNewId {
-			_, err := services.GetNetworkStorageService(sess).
+			_, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 				Id(id).
 				AllowAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 					{
@@ -1145,7 +1141,7 @@ func updateAllowedHardwareIds(d *schema.ResourceData, sess *session.Session, sto
 			}
 		}
 		if isDeletedId {
-			_, err := services.GetNetworkStorageService(sess).
+			_, err := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession()).
 				Id(id).
 				RemoveAccessFromHostList([]datatypes.Container_Network_Storage_Host{
 					{

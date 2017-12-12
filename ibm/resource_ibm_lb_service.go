@@ -72,7 +72,7 @@ func resourceIBMLbServiceCreate(d *schema.ResourceData, meta interface{}) error 
 	// Using the service group ID provided in the config, find the IDs of the
 	// respective virtualServer and virtualIpAddress
 	sgID := d.Get("service_group_id").(int)
-	serviceGroup, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerServiceGroupService(sess).
+	serviceGroup, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerServiceGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Id(sgID).
 		Mask("id,routingMethodId,routingTypeId,virtualServer[id,allocation,port,virtualIpAddress[id]]").
 		GetObject()
@@ -86,7 +86,7 @@ func resourceIBMLbServiceCreate(d *schema.ResourceData, meta interface{}) error 
 	vipID := *serviceGroup.VirtualServer.VirtualIpAddress.Id
 
 	// Convert the health check type name to an ID
-	healthCheckTypeId, err := getHealthCheckTypeId(sess, d.Get("health_check_type").(string))
+	healthCheckTypeId, err := getHealthCheckTypeId(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("health_check_type").(string))
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func resourceIBMLbServiceCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	// Retrieve the newly created object, to obtain its ID
-	svcs, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerServiceGroupService(sess).
+	svcs, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerServiceGroupService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Id(sgID).
 		Mask("mask[id,port,ipAddressId]").
 		Filter(filter.New(
@@ -157,7 +157,7 @@ func resourceIBMLbServiceUpdate(d *schema.ResourceData, meta interface{}) error 
 	// Using the ID stored in the config, find the IDs of the respective
 	// serviceGroup, virtualServer and virtualIpAddress
 	svcID, _ := strconv.Atoi(d.Id())
-	svc, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerServiceService(sess).
+	svc, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerServiceService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 		Id(svcID).
 		Mask("id,serviceGroup[id,routingTypeId,routingMethodId,virtualServer[id,allocation,port,virtualIpAddress[id]]]").
 		GetObject()
@@ -172,7 +172,7 @@ func resourceIBMLbServiceUpdate(d *schema.ResourceData, meta interface{}) error 
 	vipID := *svc.ServiceGroup.VirtualServer.VirtualIpAddress.Id
 
 	// Convert the health check type name to an ID
-	healthCheckTypeId, err := getHealthCheckTypeId(sess, d.Get("health_check_type").(string))
+	healthCheckTypeId, err := getHealthCheckTypeId(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("health_check_type").(string))
 	if err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func resourceIBMLbServiceUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceIBMLbServiceRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	svcID, _ := strconv.Atoi(d.Id())
 
@@ -291,7 +291,7 @@ func resourceIBMLbServiceDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceIBMLbServiceExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	svcID, _ := strconv.Atoi(d.Id())
 
@@ -311,8 +311,8 @@ func resourceIBMLbServiceExists(d *schema.ResourceData, meta interface{}) (bool,
 	return true, nil
 }
 
-func getHealthCheckTypeId(sess *session.Session, healthCheckTypeName string) (int, error) {
-	healthCheckTypes, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerHealthCheckTypeService(sess).
+func getHealthCheckTypeId(sessWithRetry *session.Session, healthCheckTypeName string) (int, error) {
+	healthCheckTypes, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerHealthCheckTypeService(sessWithRetry).
 		Mask("id").
 		Filter(filter.Build(
 			filter.Path("keyname").Eq(healthCheckTypeName))).

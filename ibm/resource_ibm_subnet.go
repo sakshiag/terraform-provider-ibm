@@ -131,7 +131,7 @@ func resourceIBMSubnetCreate(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
 
 	// Find price items with AdditionalServicesSubnetAddresses
-	productOrderContainer, err := buildSubnetProductOrderContainer(d, sess)
+	productOrderContainer, err := buildSubnetProductOrderContainer(d, meta.(ClientSession).SoftLayerSessionWithRetry())
 	if err != nil {
 		return fmt.Errorf("Error creating subnet: %s", err)
 	}
@@ -144,7 +144,7 @@ func resourceIBMSubnetCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error during creation of subnet: %s", err)
 	}
 
-	Subnet, err := findSubnetByOrderID(sess, *receipt.OrderId)
+	Subnet, err := findSubnetByOrderID(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 	if err != nil {
 		return fmt.Errorf("Error during creation of subnet: %s", err)
 	}
@@ -155,7 +155,7 @@ func resourceIBMSubnetCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMSubnetRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSubnetService(sess)
 
 	subnetID, err := strconv.Atoi(d.Id())
@@ -248,7 +248,7 @@ func resourceIBMSubnetDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMSubnetExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSubnetService(sess)
 
 	subnetID, err := strconv.Atoi(d.Id())

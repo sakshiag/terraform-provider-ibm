@@ -125,8 +125,7 @@ func resourceIBMComputeSSLCertificateCreate(d *schema.ResourceData, meta interfa
 }
 
 func resourceIBMComputeSSLCertificateRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetSecurityCertificateService(sess)
+	service := services.GetSecurityCertificateService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -178,8 +177,7 @@ func resourceIBMComputeSSLCertificateDelete(d *schema.ResourceData, meta interfa
 }
 
 func resourceIBMComputeSSLCertificateExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetSecurityCertificateService(sess)
+	service := services.GetSecurityCertificateService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {

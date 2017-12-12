@@ -140,8 +140,7 @@ func resourceIBMComputeAutoScalePolicy() *schema.Resource {
 }
 
 func resourceIBMComputeAutoScalePolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetScalePolicyService(sess)
+	service := services.GetScalePolicyService(meta.(ClientSession).SoftLayerSession())
 
 	var err error
 
@@ -204,8 +203,8 @@ func resourceIBMComputeAutoScalePolicyCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceIBMComputeAutoScalePolicyRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetScalePolicyService(sess)
+
+	service := services.GetScalePolicyService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	scalePolicyId, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -234,16 +233,15 @@ func resourceIBMComputeAutoScalePolicyRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceIBMComputeAutoScalePolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	scalePolicyService := services.GetScalePolicyService(sess)
-	scalePolicyTriggerService := services.GetScalePolicyTriggerService(sess)
+
+	scalePolicyTriggerService := services.GetScalePolicyTriggerService(meta.(ClientSession).SoftLayerSession())
 
 	scalePolicyId, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return fmt.Errorf("Not a valid scale policy ID, must be an integer: %s", err)
 	}
 
-	scalePolicy, err := scalePolicyService.Id(scalePolicyId).Mask(strings.Join(IBMComputeAutoScalePolicyObjectMask, ";")).GetObject()
+	scalePolicy, err := services.GetScalePolicyService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(scalePolicyId).Mask(strings.Join(IBMComputeAutoScalePolicyObjectMask, ";")).GetObject()
 	if err != nil {
 		return fmt.Errorf("Error retrieving scalePolicy: %s", err)
 	}
@@ -305,7 +303,7 @@ func resourceIBMComputeAutoScalePolicyUpdate(d *schema.ResourceData, meta interf
 
 	time.Sleep(60)
 	log.Printf("[INFO] Updating scale policy: %d", scalePolicyId)
-	_, err = scalePolicyService.Id(scalePolicyId).EditObject(&template)
+	_, err = services.GetScalePolicyService(meta.(ClientSession).SoftLayerSession()).Id(scalePolicyId).EditObject(&template)
 
 	if err != nil {
 		return fmt.Errorf("Error updating scalie policy: %s", err)
@@ -335,8 +333,8 @@ func resourceIBMComputeAutoScalePolicyDelete(d *schema.ResourceData, meta interf
 }
 
 func resourceIBMComputeAutoScalePolicyExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetScalePolicyService(sess)
+
+	service := services.GetScalePolicyService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	policyId, err := strconv.Atoi(d.Id())
 	if err != nil {

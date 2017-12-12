@@ -31,11 +31,10 @@ func dataSourceIBMComputeImageTemplate() *schema.Resource {
 }
 
 func dataSourceIBMComputeImageTemplateRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetAccountService(sess)
 
 	name := d.Get("name").(string)
-
 	imageTemplates, err := service.
 		Mask("id,name").
 		GetBlockDeviceTemplateGroups()

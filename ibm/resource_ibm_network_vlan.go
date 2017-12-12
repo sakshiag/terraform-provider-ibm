@@ -122,7 +122,6 @@ func resourceIBMNetworkVlan() *schema.Resource {
 }
 
 func resourceIBMNetworkVlanCreate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
 	router := d.Get("router_hostname").(string)
 	name := d.Get("name").(string)
 
@@ -133,10 +132,10 @@ func resourceIBMNetworkVlanCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	// Find price items with AdditionalServicesNetworkVlan
-	productOrderContainer, err := buildVlanProductOrderContainer(d, sess, AdditionalServicesNetworkVlanPackageType)
+	productOrderContainer, err := buildVlanProductOrderContainer(d, meta.(ClientSession).SoftLayerSessionWithRetry(), AdditionalServicesNetworkVlanPackageType)
 	if err != nil {
 		// Find price items with AdditionalServices
-		productOrderContainer, err = buildVlanProductOrderContainer(d, sess, AdditionalServicesPackageType)
+		productOrderContainer, err = buildVlanProductOrderContainer(d, meta.(ClientSession).SoftLayerSessionWithRetry(), AdditionalServicesPackageType)
 		if err != nil {
 			return fmt.Errorf("Error creating vlan: %s", err)
 		}
@@ -144,16 +143,16 @@ func resourceIBMNetworkVlanCreate(d *schema.ResourceData, meta interface{}) erro
 
 	log.Println("[INFO] Creating vlan")
 
-	receipt, err := services.GetProductOrderService(sess).
+	receipt, err := services.GetProductOrderService(meta.(ClientSession).SoftLayerSession()).
 		PlaceOrder(productOrderContainer, sl.Bool(false))
 	if err != nil {
 		return fmt.Errorf("Error during creation of vlan: %s", err)
 	}
 
-	vlan, err := findVlanByOrderId(sess, *receipt.OrderId)
+	vlan, err := findVlanByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 
 	if len(name) > 0 {
-		_, err = services.GetNetworkVlanService(sess).
+		_, err = services.GetNetworkVlanService(meta.(ClientSession).SoftLayerSession()).
 			Id(*vlan.Id).EditObject(&datatypes.Network_Vlan{Name: sl.String(name)})
 		if err != nil {
 			return fmt.Errorf("Error updating vlan: %s", err)
@@ -176,7 +175,7 @@ func resourceIBMNetworkVlanCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMNetworkVlanRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkVlanService(sess)
 
 	vlanId, err := strconv.Atoi(d.Id())
@@ -321,7 +320,7 @@ func resourceIBMNetworkVlanDelete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMNetworkVlanExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkVlanService(sess)
 
 	vlanID, err := strconv.Atoi(d.Id())
@@ -341,12 +340,12 @@ func resourceIBMNetworkVlanExists(d *schema.ResourceData, meta interface{}) (boo
 	return result.Id != nil && *result.Id == vlanID, nil
 }
 
-func findVlanByOrderId(sess *session.Session, orderId int) (datatypes.Network_Vlan, error) {
+func findVlanByOrderId(sessWithRetry *session.Session, orderId int) (datatypes.Network_Vlan, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"pending"},
 		Target:  []string{"complete"},
 		Refresh: func() (interface{}, string, error) {
-			vlans, err := services.GetAccountService(sess).
+			vlans, err := services.GetAccountService(sessWithRetry).
 				Filter(filter.Path("networkVlans.billingItem.orderItem.order.id").
 					Eq(strconv.Itoa(orderId)).Build()).
 				Mask("id").
@@ -384,7 +383,7 @@ func findVlanByOrderId(sess *session.Session, orderId int) (datatypes.Network_Vl
 		fmt.Errorf("Cannot find vlan with order id '%d'", orderId)
 }
 
-func buildVlanProductOrderContainer(d *schema.ResourceData, sess *session.Session, packageType string) (
+func buildVlanProductOrderContainer(d *schema.ResourceData, sessWithRetry *session.Session, packageType string) (
 	*datatypes.Container_Product_Order_Network_Vlan, error) {
 	var rt datatypes.Hardware
 	router := d.Get("router_hostname").(string)
@@ -397,19 +396,19 @@ func buildVlanProductOrderContainer(d *schema.ResourceData, sess *session.Sessio
 			errors.New("datacenter name is empty.")
 	}
 
-	dc, err := location.GetDatacenterByName(sess, datacenter, "id")
+	dc, err := location.GetDatacenterByName(sessWithRetry, datacenter, "id")
 	if err != nil {
 		return &datatypes.Container_Product_Order_Network_Vlan{}, err
 	}
 
 	// 1. Get a package
-	pkg, err := product.GetPackageByType(sess, packageType)
+	pkg, err := product.GetPackageByType(sessWithRetry, packageType)
 	if err != nil {
 		return &datatypes.Container_Product_Order_Network_Vlan{}, err
 	}
 
 	// 2. Get all prices for the package
-	productItems, err := product.GetPackageProducts(sess, *pkg.Id)
+	productItems, err := product.GetPackageProducts(sessWithRetry, *pkg.Id)
 	if err != nil {
 		return &datatypes.Container_Product_Order_Network_Vlan{}, err
 	}
@@ -457,7 +456,7 @@ func buildVlanProductOrderContainer(d *schema.ResourceData, sess *session.Sessio
 	}
 
 	if len(router) > 0 {
-		rt, err = hardware.GetRouterByName(sess, router, "id")
+		rt, err = hardware.GetRouterByName(sessWithRetry, router, "id")
 		productOrderContainer.RouterId = rt.Id
 		if err != nil {
 			return &datatypes.Container_Product_Order_Network_Vlan{},

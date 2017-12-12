@@ -71,9 +71,9 @@ func resourceIBMComputeMonitor() *schema.Resource {
 }
 
 func resourceIBMComputeMonitorCreate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	virtualGuestService := services.GetVirtualGuestService(sess)
-	monitorService := services.GetNetworkMonitorVersion1QueryHostService(sess)
+
+	virtualGuestService := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
+	monitorService := services.GetNetworkMonitorVersion1QueryHostService(meta.(ClientSession).SoftLayerSession())
 
 	guestId := d.Get("guest_id").(int)
 	ipAddress := d.Get("ip_address").(string)
@@ -120,9 +120,9 @@ func resourceIBMComputeMonitorCreate(d *schema.ResourceData, meta interface{}) e
 }
 
 func createNotifications(d *schema.ResourceData, meta interface{}, guestId int) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	virtualGuestService := services.GetVirtualGuestService(sess)
-	notificationService := services.GetUserCustomerNotificationVirtualGuestService(sess)
+
+	virtualGuestService := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
+	notificationService := services.GetUserCustomerNotificationVirtualGuestService(meta.(ClientSession).SoftLayerSession())
 
 	// Create a user notification
 	// This represents a link between a monitored guest instance and a user account
@@ -160,9 +160,9 @@ func notificationExists(notificationLinks []datatypes.User_Customer_Notification
 }
 
 func resourceIBMComputeMonitorRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetNetworkMonitorVersion1QueryHostService(sess)
-	virtualGuestService := services.GetVirtualGuestService(sess)
+
+	service := services.GetNetworkMonitorVersion1QueryHostService(meta.(ClientSession).SoftLayerSessionWithRetry())
+	virtualGuestService := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	basicMonitorId, _ := strconv.Atoi(d.Id())
 
@@ -221,13 +221,11 @@ func resourceIBMComputeMonitorRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMComputeMonitorUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetNetworkMonitorVersion1QueryHostService(sess)
 
 	basicMonitorId, _ := strconv.Atoi(d.Id())
 	guestId := d.Get("guest_id").(int)
 
-	basicMonitor, err := service.Id(basicMonitorId).GetObject()
+	basicMonitor, err := services.GetNetworkMonitorVersion1QueryHostService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(basicMonitorId).GetObject()
 	if err != nil {
 		return fmt.Errorf("Error retrieving Basic Monitor : %s", err)
 	}
@@ -241,7 +239,7 @@ func resourceIBMComputeMonitorUpdate(d *schema.ResourceData, meta interface{}) e
 		basicMonitor.WaitCycles = sl.Int(d.Get("wait_cycles").(int))
 	}
 
-	_, err = service.Id(basicMonitorId).EditObject(&basicMonitor)
+	_, err = services.GetNetworkMonitorVersion1QueryHostService(meta.(ClientSession).SoftLayerSession()).Id(basicMonitorId).EditObject(&basicMonitor)
 	if err != nil {
 		return fmt.Errorf("Error editing Basic Monitor : %s", err)
 	}
@@ -274,8 +272,8 @@ func resourceIBMComputeMonitorDelete(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceIBMComputeMonitorExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetNetworkMonitorVersion1QueryHostService(sess)
+
+	service := services.GetNetworkMonitorVersion1QueryHostService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	basicMonitorId, err := strconv.Atoi(d.Id())
 	if err != nil {

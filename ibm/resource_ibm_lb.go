@@ -87,7 +87,6 @@ func resourceIBMLb() *schema.Resource {
 }
 
 func resourceIBMLbCreate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
 
 	connections := d.Get("connections").(int)
 	haEnabled := d.Get("ha_enabled").(bool)
@@ -137,13 +136,13 @@ func resourceIBMLbCreate(d *schema.ResourceData, meta interface{}) error {
 
 	keyName := fmt.Sprintf(keyFormatter, connections)
 
-	pkg, err := product.GetPackageByType(sess, LbLocalPackageType)
+	pkg, err := product.GetPackageByType(meta.(ClientSession).SoftLayerSessionWithRetry(), LbLocalPackageType)
 	if err != nil {
 		return err
 	}
 
 	// Get all prices for ADDITIONAL_SERVICE_LOAD_BALANCER with the given capacity
-	productItems, err := product.GetPackageProducts(sess, *pkg.Id)
+	productItems, err := product.GetPackageProducts(meta.(ClientSession).SoftLayerSessionWithRetry(), *pkg.Id)
 	if err != nil {
 		return err
 	}
@@ -169,7 +168,7 @@ func resourceIBMLbCreate(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	// Lookup the datacenter ID
-	dc, err := location.GetDatacenterByName(sess, d.Get("datacenter").(string))
+	dc, err := location.GetDatacenterByName(meta.(ClientSession).SoftLayerSessionWithRetry(), d.Get("datacenter").(string))
 
 	productOrderContainer := datatypes.Container_Product_Order_Network_LoadBalancer{
 		Container_Product_Order: datatypes.Container_Product_Order{
@@ -182,13 +181,13 @@ func resourceIBMLbCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Println("[INFO] Creating load balancer")
 
-	receipt, err := services.GetProductOrderService(sess).
+	receipt, err := services.GetProductOrderService(meta.(ClientSession).SoftLayerSession()).
 		PlaceOrder(&productOrderContainer, sl.Bool(false))
 	if err != nil {
 		return fmt.Errorf("Error during creation of load balancer: %s", err)
 	}
 
-	loadBalancer, err := findLoadBalancerByOrderId(sess, *receipt.OrderId, dedicated)
+	loadBalancer, err := findLoadBalancerByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId, dedicated)
 	if err != nil {
 		return fmt.Errorf("Error during creation of load balancer: %s", err)
 	}
@@ -222,8 +221,7 @@ func resourceIBMLbUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMLbRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	vipID, _ := strconv.Atoi(d.Id())
 
 	vip, err := services.GetNetworkApplicationDeliveryControllerLoadBalancerVirtualIpAddressService(sess).
@@ -251,7 +249,6 @@ func resourceIBMLbRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMLbDelete(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
-	vipService := services.GetNetworkApplicationDeliveryControllerLoadBalancerVirtualIpAddressService(sess)
 
 	vipID, _ := strconv.Atoi(d.Id())
 
@@ -260,11 +257,11 @@ func resourceIBMLbDelete(d *schema.ResourceData, meta interface{}) error {
 
 	// Get billing item associated with the load balancer
 	if d.Get("dedicated").(bool) {
-		billingItem, err = vipService.
+		billingItem, err = services.GetNetworkApplicationDeliveryControllerLoadBalancerVirtualIpAddressService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 			Id(vipID).
 			GetDedicatedBillingItem()
 	} else {
-		billingItem.Billing_Item, err = vipService.
+		billingItem.Billing_Item, err = services.GetNetworkApplicationDeliveryControllerLoadBalancerVirtualIpAddressService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 			Id(vipID).
 			GetBillingItem()
 	}
@@ -289,7 +286,7 @@ func resourceIBMLbDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMLbExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 
 	vipID, _ := strconv.Atoi(d.Id())
 
@@ -321,7 +318,7 @@ func getConnectionLimit(connectionLimit int) int {
 	}
 }
 
-func findLoadBalancerByOrderId(sess *session.Session, orderId int, dedicated bool) (datatypes.Network_Application_Delivery_Controller_LoadBalancer_VirtualIpAddress, error) {
+func findLoadBalancerByOrderId(sessWithRetry *session.Session, orderId int, dedicated bool) (datatypes.Network_Application_Delivery_Controller_LoadBalancer_VirtualIpAddress, error) {
 	var filterPath string
 	if dedicated {
 		filterPath = "adcLoadBalancers.dedicatedBillingItem.orderItem.order.id"
@@ -333,7 +330,7 @@ func findLoadBalancerByOrderId(sess *session.Session, orderId int, dedicated boo
 		Pending: []string{"pending"},
 		Target:  []string{"complete"},
 		Refresh: func() (interface{}, string, error) {
-			lbs, err := services.GetAccountService(sess).
+			lbs, err := services.GetAccountService(sessWithRetry).
 				Filter(filter.Build(
 					filter.Path(filterPath).
 						Eq(strconv.Itoa(orderId)))).

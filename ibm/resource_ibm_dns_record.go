@@ -263,7 +263,7 @@ func resourceIBMDNSRecordCreate(d *schema.ResourceData, meta interface{}) error 
 //  Reads DNS Domain Resource Record from SL system
 //  https://sldn.softlayer.com/reference/services/SoftLayer_Dns_Domain_ResourceRecord/getObject
 func resourceIBMDNSRecordRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetDnsDomainResourceRecordService(sess)
 
 	id, err := strconv.Atoi(d.Id())
@@ -308,7 +308,7 @@ func resourceIBMDNSRecordUpdate(d *schema.ResourceData, meta interface{}) error 
 	recordId, _ := strconv.Atoi(d.Id())
 
 	service := services.GetDnsDomainResourceRecordService(sess)
-	record, err := service.Id(recordId).GetObject()
+	record, err := services.GetDnsDomainResourceRecordService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(recordId).GetObject()
 	if err != nil {
 		return fmt.Errorf("Error retrieving DNS Resource Record: %s", err)
 	}
@@ -417,7 +417,7 @@ func resourceIBMDNSRecordDelete(d *schema.ResourceData, meta interface{}) error 
 // Exists function is called by refresh
 // if the entity is absent - it is deleted from the .tfstate file
 func resourceIBMDNSRecordExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetDnsDomainResourceRecordService(sess)
 
 	id, err := strconv.Atoi(d.Id())

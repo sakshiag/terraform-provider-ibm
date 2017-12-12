@@ -71,13 +71,12 @@ func resourceIBMNetworkPublicIp() *schema.Resource {
 }
 
 func resourceIBMNetworkPublicIpCreate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
 
 	// Find price items with AdditionalServicesGlobalIpAddresses
-	productOrderContainer, err := buildGlobalIpProductOrderContainer(d, sess, AdditionalServicesGlobalIpAddressesPackageType)
+	productOrderContainer, err := buildGlobalIpProductOrderContainer(d, meta.(ClientSession).SoftLayerSessionWithRetry(), AdditionalServicesGlobalIpAddressesPackageType)
 	if err != nil {
 		// Find price items with AdditionalServices
-		productOrderContainer, err = buildGlobalIpProductOrderContainer(d, sess, AdditionalServicesPackageType)
+		productOrderContainer, err = buildGlobalIpProductOrderContainer(d, meta.(ClientSession).SoftLayerSessionWithRetry(), AdditionalServicesPackageType)
 		if err != nil {
 			return fmt.Errorf("Error creating network public ip: %s", err)
 		}
@@ -85,13 +84,13 @@ func resourceIBMNetworkPublicIpCreate(d *schema.ResourceData, meta interface{}) 
 
 	log.Println("[INFO] Creating network public ip")
 
-	receipt, err := services.GetProductOrderService(sess).
+	receipt, err := services.GetProductOrderService(meta.(ClientSession).SoftLayerSession()).
 		PlaceOrder(productOrderContainer, sl.Bool(false))
 	if err != nil {
 		return fmt.Errorf("Error during creation of network public ip: %s", err)
 	}
 
-	globalIp, err := findGlobalIpByOrderId(sess, *receipt.OrderId)
+	globalIp, err := findGlobalIpByOrderId(meta.(ClientSession).SoftLayerSessionWithRetry(), *receipt.OrderId)
 	if err != nil {
 		return fmt.Errorf("Error during creation of network public ip: %s", err)
 	}
@@ -103,7 +102,7 @@ func resourceIBMNetworkPublicIpCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIBMNetworkPublicIpRead(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSubnetIpAddressGlobalService(sess)
 
 	globalIpId, err := strconv.Atoi(d.Id())
@@ -129,8 +128,6 @@ func resourceIBMNetworkPublicIpRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceIBMNetworkPublicIpUpdate(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetNetworkSubnetIpAddressGlobalService(sess)
-
 	globalIpId, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return fmt.Errorf("Not a valid network public ip ID, must be an integer: %s", err)
@@ -152,13 +149,13 @@ func resourceIBMNetworkPublicIpUpdate(d *schema.ResourceData, meta interface{}) 
 		d.Set("routes_to", routes_to)
 	}
 
-	_, err = service.Id(globalIpId).Route(sl.String(routes_to))
+	_, err = services.GetNetworkSubnetIpAddressGlobalService(sess).Id(globalIpId).Route(sl.String(routes_to))
 	if err != nil {
 		return fmt.Errorf("Error editing network public Ip: %s", err)
 	}
 	// Update notes
 	if d.HasChange("notes") {
-		publicIp, err := service.Id(globalIpId).Mask(GlobalIpMask).GetObject()
+		publicIp, err := services.GetNetworkSubnetIpAddressGlobalService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(globalIpId).Mask(GlobalIpMask).GetObject()
 		if err != nil {
 			return fmt.Errorf("Error updating network public Ip: %s", err)
 		}
@@ -172,7 +169,7 @@ func resourceIBMNetworkPublicIpUpdate(d *schema.ResourceData, meta interface{}) 
 		Pending: []string{"pending"},
 		Target:  []string{"complete"},
 		Refresh: func() (interface{}, string, error) {
-			transaction, err := service.Id(globalIpId).GetActiveTransaction()
+			transaction, err := services.GetNetworkSubnetIpAddressGlobalService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(globalIpId).GetActiveTransaction()
 			if err != nil {
 				return datatypes.Network_Subnet_IpAddress_Global{}, "pending", err
 			}
@@ -223,7 +220,7 @@ func resourceIBMNetworkPublicIpDelete(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIBMNetworkPublicIpExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	service := services.GetNetworkSubnetIpAddressGlobalService(sess)
 
 	globalIpId, err := strconv.Atoi(d.Id())
@@ -241,12 +238,12 @@ func resourceIBMNetworkPublicIpExists(d *schema.ResourceData, meta interface{}) 
 	return result.Id != nil && *result.Id == globalIpId, nil
 }
 
-func findGlobalIpByOrderId(sess *session.Session, orderId int) (datatypes.Network_Subnet_IpAddress_Global, error) {
+func findGlobalIpByOrderId(sessWithRetry *session.Session, orderId int) (datatypes.Network_Subnet_IpAddress_Global, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"pending"},
 		Target:  []string{"complete"},
 		Refresh: func() (interface{}, string, error) {
-			globalIps, err := services.GetAccountService(sess).
+			globalIps, err := services.GetAccountService(sessWithRetry).
 				Filter(filter.Path("globalIpRecords.billingItem.orderItem.order.id").
 					Eq(strconv.Itoa(orderId)).Build()).
 				Mask("id,ipAddress[ipAddress]").
@@ -282,17 +279,17 @@ func findGlobalIpByOrderId(sess *session.Session, orderId int) (datatypes.Networ
 		fmt.Errorf("Cannot find network public ip with order id '%d'", orderId)
 }
 
-func buildGlobalIpProductOrderContainer(d *schema.ResourceData, sess *session.Session, packageType string) (
+func buildGlobalIpProductOrderContainer(d *schema.ResourceData, sessWithRetry *session.Session, packageType string) (
 	*datatypes.Container_Product_Order_Network_Subnet, error) {
 
 	// 1. Get a package
-	pkg, err := product.GetPackageByType(sess, packageType)
+	pkg, err := product.GetPackageByType(sessWithRetry, packageType)
 	if err != nil {
 		return &datatypes.Container_Product_Order_Network_Subnet{}, err
 	}
 
 	// 2. Get all prices for the package
-	productItems, err := product.GetPackageProducts(sess, *pkg.Id)
+	productItems, err := product.GetPackageProducts(sessWithRetry, *pkg.Id)
 	if err != nil {
 		return &datatypes.Container_Product_Order_Network_Subnet{}, err
 	}
