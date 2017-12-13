@@ -3,7 +3,6 @@ package ibm
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/IBM-Bluemix/bluemix-go/helpers"
@@ -173,7 +172,6 @@ func expandExec(execs *schema.Set) *whisk.Exec {
 
 func flattenExec(in *whisk.Exec) []interface{} {
 	att := make(map[string]interface{})
-	log.Println("************", in)
 	if in.Image != "" {
 		att["image"] = in.Image
 	}
@@ -229,11 +227,63 @@ func expandParameters(annotations string) (whisk.KeyValueArr, error) {
 }
 
 func flattenParameters(in whisk.KeyValueArr) (string, error) {
-	b, err := json.Marshal(in)
+	noExec := make(whisk.KeyValueArr, 0, len(in))
+	for _, v := range in {
+		if v.Key == "_actions" {
+			continue
+		}
+		noExec = append(noExec, v)
+	}
+	b, err := json.Marshal(noExec)
 	if err != nil {
 		return "", err
 	}
 	return string(b[:]), nil
+}
+
+func expandBinding(binding []interface{}) (*whisk.Binding, error) {
+	bindingParameters := &whisk.Binding{}
+	for _, b := range binding {
+		param := b.(map[string]interface{})
+		var qualifiedBindingName = new(QualifiedName)
+		var err error
+		bindingName := fmt.Sprintf("/%s/%s", param["namespace"].(string), param["name"].(string))
+		if qualifiedBindingName, err = NewQualifiedName(bindingName); err != nil {
+			return nil, NewQualifiedNameError(bindingName, err)
+		}
+		bindingParameters.Namespace = qualifiedBindingName.GetNamespace()
+		bindingParameters.Name = qualifiedBindingName.GetEntityName()
+	}
+
+	return bindingParameters, nil
+}
+
+func flattenBinding(bindingParameters *whisk.Binding) []map[string]interface{} {
+	binding := make(map[string]interface{})
+	binding["namespace"] = bindingParameters.Namespace
+	binding["name"] = bindingParameters.Name
+	result := []map[string]interface{}{binding}
+	return result
+}
+
+func flattenActionOrTrigger(in interface{}) []interface{} {
+	att := make(map[string]interface{})
+	parameter := in.(map[string]interface{})
+	att["name"] = parameter["name"]
+	att["path"] = parameter["path"]
+	return []interface{}{att}
+}
+
+func flattenAction(namespace, name string) []interface{} {
+	att := make(map[string]interface{})
+	att["name"] = name
+	packageName := ""
+	temp := strings.Split(namespace, "/")
+	if len(temp) == 2 {
+		packageName = temp[1]
+	}
+	att["package"] = packageName
+	return []interface{}{att}
 }
 
 func ptrToInt(i int) *int {

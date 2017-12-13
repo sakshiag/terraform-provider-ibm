@@ -27,15 +27,15 @@ func TestAccOpenWhiskAction_Basic(t *testing.T) {
 				Config: testAccCheckOpenWhiskActionCreate(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckOpenWhiskActionExists("ibm_openwhisk_action.action", &conf),
-					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "name", name),
-					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "exec.0.kind", "nodejs:6"),
+					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "action.#", "1"),
+					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "exec.1865481321.kind", "nodejs:6"),
 				),
 			},
 
 			resource.TestStep{
 				Config: testAccCheckOpenWhiskActionUpdate(updatedName),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "name", updatedName),
+					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "action.455559736.name", updatedName),
 				),
 			},
 		},
@@ -56,7 +56,7 @@ func TestAccOpenWhiskAction_With_Annotations(t *testing.T) {
 				Config: testAccCheckOpenWhiskActionCreateWithAnnotations(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckOpenWhiskActionExists("ibm_openwhisk_action.action", &conf),
-					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "name", name),
+					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "action.0.name", name),
 				),
 			},
 		},
@@ -77,7 +77,7 @@ func TestAccOpenWhiskAction_With_Sequence(t *testing.T) {
 				Config: testAccCheckOpenWhiskActionCreateWithSequence(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckOpenWhiskActionExists("ibm_openwhisk_action.action", &conf),
-					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "name", name),
+					resource.TestCheckResourceAttr("ibm_openwhisk_action.action", "action.0.name", name),
 				),
 			},
 		},
@@ -135,7 +135,11 @@ func testAccCheckOpenWhiskActionCreate(name string) string {
 	return fmt.Sprintf(`
 	
 resource "ibm_openwhisk_action" "action" {
-   	name = "%s"
+	action = [
+		{
+		  "name"      = "%s"
+		},
+	  ]
 	exec = {
 	 kind = "nodejs:6"
      code = "${file("test-fixtures/wsk-create-cat.js")}"
@@ -152,7 +156,11 @@ func testAccCheckOpenWhiskActionUpdate(updatedName string) string {
 	return fmt.Sprintf(`
 	
 resource "ibm_openwhisk_action" "action" {
-   	name = "%s"
+	action = [
+		{
+		  "name"      = "%s"
+		},
+	  ]
 	exec = {
 	 kind = "nodejs:6"
      code = "${file("test-fixtures/wsk-create-cat.js")}"
@@ -168,7 +176,11 @@ func testAccCheckOpenWhiskActionCreateWithAnnotations(name string) string {
 	return fmt.Sprintf(`
 	
 resource "ibm_openwhisk_action" "action" {
-   	name = "%s"
+	action = [
+		{
+		  "name"      = "%s"
+		},
+	  ]
 	exec = {
 	 kind = "nodejs:6"
      code = "${file("test-fixtures/wsk-create-cat.js")}"
@@ -202,7 +214,11 @@ func testAccCheckOpenWhiskActionCreateWithSequence(name string) string {
 	return fmt.Sprintf(`
 	
 resource "ibm_openwhisk_action" "action" {
-   	name = "%s"
+	action = [
+		{
+		  "name"      = "%s"
+		},
+	  ]
 	exec = {
 	 components = ["/whisk.system/utils/split", "/whisk.system/utils/sort"]
 	}

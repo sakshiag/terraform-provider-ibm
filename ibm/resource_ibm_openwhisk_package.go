@@ -1,10 +1,13 @@
 package ibm
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/apache/incubator-openwhisk-client-go/whisk"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -35,11 +38,10 @@ func resourceIBMOpenWhiskPackage() *schema.Resource {
 				Computed:    true,
 				Description: "Semantic version of the item",
 			},
-			"annotations": {
+			"user_defined_annotations": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Description:      "Annotations on the item.",
-				Default:          "[]",
 				ValidateFunc:     validateJSONString,
 				DiffSuppressFunc: suppressEquivalentJSON,
 				StateFunc: func(v interface{}) string {
@@ -47,10 +49,9 @@ func resourceIBMOpenWhiskPackage() *schema.Resource {
 					return json
 				},
 			},
-			"parameters": {
+			"user_defined_parameters": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "[]",
 				Description:      "Parameter bindings included in the context passed to the package.",
 				ValidateFunc:     validateJSONString,
 				DiffSuppressFunc: suppressEquivalentJSON,
@@ -58,6 +59,34 @@ func resourceIBMOpenWhiskPackage() *schema.Resource {
 					json, _ := normalizeJSONString(v)
 					return json
 				},
+			},
+			"annotations": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Annotations on the item.",
+			},
+			"parameters": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Parameters on the item.",
+			},
+			"binding": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"namespace": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+				Set: resourceIBMOpenWhiskPackageBindingHash,
 			},
 		},
 	}
@@ -82,7 +111,7 @@ func resourceIBMOpenWhiskPackageCreate(d *schema.ResourceData, meta interface{})
 		Name:      qualifiedName.GetEntityName(),
 		Namespace: qualifiedName.GetNamespace(),
 	}
-	if v, ok := d.GetOk("annotations"); ok {
+	if v, ok := d.GetOk("user_defined_annotations"); ok {
 		var err error
 		payload.Annotations, err = expandAnnotations(v.(string))
 		if err != nil {
@@ -90,7 +119,7 @@ func resourceIBMOpenWhiskPackageCreate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	if v, ok := d.GetOk("parameters"); ok {
+	if v, ok := d.GetOk("user_defined_parameters"); ok {
 		var err error
 		payload.Parameters, err = expandParameters(v.(string))
 		if err != nil {
@@ -105,6 +134,14 @@ func resourceIBMOpenWhiskPackageCreate(d *schema.ResourceData, meta interface{})
 
 	if version, ok := d.GetOk("version"); ok {
 		payload.Version = version.(string)
+	}
+
+	if v, ok := d.GetOk("binding"); ok {
+		var err error
+		payload.Binding, err = expandBinding(v.(*schema.Set).List())
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Println("[INFO] Creating OpenWhisk pkg")
@@ -153,6 +190,11 @@ func resourceIBMOpenWhiskPackageRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 	d.Set("parameters", parameters)
+
+	if !isEmpty(*pkg.Binding) {
+		binding := flattenBinding(pkg.Binding)
+		d.Set("binding", binding)
+	}
 	return nil
 }
 
@@ -182,18 +224,27 @@ func resourceIBMOpenWhiskPackageUpdate(d *schema.ResourceData, meta interface{})
 		ischanged = true
 	}
 
-	if d.HasChange("parameters") {
+	if d.HasChange("user_defined_parameters") {
 		var err error
-		payload.Parameters, err = expandParameters(d.Get("parameters").(string))
+		payload.Parameters, err = expandParameters(d.Get("user_defined_parameters").(string))
 		if err != nil {
 			return err
 		}
 		ischanged = true
 	}
 
-	if d.HasChange("annotations") {
+	if d.HasChange("user_defined_annotations") {
 		var err error
-		payload.Annotations, err = expandAnnotations(d.Get("annotations").(string))
+		payload.Annotations, err = expandAnnotations(d.Get("user_defined_annotations").(string))
+		if err != nil {
+			return err
+		}
+		ischanged = true
+	}
+
+	if d.HasChange("binding") {
+		var err error
+		payload.Binding, err = expandBinding(d.Get("binding").(*schema.Set).List())
 		if err != nil {
 			return err
 		}
@@ -258,4 +309,33 @@ func resourceIBMOpenWhiskPackageExists(d *schema.ResourceData, meta interface{})
 		return false, fmt.Errorf("Error communicating with OpenWhisk Client : %s", err)
 	}
 	return pkg.Name == id, nil
+}
+
+func resourceIBMOpenWhiskPackageBindingHash(v interface{}) int {
+	var buf bytes.Buffer
+	binding := v.(map[string]interface{})
+	buf.WriteString(fmt.Sprintf("%s-", binding["namespace"].(string)))
+	buf.WriteString(fmt.Sprintf("%s-", binding["name"].(string)))
+	return hashcode.String(buf.String())
+}
+
+func isEmpty(object interface{}) bool {
+	//First check normal definitions of empty
+	if object == nil {
+		return true
+	} else if object == "" {
+		return true
+	} else if object == false {
+		return true
+	}
+
+	//Then see if it's a struct
+	if reflect.ValueOf(object).Kind() == reflect.Struct {
+		// and create an empty copy of the struct object to compare against
+		empty := reflect.New(reflect.TypeOf(object)).Elem().Interface()
+		if reflect.DeepEqual(object, empty) {
+			return true
+		}
+	}
+	return false
 }

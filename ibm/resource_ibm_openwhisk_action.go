@@ -1,10 +1,13 @@
 package ibm
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/apache/incubator-openwhisk-client-go/whisk"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -18,11 +21,26 @@ func resourceIBMOpenWhiskAction() *schema.Resource {
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The name of the action",
+			"action": {
+				Type:     schema.TypeSet,
+				Required: true,
+				ForceNew: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"package": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The package name",
+						},
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the action",
+						},
+					},
+				},
+				Set: resourceIBMOpenWhiskActionHash,
 			},
 			"limits": {
 				Type:     schema.TypeSet,
@@ -144,7 +162,14 @@ func resourceIBMOpenWhiskActionCreate(d *schema.ResourceData, meta interface{}) 
 
 	exec := d.Get("exec").(*schema.Set)
 
-	name := d.Get("name").(string)
+	actionParameters := d.Get("action").(*schema.Set).List()[0].(map[string]interface{})
+	var name string
+
+	if actionParameters["package"] != "" {
+		name = fmt.Sprintf("%s/%s", actionParameters["package"], actionParameters["name"])
+	} else {
+		name = actionParameters["name"].(string)
+	}
 
 	var qualifiedName = new(QualifiedName)
 
@@ -192,7 +217,14 @@ func resourceIBMOpenWhiskActionCreate(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating OpenWhisk Action: %s", err)
 	}
 
-	d.SetId(action.Name)
+	temp := strings.Split(action.Namespace, "/")
+
+	if len(temp) == 2 {
+		d.SetId(fmt.Sprintf("%s/%s", temp[1], action.Name))
+	} else {
+		d.SetId(action.Name)
+	}
+
 	return resourceIBMOpenWhiskActionRead(d, meta)
 }
 
@@ -218,8 +250,6 @@ func resourceIBMOpenWhiskActionRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error retrieving OpenWhisk Action %s : %s", id, err)
 	}
 
-	d.SetId(action.Name)
-	d.Set("name", action.Name)
 	d.Set("limits", flattenLimits(action.Limits))
 	d.Set("exec", flattenExec(action.Exec))
 	d.Set("publish", action.Publish)
@@ -234,6 +264,8 @@ func resourceIBMOpenWhiskActionRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 	d.Set("parameters", parameters)
+
+	d.Set("action", flattenAction(action.Namespace, action.Name))
 	return nil
 }
 
@@ -243,7 +275,9 @@ func resourceIBMOpenWhiskActionUpdate(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	actionService := wskClient.Actions
-	name := d.Get("name").(string)
+
+	actionParameters := d.Get("action").(*schema.Set).List()[0].(map[string]interface{})
+	name := fmt.Sprintf("%s/%s", actionParameters["package"], actionParameters["name"])
 
 	var qualifiedName = new(QualifiedName)
 
@@ -321,4 +355,14 @@ func resourceIBMOpenWhiskActionExists(d *schema.ResourceData, meta interface{}) 
 		return false, fmt.Errorf("Error communicating with OpenWhisk Client : %s", err)
 	}
 	return action.Name == id, nil
+}
+
+func resourceIBMOpenWhiskActionHash(v interface{}) int {
+	var buf bytes.Buffer
+	qualifiedName := v.(map[string]interface{})
+	if v, ok := qualifiedName["package"]; ok {
+		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
+	}
+	buf.WriteString(fmt.Sprintf("%s-", qualifiedName["name"].(string)))
+	return hashcode.String(buf.String())
 }

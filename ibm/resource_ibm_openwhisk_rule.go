@@ -1,10 +1,12 @@
 package ibm
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 
 	"github.com/apache/incubator-openwhisk-client-go/whisk"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -24,15 +26,45 @@ func resourceIBMOpenWhiskRule() *schema.Resource {
 				ForceNew:    true,
 				Description: "Name of rule",
 			},
-			"trigger_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the trigger",
+			"trigger": {
+				Type:     schema.TypeSet,
+				Required: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"path": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The namespace of the trigger",
+						},
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the trigger",
+						},
+					},
+				},
+				Set: resourceIBMOpenWhiskRuleHash,
 			},
-			"action_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the action",
+			"action": {
+				Type:     schema.TypeSet,
+				Required: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"path": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The namespace and the package of the action",
+						},
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the action",
+						},
+					},
+				},
+				Set: resourceIBMOpenWhiskRuleHash,
 			},
 			"status": {
 				Type:        schema.TypeString,
@@ -69,14 +101,14 @@ func resourceIBMOpenWhiskRuleCreate(d *schema.ResourceData, meta interface{}) er
 
 	wskClient.Namespace = qualifiedName.GetNamespace()
 
-	triggerName := getQualifiedName(d.Get("trigger_name").(string), wskClient.Namespace)
-	actionName := getQualifiedName(d.Get("action_name").(string), wskClient.Namespace)
+	trigger := d.Get("trigger").(*schema.Set).List()[0]
+	action := d.Get("action").(*schema.Set).List()[0]
 
 	payload := whisk.Rule{
 		Name:      qualifiedName.GetEntityName(),
 		Namespace: qualifiedName.GetNamespace(),
-		Trigger:   triggerName,
-		Action:    actionName,
+		Trigger:   trigger,
+		Action:    action,
 	}
 
 	if publish, ok := d.GetOk("publish"); ok {
@@ -120,15 +152,12 @@ func resourceIBMOpenWhiskRuleRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error retrieving OpenWhisk package %s : %s", id, err)
 	}
 
-	d.SetId(rule.Name)
 	d.Set("name", rule.Name)
 	d.Set("publish", rule.Publish)
 	d.Set("version", rule.Version)
 	d.Set("status", rule.Status)
-	triggerName := (rule.Trigger).(map[string]interface{})
-	d.Set("trigger_name", getQualifiedName(triggerName["name"].(string), triggerName["path"].(string)))
-	actionName := (rule.Action).(map[string]interface{})
-	d.Set("action_name", getQualifiedName(actionName["name"].(string), actionName["path"].(string)))
+	d.Set("trigger", flattenActionOrTrigger(rule.Trigger))
+	d.Set("action", flattenActionOrTrigger(rule.Action))
 	return nil
 }
 
@@ -158,15 +187,15 @@ func resourceIBMOpenWhiskRuleUpdate(d *schema.ResourceData, meta interface{}) er
 		ischanged = true
 	}
 
-	if d.HasChange("trigger_name") {
-		triggerName := getQualifiedName(d.Get("trigger_name").(string), wskClient.Namespace)
-		payload.Trigger = triggerName
+	if d.HasChange("trigger") {
+		trigger := d.Get("trigger").(*schema.Set).List()[0]
+		payload.Trigger = trigger
 		ischanged = true
 	}
 
-	if d.HasChange("action_name") {
-		actionName := getQualifiedName(d.Get("action_name").(string), wskClient.Namespace)
-		payload.Action = actionName
+	if d.HasChange("action") {
+		action := d.Get("action").(*schema.Set).List()[0]
+		payload.Action = action
 		ischanged = true
 	}
 
@@ -231,4 +260,12 @@ func resourceIBMOpenWhiskRuleExists(d *schema.ResourceData, meta interface{}) (b
 		return false, fmt.Errorf("Error communicating with OpenWhisk Client : %s", err)
 	}
 	return rule.Name == id, nil
+}
+
+func resourceIBMOpenWhiskRuleHash(v interface{}) int {
+	var buf bytes.Buffer
+	qualifiedName := v.(map[string]interface{})
+	buf.WriteString(fmt.Sprintf("%s-", qualifiedName["path"].(string)))
+	buf.WriteString(fmt.Sprintf("%s-", qualifiedName["name"].(string)))
+	return hashcode.String(buf.String())
 }
