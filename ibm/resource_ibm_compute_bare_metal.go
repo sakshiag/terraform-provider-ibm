@@ -477,7 +477,7 @@ func resourceIBMComputeBareMetalCreate(d *schema.ResourceData, meta interface{})
 
 	if quote_id > 0 {
 		// Build a bare metal template from the quote.
-		order, err = services.GetBillingOrderQuoteService(sess).
+		order, err = services.GetBillingOrderQuoteService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 			Id(quote_id).GetRecalculatedOrderContainer(nil, sl.Bool(false))
 		if err != nil {
 			return fmt.Errorf(
@@ -495,12 +495,12 @@ func resourceIBMComputeBareMetalCreate(d *schema.ResourceData, meta interface{})
 		if err != nil {
 			return err
 		}
-		order, err = services.GetHardwareService(sess).GenerateOrderTemplate(&hardware)
+		order, err = services.GetHardwareService(meta.(ClientSession).SoftLayerSessionWithRetry()).GenerateOrderTemplate(&hardware)
 		if err != nil {
 			return fmt.Errorf(
 				"Encountered problem trying to get the bare metal order template: %s", err)
 		}
-		items, err := product.GetPackageProducts(sess, *order.PackageId, productItemMaskWithPriceLocationGroupID)
+		items, err := product.GetPackageProducts(meta.(ClientSession).SoftLayerSessionWithRetry(), *order.PackageId, productItemMaskWithPriceLocationGroupID)
 		if err != nil {
 			return err
 		}
@@ -595,7 +595,7 @@ func resourceIBMComputeBareMetalCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceIBMComputeBareMetalRead(d *schema.ResourceData, meta interface{}) error {
-	service := services.GetHardwareService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetHardwareService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -722,7 +722,7 @@ func resourceIBMComputeBareMetalRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceIBMComputeBareMetalUpdate(d *schema.ResourceData, meta interface{}) error {
 	id, _ := strconv.Atoi(d.Id())
-	service := services.GetHardwareService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetHardwareService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	if d.HasChange("tags") {
 		err := setHardwareTags(id, d, meta)
@@ -747,8 +747,6 @@ func resourceIBMComputeBareMetalUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceIBMComputeBareMetalDelete(d *schema.ResourceData, meta interface{}) error {
 	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetHardwareService(sess)
-
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return fmt.Errorf("Not a valid ID, must be an integer: %s", err)
@@ -759,7 +757,7 @@ func resourceIBMComputeBareMetalDelete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error deleting bare metal server while waiting for zero active transactions: %s", err)
 	}
 
-	billingItem, err := service.Id(id).GetBillingItem()
+	billingItem, err := services.GetHardwareService(meta.(ClientSession).SoftLayerSessionWithRetry()).Id(id).GetBillingItem()
 	if err != nil {
 		return fmt.Errorf("Error getting billing item for bare metal server: %s", err)
 	}
@@ -777,7 +775,7 @@ func resourceIBMComputeBareMetalDelete(d *schema.ResourceData, meta interface{})
 }
 
 func resourceIBMComputeBareMetalExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	service := services.GetHardwareService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetHardwareService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -807,7 +805,7 @@ func waitForBareMetalProvision(hw *datatypes.Hardware, d *schema.ResourceData, m
 		Pending: []string{"retry", "pending"},
 		Target:  []string{"provisioned"},
 		Refresh: func() (interface{}, string, error) {
-			sess := meta.(ClientSession).SoftLayerSession()
+			sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 			service := services.GetAccountService(sess)
 			bms, err := service.Filter(
 				filter.Build(
@@ -851,7 +849,7 @@ func waitForBareMetalProvision(hw *datatypes.Hardware, d *schema.ResourceData, m
 
 func waitForNoBareMetalActiveTransactions(id int, meta interface{}) (interface{}, error) {
 	log.Printf("Waiting for server (%d) to have zero active transactions", id)
-	service := services.GetHardwareServerService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetHardwareServerService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"retry", "active"},
@@ -891,8 +889,9 @@ func setHardwareTags(id int, d *schema.ResourceData, meta interface{}) error {
 
 func setHardwareNotes(id int, d *schema.ResourceData, meta interface{}) error {
 	service := services.GetHardwareServerService(meta.(ClientSession).SoftLayerSession())
+	serviceWithRetry := services.GetHardwareServerService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
-	result, err := service.Id(id).GetObject()
+	result, err := serviceWithRetry.Id(id).GetObject()
 	if err != nil {
 		return err
 	}
@@ -932,7 +931,7 @@ func getItemPriceId(items []datatypes.Product_Item, categoryCode string, keyName
 }
 
 func getMonthlyBareMetalOrder(d *schema.ResourceData, meta interface{}) (datatypes.Container_Product_Order, error) {
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	// Validate attributes for monthly bare metal server ordering.
 	if d.Get("hourly_billing").(bool) {
 		return datatypes.Container_Product_Order{}, fmt.Errorf("Monthly bare metal server only supports monthly billing.")

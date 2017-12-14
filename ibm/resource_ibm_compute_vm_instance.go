@@ -25,7 +25,7 @@ import (
 type storageIds []int
 
 func (s storageIds) Storages(meta interface{}) ([]datatypes.Network_Storage, error) {
-	storageService := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSession())
+	storageService := services.GetNetworkStorageService(meta.(ClientSession).SoftLayerSessionWithRetry())
 	storages := make([]datatypes.Network_Storage, len(s))
 
 	for i, id := range s {
@@ -420,7 +420,7 @@ func resourceIBMComputeVmInstance() *schema.Resource {
 }
 
 func getSubnetID(subnet string, meta interface{}) (int, error) {
-	service := services.GetAccountService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	subnetInfo := strings.Split(subnet, "/")
 	if len(subnetInfo) != 2 {
@@ -539,8 +539,7 @@ func getVirtualGuestTemplateFromResourceData(d *schema.ResourceData, meta interf
 		}
 	} else if dedicatedHostName, ok := d.GetOk("dedicated_host_name"); ok {
 		hostName := dedicatedHostName.(string)
-		service := services.GetAccountService(meta.(ClientSession).SoftLayerSession())
-
+		service := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry())
 		hosts, err := service.
 			Mask("id").
 			Filter(filter.Path("dedicatedHosts.name").Eq(hostName).Build()).
@@ -558,7 +557,7 @@ func getVirtualGuestTemplateFromResourceData(d *schema.ResourceData, meta interf
 	if imgID, ok := d.GetOk("image_id"); ok {
 		imageID := imgID.(int)
 		service := services.
-			GetVirtualGuestBlockDeviceTemplateGroupService(meta.(ClientSession).SoftLayerSession())
+			GetVirtualGuestBlockDeviceTemplateGroupService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 		image, err := service.
 			Mask("id,globalIdentifier").Id(imageID).
@@ -681,7 +680,7 @@ func getVirtualGuestTemplateFromResourceData(d *schema.ResourceData, meta interf
 }
 
 func resourceIBMComputeVmInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSession())
+	serviceWithRetry := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 	sess := meta.(ClientSession).SoftLayerSession()
 
 	opts, err := getVirtualGuestTemplateFromResourceData(d, meta)
@@ -699,7 +698,7 @@ func resourceIBMComputeVmInstanceCreate(d *schema.ResourceData, meta interface{}
 		bd := *opts.BlockDeviceTemplateGroup
 		opts.BlockDeviceTemplateGroup = nil
 		opts.OperatingSystemReferenceCode = sl.String("UBUNTU_LATEST")
-		template, err = service.GenerateOrderTemplate(&opts)
+		template, err = serviceWithRetry.GenerateOrderTemplate(&opts)
 		if err != nil {
 			return fmt.Errorf("Error generating order template: %s", err)
 		}
@@ -720,13 +719,13 @@ func resourceIBMComputeVmInstanceCreate(d *schema.ResourceData, meta interface{}
 		template.VirtualGuests[0].OperatingSystemReferenceCode = nil
 	} else {
 		// Build an order template with os_reference_code
-		template, err = service.GenerateOrderTemplate(&opts)
+		template, err = serviceWithRetry.GenerateOrderTemplate(&opts)
 		if err != nil {
 			return fmt.Errorf("Error generating order template: %s", err)
 		}
 	}
 
-	items, err := product.GetPackageProducts(sess, *template.PackageId, productItemMaskWithPriceLocationGroupID)
+	items, err := product.GetPackageProducts(meta.(ClientSession).SoftLayerSessionWithRetry(), *template.PackageId, productItemMaskWithPriceLocationGroupID)
 	if err != nil {
 		return fmt.Errorf("Error generating order template: %s", err)
 	}
@@ -867,7 +866,7 @@ func resourceIBMComputeVmInstanceCreate(d *schema.ResourceData, meta interface{}
 		storageIds = append(storageIds, expandIntList(blockStorageSet.List())...)
 	}
 	if len(storageIds) > 0 {
-		err := addAccessToStorageList(service.Id(id), id, storageIds, meta)
+		err := addAccessToStorageList(serviceWithRetry.Id(id), id, storageIds, meta)
 		if err != nil {
 			return err
 		}
@@ -892,7 +891,7 @@ func resourceIBMComputeVmInstanceCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
@@ -1063,7 +1062,7 @@ func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) 
 func readSecondaryIPAddresses(d *schema.ResourceData, meta interface{}, primaryIPAddress *string) error {
 	d.Set("secondary_ip_addresses", nil)
 	if primaryIPAddress != nil {
-		secondarySubnetResult, err := services.GetAccountService(meta.(ClientSession).SoftLayerSession()).
+		secondarySubnetResult, err := services.GetAccountService(meta.(ClientSession).SoftLayerSessionWithRetry()).
 			Mask("ipAddresses[id,ipAddress],subnetType").
 			Filter(filter.Build(filter.Path("publicSubnets.endPointIpAddress.ipAddress").Eq(*primaryIPAddress))).
 			GetPublicSubnets()
@@ -1088,15 +1087,16 @@ func readSecondaryIPAddresses(d *schema.ResourceData, meta interface{}, primaryI
 	return nil
 }
 func resourceIBMComputeVmInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetVirtualGuestService(sess)
+
+	serviceWithRetry := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
+	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSession())
 
 	id, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return fmt.Errorf("Not a valid ID, must be an integer: %s", err)
 	}
 
-	result, err := service.Id(id).GetObject()
+	result, err := serviceWithRetry.Id(id).GetObject()
 	if err != nil {
 		return fmt.Errorf("Error retrieving virtual guest: %s", err)
 	}
@@ -1140,7 +1140,7 @@ func resourceIBMComputeVmInstanceUpdate(d *schema.ResourceData, meta interface{}
 		}
 	}
 
-	err = modifyStorageAccess(service.Id(id), id, meta, d)
+	err = modifyStorageAccess(serviceWithRetry.Id(id), id, meta, d)
 	if err != nil {
 		return err
 	}
@@ -1164,7 +1164,7 @@ func resourceIBMComputeVmInstanceUpdate(d *schema.ResourceData, meta interface{}
 	}
 
 	if len(upgradeOptions) > 0 {
-		_, err = virtual.UpgradeVirtualGuest(sess, &result, upgradeOptions)
+		_, err = virtual.UpgradeVirtualGuest(meta.(ClientSession).SoftLayerSession(), &result, upgradeOptions)
 		if err != nil {
 			return fmt.Errorf("Couldn't upgrade virtual guest: %s", err)
 		}
@@ -1248,7 +1248,7 @@ func resourceIBMComputeVmInstanceDelete(d *schema.ResourceData, meta interface{}
 
 func detachSecurityGroupNetworkComponentBindings(d *schema.ResourceData, meta interface{}, id int) error {
 	sess := meta.(ClientSession).SoftLayerSession()
-	service := services.GetVirtualGuestService(sess)
+	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 	publicSgIDs := d.Get("public_security_group_ids").(*schema.Set).List()
 	privateSgIDS := d.Get("private_security_group_ids").(*schema.Set).List()
 	if len(publicSgIDs) == 0 && len(privateSgIDS) == 0 {
@@ -1323,7 +1323,7 @@ func WaitForUpgradeTransactionsToAppear(d *schema.ResourceData, meta interface{}
 		Pending: []string{"retry", pendingUpgrade},
 		Target:  []string{inProgressUpgrade},
 		Refresh: func() (interface{}, string, error) {
-			service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSession())
+			service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 			transactions, err := service.Id(id).GetActiveTransactions()
 			if err != nil {
 				if apiErr, ok := err.(sl.Error); ok && apiErr.StatusCode == 404 {
@@ -1357,7 +1357,7 @@ func WaitForNoActiveTransactions(d *schema.ResourceData, meta interface{}) (inte
 		Pending: []string{"retry", activeTransaction},
 		Target:  []string{idleTransaction},
 		Refresh: func() (interface{}, string, error) {
-			service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSession())
+			service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 			transactions, err := service.Id(id).GetActiveTransactions()
 			if err != nil {
 				if apiErr, ok := err.(sl.Error); ok && apiErr.StatusCode == 404 {
@@ -1385,7 +1385,7 @@ func WaitForVirtualGuestAvailable(d *schema.ResourceData, meta interface{}) (int
 	if err != nil {
 		return nil, fmt.Errorf("The instance ID %s must be numeric", d.Id())
 	}
-	sess := meta.(ClientSession).SoftLayerSession()
+	sess := meta.(ClientSession).SoftLayerSessionWithRetry()
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"retry", virtualGuestProvisioning},
 		Target:     []string{virtualGuestAvailable},
@@ -1447,7 +1447,7 @@ func virtualGuestStateRefreshFunc(sess *session.Session, instanceID int, d *sche
 }
 
 func resourceIBMComputeVmInstanceExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSession())
+	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 	guestID, err := strconv.Atoi(d.Id())
 	if err != nil {
 		return false, fmt.Errorf("Not a valid ID, must be an integer: %s", err)
@@ -1539,9 +1539,9 @@ func removeAccessToStorageList(sam storageAccessModifier, deviceID int, ids stor
 
 func setNotes(id int, d *schema.ResourceData, meta interface{}) error {
 	service := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSession())
-
+	serviceWithRetry := services.GetVirtualGuestService(meta.(ClientSession).SoftLayerSessionWithRetry())
 	if notes := d.Get("notes").(string); notes != "" {
-		result, err := service.Id(id).GetObject()
+		result, err := serviceWithRetry.Id(id).GetObject()
 		if err != nil {
 			return fmt.Errorf("Error retrieving virtual guest: %s", err)
 		}
