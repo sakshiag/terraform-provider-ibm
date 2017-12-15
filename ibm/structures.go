@@ -1,11 +1,15 @@
 package ibm
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/IBM-Bluemix/bluemix-go/api/container/containerv1"
 	"github.com/IBM-Bluemix/bluemix-go/api/iampap/iampapv1"
 	"github.com/IBM-Bluemix/bluemix-go/api/mccp/mccpv2"
+	"github.com/apache/incubator-openwhisk-client-go/whisk"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
@@ -328,4 +332,115 @@ func flattenVlans(list []containerv1.Vlan) []map[string]interface{} {
 		vlans[i] = l
 	}
 	return vlans
+}
+
+func normalizeJSONString(jsonString interface{}) (string, error) {
+	var j interface{}
+	if jsonString == nil || jsonString.(string) == "" {
+		return "", nil
+	}
+	s := jsonString.(string)
+	err := json.Unmarshal([]byte(s), &j)
+	if err != nil {
+		return s, err
+	}
+	bytes, err := json.Marshal(j)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes[:]), nil
+}
+
+func expandAnnotations(annotations string) (whisk.KeyValueArr, error) {
+	var result whisk.KeyValueArr
+	dc := json.NewDecoder(strings.NewReader(annotations))
+	dc.UseNumber()
+	err := dc.Decode(&result)
+	return result, err
+}
+
+func flattenAnnotations(in whisk.KeyValueArr) (string, error) {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return "", err
+	}
+	return string(b[:]), nil
+}
+
+func expandParameters(annotations string) (whisk.KeyValueArr, error) {
+	var result whisk.KeyValueArr
+	dc := json.NewDecoder(strings.NewReader(annotations))
+	dc.UseNumber()
+	err := dc.Decode(&result)
+	return result, err
+}
+
+func flattenParameters(in whisk.KeyValueArr) (string, error) {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return "", err
+	}
+	return string(b[:]), nil
+}
+
+func filterAnnotations(bindedAnnotations, annotations whisk.KeyValueArr) whisk.KeyValueArr {
+	userDefinedAnnotations := make(whisk.KeyValueArr, 0)
+	for _, a := range annotations {
+		insert := false
+		if a.Key == "binding" {
+			insert = false
+			break
+		}
+		for _, b := range bindedAnnotations {
+			if a.Key == b.Key && reflect.DeepEqual(a.Value, b.Value) {
+				insert = false
+				break
+			}
+			insert = true
+		}
+		if insert {
+			userDefinedAnnotations = append(userDefinedAnnotations, a)
+		}
+	}
+	return userDefinedAnnotations
+}
+
+func filterParameters(bindedParameters, parameters whisk.KeyValueArr) whisk.KeyValueArr {
+	userDefinedParameters := make(whisk.KeyValueArr, 0)
+	for _, p := range parameters {
+		insert := false
+		for _, b := range bindedParameters {
+			if p.Key == b.Key && reflect.DeepEqual(p.Value, b.Value) {
+				insert = false
+				break
+			}
+			insert = true
+		}
+		if insert {
+			userDefinedParameters = append(userDefinedParameters, p)
+		}
+
+	}
+	return userDefinedParameters
+}
+
+func isEmpty(object interface{}) bool {
+	//First check normal definitions of empty
+	if object == nil {
+		return true
+	} else if object == "" {
+		return true
+	} else if object == false {
+		return true
+	}
+
+	//Then see if it's a struct
+	if reflect.ValueOf(object).Kind() == reflect.Struct {
+		// and create an empty copy of the struct object to compare against
+		empty := reflect.New(reflect.TypeOf(object)).Elem().Interface()
+		if reflect.DeepEqual(object, empty) {
+			return true
+		}
+	}
+	return false
 }

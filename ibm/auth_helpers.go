@@ -17,6 +17,7 @@ type AuthResponse struct {
 	Namespaces []struct {
 		Name string
 		Key  string
+		UUID string
 	}
 }
 
@@ -56,6 +57,7 @@ func whiskClient(c *bluemix.Config, namespace string) (*whisk.Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't fetch namespace details %v", err)
 	}
+
 	allNamespaces := []string{}
 	for _, n := range authResp.Namespaces {
 		allNamespaces = append(allNamespaces, n.Name)
@@ -66,7 +68,7 @@ func whiskClient(c *bluemix.Config, namespace string) (*whisk.Client, error) {
 			}
 			wskClient, err := whisk.NewClient(http.DefaultClient, &whisk.Config{
 				Namespace: namespace,
-				AuthToken: n.Key,
+				AuthToken: fmt.Sprintf("%s:%s", n.UUID, n.Key),
 				//BaseURL:   u,
 				Host: u.Host,
 			})

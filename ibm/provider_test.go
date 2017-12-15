@@ -26,6 +26,7 @@ var lbaasSubnetId string
 var dedicatedHostName string
 var dedicatedHostID string
 var err error
+var wskNamespace string
 
 func init() {
 	cfOrganization = os.Getenv("IBM_ORG")
@@ -115,6 +116,11 @@ func init() {
 	if dedicatedHostID == "" {
 		dedicatedHostID = "30301"
 		fmt.Println("[INFO] Set the environment variable IBM_DEDICATED_HOST_ID for testing ibm_compute_vm_instance resource else it is set to default value '30301'")
+	}
+
+	wskNamespace = os.Getenv("WSK_NAMESPACE")
+	if wskNamespace == "" {
+		fmt.Println("[WARN] Set the environment variable WSK_NAMESPACE for testing openwhisk resource Some tests for that resource will fail if this is not set correctly")
 	}
 
 }

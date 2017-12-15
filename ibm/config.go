@@ -237,7 +237,6 @@ func (c *Config) ClientSession() (interface{}, error) {
 		session.iamConfigErr = fmt.Errorf("Error occured while configuring Bluemix IAMPAP Service: %q", err)
 	}
 	session.iamServiceAPI = iampap
-	os.Exit(1)
 	return session, nil
 }
 

@@ -284,3 +284,45 @@ func validateNamespace(v interface{}, k string) (ws []string, errors []error) {
 	return
 
 }
+
+func validateJSONString(v interface{}, k string) (ws []string, errors []error) {
+	if _, err := normalizeJSONString(v); err != nil {
+		errors = append(errors, fmt.Errorf("%q contains an invalid JSON: %s", k, err))
+	}
+	return
+}
+
+func validatePackageName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	const alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789_-@"
+
+	for _, char := range value {
+		if !strings.Contains(alphaNumeric, strings.ToLower(string(char))) {
+			errors = append(errors, fmt.Errorf(
+				"%q (%q) The name of the package contains illegal characters", k, value))
+		}
+	}
+
+	return
+}
+
+func validateBindedPackageName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if !(strings.HasPrefix(value, "/")) {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) must start with a forward slash '/'.The package name should be '/whisk.system/cloudant', '/test@in.ibm.com_new/utils' or '/_/utils'", k, value))
+
+	}
+
+	index := strings.LastIndex(value, "/")
+
+	if index < 2 || index == len(value)-1 {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) is not a valid bind package name.The package name should be '/whisk.system/cloudant','/test@in.ibm.com_new/utils' or '/_/utils'", k, value))
+
+	}
+
+	return
+}

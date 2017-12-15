@@ -1,6 +1,7 @@
 package ibm
 
 import (
+	"os"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/mutexkv"
@@ -82,6 +83,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_iam_user_policy":          dataSourceIBMIAMUserPolicy(),
 			"ibm_lbaas":                    dataSourceIBMLbaas(),
 			"ibm_network_vlan":             dataSourceIBMNetworkVlan(),
+			"ibm_openwhisk_package":        dataSourceIBMOpenWhiskPackage(),
 			"ibm_org":                      dataSourceIBMOrg(),
 			"ibm_org_quota":                dataSourceIBMOrgQuota(),
 			"ibm_security_group":           dataSourceIBMSecurityGroup(),
@@ -125,6 +127,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_network_public_ip":               resourceIBMNetworkPublicIp(),
 			"ibm_network_vlan":                    resourceIBMNetworkVlan(),
 			"ibm_object_storage_account":          resourceIBMObjectStorageAccount(),
+			"ibm_openwhisk_package":               resourceIBMOpenWhiskPackage(),
 			"ibm_org":                             resourceIBMOrg(),
 			"ibm_security_group":                  resourceIBMSecurityGroup(),
 			"ibm_security_group_rule":             resourceIBMSecurityGroupRule(),
@@ -149,6 +152,15 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	region := d.Get("region").(string)
 	retryCount := d.Get("max_retries").(int)
 	wskNameSpace := d.Get("openwhisk_namespace").(string)
+
+	wskEnvVal, err := schema.MultiEnvDefaultFunc([]string{"WSK_NAMESPACE", "OPENWHISK_NAMESPACE"}, "")()
+	if err != nil {
+		return nil, err
+	}
+	//Set environment variable to be used in DiffSupressFunctions
+	if wskEnvVal.(string) == "" {
+		os.Setenv("WSK_NAMESPACE", wskNameSpace)
+	}
 
 	config := Config{
 		BluemixAPIKey:        bluemixAPIKey,
