@@ -3,7 +3,6 @@ package ibm
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -110,11 +109,6 @@ func NewQualifiedName(name string) (*QualifiedName, error) {
 		qualifiedName.EntityName = name
 		qualifiedName.namespace = getNamespaceFromProp()
 	}
-
-	log.Print("Info", "Qualified pkg+entity (EntityName): %s\n", qualifiedName.GetEntityName())
-	log.Print("Info", "Qualified namespace: %s\n", qualifiedName.GetNamespace())
-	log.Print("Info", "Qualified package: %s\n", qualifiedName.GetPackageName())
-	log.Print("Info", "Qualified entity: %s\n", qualifiedName.GetEntity())
 
 	return qualifiedName, nil
 }

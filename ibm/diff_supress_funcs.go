@@ -9,7 +9,11 @@ import (
 )
 
 func suppressEquivalentJSON(k, old, new string, d *schema.ResourceData) bool {
-	var oldObj, newObj interface{}
+
+	if old == "" {
+		return false
+	}
+	var oldObj, newObj []map[string]interface{}
 	err := json.Unmarshal([]byte(old), &oldObj)
 	if err != nil {
 		log.Printf("Error mashalling string 1 :: %s", err.Error())
@@ -20,5 +24,17 @@ func suppressEquivalentJSON(k, old, new string, d *schema.ResourceData) bool {
 		log.Printf("Error mashalling string 2 :: %s", err.Error())
 		return false
 	}
-	return reflect.DeepEqual(oldObj, newObj)
+
+	oldm := make(map[interface{}]interface{})
+	newm := make(map[interface{}]interface{})
+
+	for _, m := range oldObj {
+		oldm[m["key"]] = m["value"]
+	}
+	for _, m := range newObj {
+		newm[m["key"]] = m["value"]
+	}
+	log.Println("********", oldm)
+	log.Println("********", newm)
+	return reflect.DeepEqual(oldm, newm)
 }
