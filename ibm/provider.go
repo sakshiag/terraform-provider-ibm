@@ -127,6 +127,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_network_public_ip":               resourceIBMNetworkPublicIp(),
 			"ibm_network_vlan":                    resourceIBMNetworkVlan(),
 			"ibm_object_storage_account":          resourceIBMObjectStorageAccount(),
+			"ibm_openwhisk_action":                resourceIBMOpenWhiskAction(),
 			"ibm_openwhisk_package":               resourceIBMOpenWhiskPackage(),
 			"ibm_org":                             resourceIBMOrg(),
 			"ibm_security_group":                  resourceIBMSecurityGroup(),
