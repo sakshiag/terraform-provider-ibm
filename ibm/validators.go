@@ -326,3 +326,43 @@ func validateBindedPackageName(v interface{}, k string) (ws []string, errors []e
 
 	return
 }
+
+func validateActionName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if strings.HasPrefix(value, "/") {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) must not start with a forward slash '/'.The action name should be like 'myaction' or utils/cloudant'", k, value))
+
+	}
+
+	const alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789/_-@"
+
+	for _, char := range value {
+		if !strings.Contains(alphaNumeric, strings.ToLower(string(char))) {
+			errors = append(errors, fmt.Errorf(
+				"%q (%q) The name of the package contains illegal characters", k, value))
+		}
+	}
+
+	return
+}
+
+func validateActionKind(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	kindList := []string{"php:7.1", "nodejs:8", "swift:3", "nodejs", "blackbox", "java", "sequence", "nodejs:6", "python:3", "python", "python:2", "swift", "swift:3.1.1"}
+	if !stringInSlice(value, kindList) {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) Invalid kind is provided.Supported list of kinds of actions are (%q)", k, value, kindList))
+	}
+	return
+}
+
+func stringInSlice(str string, list []string) bool {
+	for _, v := range list {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}

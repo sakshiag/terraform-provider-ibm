@@ -444,3 +444,103 @@ func isEmpty(object interface{}) bool {
 	}
 	return false
 }
+
+func expandLimits(l []interface{}) *whisk.Limits {
+	if len(l) == 0 || l[0] == nil {
+		return &whisk.Limits{}
+	}
+	in := l[0].(map[string]interface{})
+	obj := &whisk.Limits{
+		Timeout: ptrToInt(in["timeout"].(int)),
+		Memory:  ptrToInt(in["memory"].(int)),
+		Logsize: ptrToInt(in["log_size"].(int)),
+	}
+	return obj
+}
+
+func flattenLimits(in *whisk.Limits) []interface{} {
+	att := make(map[string]interface{})
+	if in.Timeout != nil {
+		att["timeout"] = *in.Timeout
+	}
+	if in.Memory != nil {
+		att["memory"] = *in.Memory
+	}
+	if in.Memory != nil {
+		att["log_size"] = *in.Logsize
+	}
+	return []interface{}{att}
+}
+
+func expandExec(execs *schema.Set) *whisk.Exec {
+	for _, exec := range execs.List() {
+		e, _ := exec.(map[string]interface{})
+		obj := &whisk.Exec{
+			Image:      e["image"].(string),
+			Init:       e["init"].(string),
+			Code:       ptrToString(e["code"].(string)),
+			Kind:       e["kind"].(string),
+			Main:       e["main"].(string),
+			Components: expandStringList(e["components"].([]interface{})),
+		}
+		return obj
+	}
+
+	return &whisk.Exec{}
+}
+
+func flattenExec(in *whisk.Exec) []interface{} {
+	att := make(map[string]interface{})
+	if in.Image != "" {
+		att["image"] = in.Image
+	}
+	if in.Init != "" {
+		att["init"] = in.Init
+	}
+	if in.Code != nil {
+		att["code"] = *in.Code
+	}
+	if in.Kind != "" {
+		att["kind"] = in.Kind
+	}
+	if in.Main != "" {
+		att["main"] = in.Main
+	}
+
+	if len(in.Components) > 0 {
+		att["components"] = flattenStringList(in.Components)
+	}
+
+	return []interface{}{att}
+}
+
+func ptrToInt(i int) *int {
+	return &i
+}
+
+func ptrToString(s string) *string {
+	return &s
+}
+
+func filterActionAnnotations(in whisk.KeyValueArr) (string, error) {
+	noExec := make(whisk.KeyValueArr, 0, len(in))
+	for _, v := range in {
+		if v.Key == "exec" {
+			continue
+		}
+		noExec = append(noExec, v)
+	}
+
+	return flattenAnnotations(noExec)
+}
+
+func filterActionParameters(in whisk.KeyValueArr) (string, error) {
+	noAction := make(whisk.KeyValueArr, 0, len(in))
+	for _, v := range in {
+		if v.Key == "_actions" {
+			continue
+		}
+		noAction = append(noAction, v)
+	}
+	return flattenParameters(noAction)
+}

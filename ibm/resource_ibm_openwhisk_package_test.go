@@ -242,7 +242,7 @@ func testAccCheckOpenWhiskPackageDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openwhisk_package" {
+		if rs.Type != "ibm_openwhisk_package" {
 			continue
 		}
 
