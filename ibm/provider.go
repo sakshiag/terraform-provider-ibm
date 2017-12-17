@@ -129,6 +129,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_object_storage_account":          resourceIBMObjectStorageAccount(),
 			"ibm_openwhisk_action":                resourceIBMOpenWhiskAction(),
 			"ibm_openwhisk_package":               resourceIBMOpenWhiskPackage(),
+			"ibm_openwhisk_rule":                  resourceIBMOpenWhiskRule(),
 			"ibm_openwhisk_trigger":               resourceIBMOpenWhiskTrigger(),
 			"ibm_org":                             resourceIBMOrg(),
 			"ibm_security_group":                  resourceIBMSecurityGroup(),

@@ -3,6 +3,7 @@ package ibm
 import (
 	"fmt"
 	"net"
+	"regexp"
 	"strings"
 
 	"github.com/IBM-Bluemix/bluemix-go/helpers"
@@ -295,15 +296,12 @@ func validateJSONString(v interface{}, k string) (ws []string, errors []error) {
 func validateOpenwhiskName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
-	const alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789_-@"
+	var validName = regexp.MustCompile(`\A([\w]|[\w][\w@ .-]*[\w@.-]+)\z`)
+	if !validName.MatchString(value) {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) The name contains illegal characters", k, value))
 
-	for _, char := range value {
-		if !strings.Contains(alphaNumeric, strings.ToLower(string(char))) {
-			errors = append(errors, fmt.Errorf(
-				"%q (%q) The name contains illegal characters", k, value))
-		}
 	}
-
 	return
 }
 
@@ -365,4 +363,24 @@ func stringInSlice(str string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func validateRuleActionName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if !(strings.HasPrefix(value, "/")) {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) must start with a forward slash '/'.The action name should be like '/whisk.system/cloudant', '/test@in.ibm.com_new/hello' , '/_/hello' or /_/greeting/hello", k, value))
+
+	}
+
+	index := strings.LastIndex(value, "/")
+
+	if index < 2 || index == len(value)-1 {
+		errors = append(errors, fmt.Errorf(
+			"%q (%q) is not a valid action name.The action name should be like '/whisk.system/cloudant', '/test@in.ibm.com_new/hello' , '/_/hello' or /_/greeting/hello", k, value))
+
+	}
+
+	return
 }

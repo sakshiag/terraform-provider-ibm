@@ -174,7 +174,7 @@ func getQualifiedName(name string, namespace string) string {
 		return fmt.Sprintf("%s/%s", namespace, name)
 	} else {
 		if len(namespace) == 0 {
-			namespace = "_"
+			namespace = getNamespaceFromProp()
 		}
 		return fmt.Sprintf("/%s/%s", namespace, name)
 	}
