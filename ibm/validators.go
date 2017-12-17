@@ -292,7 +292,7 @@ func validateJSONString(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
-func validatePackageName(v interface{}, k string) (ws []string, errors []error) {
+func validateOpenwhiskName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	const alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789_-@"
@@ -300,7 +300,7 @@ func validatePackageName(v interface{}, k string) (ws []string, errors []error) 
 	for _, char := range value {
 		if !strings.Contains(alphaNumeric, strings.ToLower(string(char))) {
 			errors = append(errors, fmt.Errorf(
-				"%q (%q) The name of the package contains illegal characters", k, value))
+				"%q (%q) The name contains illegal characters", k, value))
 		}
 	}
 

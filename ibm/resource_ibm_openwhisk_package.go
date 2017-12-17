@@ -26,7 +26,7 @@ func resourceIBMOpenWhiskPackage() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				Description:  "Name of package",
-				ValidateFunc: validatePackageName,
+				ValidateFunc: validateOpenwhiskName,
 			},
 			"publish": {
 				Type:        schema.TypeBool,
@@ -131,10 +131,6 @@ func resourceIBMOpenWhiskPackageCreate(d *schema.ResourceData, meta interface{})
 	if publish, ok := d.GetOk("publish"); ok {
 		p := publish.(bool)
 		payload.Publish = &p
-	}
-
-	if version, ok := d.GetOk("version"); ok {
-		payload.Version = version.(string)
 	}
 
 	if v, ok := d.GetOk("bind_package_name"); ok {
