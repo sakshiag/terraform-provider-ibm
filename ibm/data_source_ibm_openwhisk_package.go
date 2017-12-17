@@ -55,14 +55,6 @@ func dataSourceIBMOpenWhiskPackageRead(d *schema.ResourceData, meta interface{})
 	packageService := wskClient.Packages
 	name := d.Get("name").(string)
 
-	var qualifiedName = new(QualifiedName)
-
-	if qualifiedName, err = NewQualifiedName(name); err != nil {
-		return NewQualifiedNameError(name, err)
-	}
-
-	wskClient.Namespace = qualifiedName.GetNamespace()
-
 	pkg, _, err := packageService.Get(name)
 	if err != nil {
 		return fmt.Errorf("Error retrieving OpenWhisk package %s : %s", name, err)
