@@ -149,12 +149,13 @@ func resourceIBMDNSRecord() *schema.Resource {
 			"priority": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				Default:  0,
 			},
 
 			"weight": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  0,
 			},
 
 			"tags": {
@@ -216,13 +217,9 @@ func resourceIBMDNSRecordCreate(d *schema.ResourceData, meta interface{}) error 
 			optsSrv.Protocol = sl.String(protocol.(string))
 		}
 
-		if priority, ok := d.GetOk("priority"); ok {
-			optsSrv.Priority = sl.Int(priority.(int))
-		}
+		optsSrv.Priority = sl.Int(d.Get("priority").(int))
 
-		if weight, ok := d.GetOk("weight"); ok {
-			optsSrv.Weight = sl.Int(weight.(int))
-		}
+		optsSrv.Weight = sl.Int(d.Get("weight").(int))
 
 		if port, ok := d.GetOk("port"); ok {
 			optsSrv.Port = sl.Int(port.(int))
