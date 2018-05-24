@@ -1,4 +1,4 @@
-# Contributing to IBMCLOUD Terraform Provider
+# Contributing to IBM Cloud Provider for Terraform
 
 **First:** if you're unsure  _anything_, just ask
 or submit the issue or pull request anyways. We appreciate any sort of contributions.
@@ -117,7 +117,9 @@ existing resources, but you still get to implement something completely new.
    covering their behavior. See [Writing Acceptance
    Tests](#writing-acceptance-tests) below for a detailed guide on how to
    approach these.
- - [ ] __Documentation__: Each resource gets a page in the documentation. For a   resource, you'll want to add a new file in the appropriate place and add a     link to the sidebar for that page.
+ - [ ] __Documentation__: Each resource gets a page in the documentation. For a
+   resource, you'll want to add a new file in the appropriate place and add a
+   link to the sidebar for that page.
  - [ ] __Well-formed Code__: Do your best to follow existing conventions you
    see in the codebase, and ensure your code is formatted with `go fmt`. (The
    Travis CI build will fail if `go fmt` has not been run on incoming code.)
@@ -213,13 +215,13 @@ to a single resource. Most tests follow a similar structure.
    to running acceptance tests. This is common to all tests exercising a single
    provider.
 
-Each `TestStep` is defined in the call to `resource.Test()`. Most assertion
-functions are defined out of band with the tests. This keeps the tests
-readable, and allows reuse of assertion functions across different tests of the
-same type of resource. The definition of a complete test looks like this:
+   Each `TestStep` is defined in the call to `resource.Test()`. Most assertion
+   functions are defined out of band with the tests. This keeps the tests
+   readable, and allows reuse of assertion functions across different tests of the
+   same type of resource. The definition of a complete test looks like this:
 
-```go
-func TestAccIBMComputeVmInstance_basic(t *testing.T) {
+   ```go
+   func TestAccIBMComputeVmInstance_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -231,38 +233,38 @@ func TestAccIBMComputeVmInstance_basic(t *testing.T) {
 					testAccIBMComputeVmInstanceExists("ibm_compute_vm_instance.terraform-acceptance-test-1"),
 				),
 			},
-        },
-    })
-}
-```
-
-When executing the test, the following steps are taken for each `TestStep`:
+            },
+        })
+    }
+    ```
+    
+    When executing the test, the following steps are taken for each `TestStep`:
 
 1. The Terraform configuration required for the test is applied. This is
    responsible for configuring the resource under test, and any dependencies it
    may have. For example, to test the `ibm_compute_vm_instance` resource. 
    This results in configuration which looks like this:
-
+   
     ```hcl
-   resource "ibm_compute_vm_instance" "terraform-acceptance-test-1" {
-   hostname = "terraform-sample-blockDeviceTemplateGroup"
-   domain = "bar.example.com"
-   datacenter = "ams01"
-   public_network_speed = 10
-   hourly_billing = false
-   cores = 1
-   memory = 1024
-   local_disk = false
-   image_id = 12345
-   tags = [
-     "collectd",
-     "mesos-master"
-   ]
-   public_subnet = "50.97.46.160/28"
-   private_subnet = "10.56.109.128/26"
-}    
-```
-
+       resource "ibm_compute_vm_instance" "terraform-acceptance-test-1" {
+       hostname = "terraform-sample-blockDeviceTemplateGroup"
+       domain = "bar.example.com"
+       datacenter = "ams01"
+       public_network_speed = 10
+       hourly_billing = false
+       cores = 1
+       memory = 1024
+       local_disk = false
+       image_id = 12345
+       tags = [
+         "collectd",
+         "mesos-master"
+       ]
+       public_subnet = "50.97.46.160/28"
+       private_subnet = "10.56.109.128/26"
+   }    
+   ```
+   
 1. Assertions are run using the provider API. These use the provider API
    directly rather than asserting against the resource state. For example, to
    verify that the `ibm_compute_vm_instance` described above was created
@@ -287,7 +289,7 @@ When executing the test, the following steps are taken for each `TestStep`:
 	}
 
 	return result.Id != nil && *result.Id == guestID, nil
-}
+    }
     ```
 
    Notice that the only information used from the Terraform state is the ID of
@@ -333,7 +335,7 @@ When executing the test, the following steps are taken for each `TestStep`:
 	}
 
 	return nil
-}
+    }
     ```
 
-These functions usually test only for the resource directly under test.
+    These functions usually test only for the resource directly under test.
