@@ -155,6 +155,14 @@
               </li>
             </ul>
           </li>
+          <li<%= sidebar_current("docs-ibm-datasource-is") %>>
+            <a href="#">IS Data Sources</a>
+            <ul class="nav nav-visible">
+              <li<%= sidebar_current("docs-ibm-datasource-is-vpc") %>>
+                <a href="/docs/providers/ibm/d/is_vpc.html">is_vpc</a>
+              </li>
+            </ul>
+          </li>
           <li<%= sidebar_current("docs-ibm-resource-cf") %>>
             <a href="#">Cloud Foundry Resources</a>
             <ul class="nav nav-visible">
@@ -420,8 +428,18 @@
               </li>
             </ul>
           </li>
-      </ul>
-    </div>
+          <li<%= sidebar_current("docs-ibm-resource-is") %>>
+            <a href="#">IS Resources</a>
+            <ul class="nav nav-visible">
+              <li<%= sidebar_current("docs-ibm-resource-is-vpc") %>>
+                <a href="/docs/providers/ibm/r/is_vpc.html">is_vpc</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    <% end %>
+    <%= yield %>
   <% end %>
   <%= yield %>
 <% end %>
