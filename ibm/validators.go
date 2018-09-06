@@ -639,8 +639,6 @@ func validateRecordName(t string, value string) error {
 
 	return nil
 }
-<<<<<<< HEAD
-=======
 
 func validateVLANName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
@@ -650,4 +648,23 @@ func validateVLANName(v interface{}, k string) (ws []string, errors []error) {
 	}
 	return
 }
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+
+func validateIPVersion(v interface{}, k string) (ws []string, errors []error) {
+	validVersions := map[string]bool{
+		"ipv4": true,
+		"ipv6": true,
+	}
+
+	value := v.(string)
+	_, found := validVersions[value]
+	if !found {
+		strarray := make([]string, 0, len(validVersions))
+		for key := range validVersions {
+			strarray = append(strarray, key)
+		}
+		errors = append(errors, fmt.Errorf(
+			"%q contains an invalid ip version type %q. Valid types are %q.",
+			k, value, strings.Join(strarray, ",")))
+	}
+	return
+}
