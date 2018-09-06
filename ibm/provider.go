@@ -116,6 +116,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_is_region":                  dataSourceIBMISRegion(),
 			"ibm_is_vpc":                     dataSourceIBMISVPC(),
 			"ibm_is_zone":                    dataSourceIBMISZone(),
+			"ibm_is_zones":                   dataSourceIBMISZones(),
 			"ibm_lbaas":                      dataSourceIBMLbaas(),
 			"ibm_network_vlan":               dataSourceIBMNetworkVlan(),
 			"ibm_org":                        dataSourceIBMOrg(),
