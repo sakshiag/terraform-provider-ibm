@@ -117,6 +117,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_iam_user_policy":            dataSourceIBMIAMUserPolicy(),
 			"ibm_iam_service_id":             dataSourceIBMIAMServiceID(),
 			"ibm_iam_service_policy":         dataSourceIBMIAMServicePolicy(),
+			"ibm_is_region":                  dataSourceIBMISRegion(),
 			"ibm_is_vpc":                     dataSourceIBMISVPC(),
 			"ibm_lbaas":                      dataSourceIBMLbaas(),
 			"ibm_network_vlan":               dataSourceIBMNetworkVlan(),

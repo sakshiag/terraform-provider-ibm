@@ -12,15 +12,10 @@ import (
 
 var cfOrganization string
 var cfSpace string
-<<<<<<< HEAD
-var cis_crn string
-var cis_domain string
-=======
 var cisDomainStatic string
 var cisDomainTest string
 var cisInstance string
 var cisResourceGroup string
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 var ibmid1 string
 var ibmid2 string
 var IAMUser string
@@ -51,7 +46,11 @@ var placementGroupName string
 =======
 var certCRN string
 var updatedCertCRN string
+<<<<<<< HEAD
 >>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+=======
+var regionName string
+>>>>>>> Add datasource support for IS region
 
 func init() {
 	cfOrganization = os.Getenv("IBM_ORG")
@@ -262,6 +261,12 @@ func init() {
 	if placementGroupName == "" {
 		placementGroupName = "terraform_group"
 		fmt.Println("[WARN] Set the environment variable IBM_PLACEMENT_GROUP_NAME for testing ibm_compute_vm_instance resource else it is set to default value 'terraform-group'")
+	}
+
+	regionName = os.Getenv("SL_REGION")
+	if regionName == "" {
+		regionName = "us-south"
+		fmt.Println("[INFO] Set the environment variable SL_REGION for testing ibm_is_region datasource else it is set to default value 'us-south'")
 	}
 
 }
