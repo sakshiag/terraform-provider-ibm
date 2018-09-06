@@ -95,13 +95,9 @@ func Provider() terraform.ResourceProvider {
 			"ibm_function_rule":              dataSourceIBMFunctionRule(),
 			"ibm_function_trigger":           dataSourceIBMFunctionTrigger(),
 			"ibm_cis":                        dataSourceIBMCISInstance(),
-<<<<<<< HEAD
-			"ibm_cis_ip_addresses":           dataSourceIBMCISIP(),
-=======
 			"ibm_cis_domain":                 dataSourceIBMCISDomain(),
 			"ibm_cis_ip_addresses":           dataSourceIBMCISIP(),
 			"ibm_database":                   dataSourceIBMDatabaseInstance(),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			"ibm_compute_bare_metal":         dataSourceIBMComputeBareMetal(),
 			"ibm_compute_image_template":     dataSourceIBMComputeImageTemplate(),
 			"ibm_compute_placement_group":    dataSourceIBMComputePlacementGroup(),
@@ -119,6 +115,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_iam_service_policy":         dataSourceIBMIAMServicePolicy(),
 			"ibm_is_region":                  dataSourceIBMISRegion(),
 			"ibm_is_vpc":                     dataSourceIBMISVPC(),
+			"ibm_is_zone":                    dataSourceIBMISZone(),
 			"ibm_lbaas":                      dataSourceIBMLbaas(),
 			"ibm_network_vlan":               dataSourceIBMNetworkVlan(),
 			"ibm_org":                        dataSourceIBMOrg(),
@@ -145,10 +142,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_function_rule":                         resourceIBMFunctionRule(),
 			"ibm_function_trigger":                      resourceIBMFunctionTrigger(),
 			"ibm_cis":                                   resourceIBMCISInstance(),
-<<<<<<< HEAD
-=======
 			"ibm_database":                              resourceIBMDatabaseInstance(),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			"ibm_cis_domain":                            resourceIBMCISDomain(),
 			"ibm_cis_domain_settings":                   resourceIBMCISSettings(),
 			"ibm_cis_healthcheck":                       resourceIBMCISHealthCheck(),
@@ -166,14 +160,10 @@ func Provider() terraform.ResourceProvider {
 			"ibm_compute_ssl_certificate":               resourceIBMComputeSSLCertificate(),
 			"ibm_compute_user":                          resourceIBMComputeUser(),
 			"ibm_compute_vm_instance":                   resourceIBMComputeVmInstance(),
-<<<<<<< HEAD
-			"ibm_container_cluster":                     resourceIBMContainerCluster(),
-=======
 			"ibm_container_alb":                         resourceIBMContainerALB(),
 			"ibm_container_alb_cert":                    resourceIBMContainerALBCert(),
 			"ibm_container_cluster":                     resourceIBMContainerCluster(),
 			"ibm_container_cluster_feature":             resourceIBMContainerClusterFeature(),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			"ibm_container_bind_service":                resourceIBMContainerBindService(),
 			"ibm_container_worker_pool":                 resourceIBMContainerWorkerPool(),
 			"ibm_container_worker_pool_zone_attachment": resourceIBMContainerWorkerPoolZoneAttachment(),
@@ -217,11 +207,6 @@ func Provider() terraform.ResourceProvider {
 			"ibm_service_instance":                      resourceIBMServiceInstance(),
 			"ibm_service_key":                           resourceIBMServiceKey(),
 			"ibm_space":                                 resourceIBMSpace(),
-<<<<<<< HEAD
-			"ibm_storage_block":                         resourceIBMStorageBlock(),
-			"ibm_storage_file":                          resourceIBMStorageFile(),
-			"ibm_subnet":                                resourceIBMSubnet(),
-=======
 			"ibm_storage_evault":                        resourceIBMStorageEvault(),
 			"ibm_storage_block":                         resourceIBMStorageBlock(),
 			"ibm_storage_file":                          resourceIBMStorageFile(),
@@ -229,7 +214,6 @@ func Provider() terraform.ResourceProvider {
 			"ibm_ssl_certificate":                       resourceIBMSSLCertificate(),
 			"ibm_cdn":                                   resourceIBMCDN(),
 			"ibm_hardware_firewall_shared":              resourceIBMFirewallShared(),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		},
 
 		ConfigureFunc: providerConfigure,

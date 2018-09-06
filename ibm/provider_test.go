@@ -42,15 +42,11 @@ var csRegion string
 var extendedHardwareTesting bool
 var err error
 var placementGroupName string
-<<<<<<< HEAD
-=======
 var certCRN string
 var updatedCertCRN string
-<<<<<<< HEAD
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
-=======
 var regionName string
->>>>>>> Add datasource support for IS region
+var ISZoneName string
+
 
 func init() {
 	cfOrganization = os.Getenv("IBM_ORG")
@@ -165,24 +161,15 @@ func init() {
 
 	kubeVersion = os.Getenv("IBM_KUBE_VERSION")
 	if kubeVersion == "" {
-<<<<<<< HEAD
-		kubeVersion = "1.10.11"
-		fmt.Println("[WARN] Set the environment variable IBM_KUBE_VERSION for testing ibm_container_cluster resource else it is set to default value '1.10.11'")
-=======
 		kubeVersion = "1.10.13"
 		fmt.Println("[WARN] Set the environment variable IBM_KUBE_VERSION for testing ibm_container_cluster resource else it is set to default value '1.10.13'")
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	}
 
 	kubeUpdateVersion = os.Getenv("IBM_KUBE_UPDATE_VERSION")
 	if kubeUpdateVersion == "" {
-<<<<<<< HEAD
-		kubeUpdateVersion = "1.11.5"
-		fmt.Println("[WARN] Set the environment variable IBM_KUBE_UPDATE_VERSION for testing ibm_container_cluster resource else it is set to default value '1.11.5'")
-=======
 		kubeUpdateVersion = "1.11.8"
 		fmt.Println("[WARN] Set the environment variable IBM_KUBE_UPDATE_VERSION for testing ibm_container_cluster resource else it is set to default value '1.11.8'")
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+
 	}
 
 	privateSubnetID = os.Getenv("IBM_PRIVATE_SUBNET_ID")
@@ -267,6 +254,12 @@ func init() {
 	if regionName == "" {
 		regionName = "us-south"
 		fmt.Println("[INFO] Set the environment variable SL_REGION for testing ibm_is_region datasource else it is set to default value 'us-south'")
+	}
+	
+	ISZoneName = os.Getenv("SL_ZONE")
+	if ISZoneName == "" {
+		ISZoneName = "us-south-2"
+		fmt.Println("[INFO] Set the environment variable SL_ZONE for testing ibm_is_zone datasource else it is set to default value 'us-south-2'")
 	}
 
 }
