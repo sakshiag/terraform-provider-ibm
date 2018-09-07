@@ -1,0 +1,246 @@
+package ibm
+
+import (
+	"log"
+	"time"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.ibm.com/Bluemix/riaas-go-client/clients/network"
+	iserrors "github.ibm.com/Bluemix/riaas-go-client/errors"
+)
+
+const (
+	isPublicGatewayName              = "name"
+	isPublicGatewayFloatingIP        = "floating_ip"
+	isPublicGatewayResourceGroup     = "resource_group"
+	isPublicGatewayStatus            = "status"
+	isPublicGatewayTags              = "tags"
+	isPublicGatewayVPC               = "vpc"
+	isPublicGatewayZone              = "zone"
+	isPublicGatewayFloatingIPAddress = "address"
+
+	isPublicGatewayProvisioning     = "provisioning"
+	isPublicGatewayProvisioningDone = "available"
+)
+
+func resourceIBMISPublicGateway() *schema.Resource {
+	return &schema.Resource{
+		Create:   resourceIBMISPublicGatewayCreate,
+		Read:     resourceIBMISPublicGatewayRead,
+		Update:   resourceIBMISPublicGatewayUpdate,
+		Delete:   resourceIBMISPublicGatewayDelete,
+		Exists:   resourceIBMISPublicGatewayExists,
+		Importer: &schema.ResourceImporter{},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			isPublicGatewayName: {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: false,
+			},
+
+			isPublicGatewayFloatingIP: {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						isPublicGatewayFloatingIPAddress: {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+					},
+				},
+			},
+
+			isPublicGatewayResourceGroup: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+			},
+
+			isPublicGatewayStatus: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			isPublicGatewayTags: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
+
+			isPublicGatewayVPC: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+
+			isPublicGatewayZone: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+		},
+	}
+}
+
+func resourceIBMISPublicGatewayCreate(d *schema.ResourceData, meta interface{}) error {
+	sess, _ := meta.(ClientSession).ISSession()
+
+	name := d.Get(isPublicGatewayName).(string)
+	vpc := d.Get(isPublicGatewayVPC).(string)
+	zone := d.Get(isPublicGatewayZone).(string)
+	floatingipID := ""
+	if floatingipdataIntf, ok := d.GetOk(isPublicGatewayFloatingIP); ok {
+		floatingipdata := floatingipdataIntf.(map[string]interface{})
+		floatingipidintf, ispresent := floatingipdata["id"]
+		if ispresent {
+			floatingipID = floatingipidintf.(string)
+		}
+	}
+
+	publicgwC := network.NewPublicGatewayClient(sess)
+	publicgw, err := publicgwC.Create(name, zone, vpc, floatingipID)
+	if err != nil {
+		return err
+	}
+
+	d.SetId(publicgw.ID.String())
+	log.Printf("[INFO] PublicGateway : %s", publicgw.ID.String())
+
+	_, err = isWaitForPublicGatewayAvailable(publicgwC, d.Id(), d)
+	if err != nil {
+		return err
+	}
+
+	return resourceIBMISPublicGatewayRead(d, meta)
+}
+
+func isWaitForPublicGatewayAvailable(publicgwC *network.PublicGatewayClient, id string, d *schema.ResourceData) (interface{}, error) {
+	log.Printf("Waiting for subnet (%s) to be available.", id)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"retry", isPublicGatewayProvisioning},
+		Target:     []string{isPublicGatewayProvisioningDone},
+		Refresh:    isPublicGatewayRefreshFunc(publicgwC, id),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	return stateConf.WaitForState()
+}
+
+func isPublicGatewayRefreshFunc(publicgwC *network.PublicGatewayClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+
+		publicgw, err := publicgwC.Get(id)
+		if err != nil {
+			return nil, "", err
+		}
+
+		// if its still pending, returning provisioning
+		if publicgw.Status == "pending" {
+			return publicgw, isPublicGatewayProvisioning, nil
+		}
+
+		log.Printf("[Debug] state = %s", publicgw.Status)
+		log.Printf("[Debug] gw = %s", publicgw.FloatingIP)
+		return publicgw, isPublicGatewayProvisioningDone, nil
+	}
+}
+
+func resourceIBMISPublicGatewayRead(d *schema.ResourceData, meta interface{}) error {
+	sess, _ := meta.(ClientSession).ISSession()
+	publicgwC := network.NewPublicGatewayClient(sess)
+
+	publicgw, err := publicgwC.Get(d.Id())
+	if err != nil {
+		return err
+	}
+
+	d.Set("id", publicgw.ID.String())
+	d.Set(isPublicGatewayName, publicgw.Name)
+	if publicgw.FloatingIP != nil {
+
+		floatIP := map[string]interface{}{
+			"id": publicgw.FloatingIP.ID.String(),
+			isPublicGatewayFloatingIPAddress: publicgw.FloatingIP.Address,
+		}
+		d.Set(isPublicGatewayFloatingIP, floatIP)
+
+	}
+
+	d.Set(isPublicGatewayStatus, publicgw.Status)
+	d.Set(isPublicGatewayZone, publicgw.Zone.Name)
+	d.Set(isPublicGatewayVPC, publicgw.Vpc.ID.String())
+	if publicgw.ResourceGroup != nil {
+		d.Set(isPublicGatewayResourceGroup, publicgw.ResourceGroup)
+	} else {
+		d.Set(isPublicGatewayResourceGroup, nil)
+	}
+	d.Set(isPublicGatewayTags, publicgw.Tags)
+
+	return nil
+}
+
+func resourceIBMISPublicGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	sess, _ := meta.(ClientSession).ISSession()
+	publicgwC := network.NewPublicGatewayClient(sess)
+
+	name := ""
+	if d.HasChange(isPublicGatewayName) {
+		name = d.Get(isPublicGatewayName).(string)
+	}
+
+	_, err := publicgwC.Update(d.Id(), name)
+	if err != nil {
+		return err
+	}
+
+	return resourceIBMISPublicGatewayRead(d, meta)
+}
+
+func resourceIBMISPublicGatewayDelete(d *schema.ResourceData, meta interface{}) error {
+
+	sess, _ := meta.(ClientSession).ISSession()
+	publicgwC := network.NewPublicGatewayClient(sess)
+	err := publicgwC.Delete(d.Id())
+	if err != nil {
+		return err
+	}
+
+	d.SetId("")
+	return nil
+}
+
+func resourceIBMISPublicGatewayExists(d *schema.ResourceData, meta interface{}) (bool, error) {
+	sess, _ := meta.(ClientSession).ISSession()
+	publicgwC := network.NewPublicGatewayClient(sess)
+
+	_, err := publicgwC.Get(d.Id())
+	if err != nil {
+		iserror, ok := err.(iserrors.RiaasError)
+		if ok {
+			if len(iserror.Payload.Errors) == 1 &&
+				iserror.Payload.Errors[0].Code == "not_found" {
+				return false, nil
+			}
+		}
+		return false, err
+	}
+	return true, nil
+}
