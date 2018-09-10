@@ -11,7 +11,16 @@ import (
 	"github.com/IBM-Cloud/bluemix-go/helpers"
 	"github.com/hashicorp/terraform/helper/schema"
 	homedir "github.com/mitchellh/go-homedir"
+	gouuid "github.com/satori/go.uuid"
 )
+
+var (
+	validHRef *regexp.Regexp
+)
+
+func init() {
+	validHRef = regexp.MustCompile(`^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`)
+}
 
 func validateSecondaryIPCount(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(int)
@@ -666,5 +675,99 @@ func validateIPVersion(v interface{}, k string) (ws []string, errors []error) {
 			"%q contains an invalid ip version type %q. Valid types are %q.",
 			k, value, strings.Join(strarray, ",")))
 	}
+	return
+}
+
+func validateVPCIdentity(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	// We do not currently accept CRN or HRef
+	validators := []func(string) bool{isSecurityGroupAddress, isSecurityGroupCIDR,
+		isVPCIdentityByID}
+
+	for _, validator := range validators {
+		if validator(value) {
+			return
+		}
+	}
+	errors = append(errors, fmt.Errorf("%q (%s) invalid vpc identity", k, value))
+	return
+}
+
+func validateResourceGroupId(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := gouuid.FromString(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q contains an invalid resource group id, %q.", k, value))
+	}
+	return
+}
+
+func validateSecurityGroupId(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	_, err := gouuid.FromString(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q contains an invalid security group id, %q.", k, value))
+	}
+	return
+}
+func validateICMPType(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(int)
+	if value < 0 || value > 254 {
+		errors = append(errors, fmt.Errorf("%q (%d) invalid ICMP type", k, value))
+	}
+	return
+}
+
+func validateICMPCode(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(int)
+	if value < 0 || value > 255 {
+		errors = append(errors, fmt.Errorf("%q (%d) invalid ICMP code", k, value))
+	}
+	return
+}
+
+func validateISSecurityRulePort(v interface{}, k string) (ws []string, errors []error) {
+	return validatePortRange(1, 65535)(v, k)
+}
+
+func isSecurityGroupAddress(s string) bool {
+	return net.ParseIP(s) != nil
+}
+
+func isSecurityGroupCIDR(s string) bool {
+	_, _, err := net.ParseCIDR(s)
+	return err == nil
+}
+
+func isSecurityGroupIdentityByID(s string) bool {
+	_, err := gouuid.FromString(s)
+	return err == nil
+}
+
+func isSecurityGroupIdentityByCRN(s string) bool {
+	segments := strings.Split(s, ":")
+	return len(segments) == 10 && segments[0] == "crn"
+}
+
+func isSecurityGroupIdentityByHRef(s string) bool {
+	return validHRef.MatchString(s)
+}
+
+func isVPCIdentityByID(s string) bool {
+	_, err := gouuid.FromString(s)
+	return err == nil
+}
+
+func validateSecurityGroupRemote(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	validators := []func(string) bool{isSecurityGroupAddress, isSecurityGroupCIDR,
+		isSecurityGroupIdentityByID /*, isSecurityGroupIdentityByCRN, isSecurityGroupIdentityByHRef*/}
+
+	for _, validator := range validators {
+		if validator(value) {
+			return
+		}
+	}
+	errors = append(errors, fmt.Errorf("%q (%s) invalid security group remote", k, value))
 	return
 }
