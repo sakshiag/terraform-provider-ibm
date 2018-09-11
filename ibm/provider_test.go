@@ -47,6 +47,7 @@ var updatedCertCRN string
 var regionName string
 var ISZoneName string
 var ISCIDR string
+var isImage string
 
 
 func init() {
@@ -267,6 +268,12 @@ func init() {
 	if ISCIDR == "" {
 		ISCIDR = "192.168.1.0/24"
 		fmt.Println("[INFO] Set the environment variable SL_CIDR for testing ibm_is_subnet else it is set to default value '192.168.1.0/24'")
+	}
+
+	isImage = os.Getenv("SL_IMAGE")
+	if isImage == "" {
+		isImage = "7eb4e35b-4257-56f8-d7da-326d85452591"
+		fmt.Println("[INFO] Set the environment variable SL_IMAGE for testing ibm_is_instance, ibm_is_floatingip else it is set to default value '7eb4e35b-4257-56f8-d7da-326d85452591'")
 	}
 
 }

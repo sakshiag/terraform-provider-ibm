@@ -771,3 +771,23 @@ func validateSecurityGroupRemote(v interface{}, k string) (ws []string, errors [
 	errors = append(errors, fmt.Errorf("%q (%s) invalid security group remote", k, value))
 	return
 }
+
+func validateGeneration(v interface{}, k string) (ws []string, errors []error) {
+	validVersions := map[string]bool{
+		"gc": true,
+		"gt": true,
+	}
+
+	value := v.(string)
+	_, found := validVersions[value]
+	if !found {
+		strarray := make([]string, 0, len(validVersions))
+		for key := range validVersions {
+			strarray = append(strarray, key)
+		}
+		errors = append(errors, fmt.Errorf(
+			"%q contains an invalid generation type %q. Valid types are %q.",
+			k, value, strings.Join(strarray, ",")))
+	}
+	return
+}

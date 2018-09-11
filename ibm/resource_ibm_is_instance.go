@@ -1,0 +1,530 @@
+package ibm
+
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/go-openapi/strfmt"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.ibm.com/Bluemix/riaas-go-client/clients/compute"
+	iserrors "github.ibm.com/Bluemix/riaas-go-client/errors"
+	"github.ibm.com/riaas/rias-api/riaas/models"
+)
+
+const (
+	isInstanceName                    = "name"
+	isInstanceTags                    = "tags"
+	isInstanceKeys                    = "keys"
+	isInstanceNetworkInterfaces       = "network_interfaces"
+	isInstancePrimaryNetworkInterface = "primary_network_interface"
+	isInstanceNicName                 = "name"
+	isInstanceNicPortSpeed            = "port_speed"
+	isInstanceNicPrimaryIpv4Address   = "primary_ipv4_address"
+	isInstanceNicPrimaryIpv6Address   = "primary_ipv6_address"
+	isInstanceNicResourceGroup        = "resource_group"
+	isInstanceNicSecondaryAddress     = "secondary_addresses"
+	isInstanceNicSecurityGroups       = "security_groups"
+	isInstanceNicSubnet               = "subnet"
+	isInstanceNicTags                 = "tags"
+	isInstanceNicFloatingIPs          = "floating_ips"
+	isInstanceProfile                 = "profile"
+	isInstanceResourceGroup           = "resource_group"
+	isInstanceUserData                = "user_data"
+	isInstanceVolumeAttachments       = "volume_attachments"
+	isInstanceVPC                     = "vpc"
+	isInstanceZone                    = "zone"
+	isInstanceBootVolumeAttachment    = "boot_volume_attachment"
+	isInstanceVolAttName              = "name"
+	isInstanceVolAttResourcceGroup    = "resource_group"
+	isInstanceVolAttTags              = "tags"
+	isInstanceVolAttVolume            = "volume"
+	isInstanceVolAttVolAutoDelete     = "auto_delete"
+	isInstanceVolAttVolCapacity       = "capacity"
+	isInstanceVolAttVolIops           = "iops"
+	isInstanceVolAttVolName           = "name"
+	isInstanceVolAttVolBillingTerm    = "billing_term"
+	isInstanceVolAttVolEncryptionKey  = "encryption_key"
+	isInstanceVolAttVolResourceGroup  = "resource_group"
+	isInstanceVolAttVolTags           = "tags"
+	isInstanceVolAttVolType           = "type"
+	isInstanceVolAttVolProfile        = "profile"
+	isInstanceImage                   = "image"
+	isInstanceCPU                     = "cpu"
+	isInstanceCPUArch                 = "architecture"
+	isInstanceCPUCores                = "cores"
+	isInstanceCPUFrequency            = "frequency"
+	isInstanceGpu                     = "gpu"
+	isInstanceGpuCores                = "cores"
+	isInstanceGpuCount                = "count"
+	isInstanceGpuManufacturer         = "manufacturer"
+	isInstanceGpuMemory               = "memory"
+	isInstanceGpuModel                = "model"
+	isInstanceMemory                  = "memory"
+	isInstanceStatus                  = "status"
+	isInstanceGeneration              = "generation"
+
+	isInstanceProvisioning     = "provisioning"
+	isInstanceProvisioningDone = "done"
+	isInstanceAvailable        = "available"
+	isInstanceDeleting         = "deleting"
+	isInstanceDeleteDone       = "done"
+	isInstanceFailed           = "failed"
+)
+
+func resourceIBMISInstance() *schema.Resource {
+	return &schema.Resource{
+		Create:   resourceIBMisInstanceCreate,
+		Read:     resourceIBMisInstanceRead,
+		Update:   resourceIBMisInstanceUpdate,
+		Delete:   resourceIBMisInstanceDelete,
+		Exists:   resourceIBMisInstanceExists,
+		Importer: &schema.ResourceImporter{},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Delete: schema.DefaultTimeout(60 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			isInstanceName: {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: false,
+			},
+
+			isInstanceVPC: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+
+			isInstanceZone: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+
+			isInstanceProfile: {
+				Type:     schema.TypeString,
+				ForceNew: false,
+				Required: true,
+			},
+
+			isInstanceTags: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
+
+			isInstanceKeys: {
+				Type:             schema.TypeSet,
+				Required:         true,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				Set:              schema.HashString,
+				DiffSuppressFunc: applyOnce,
+			},
+
+			isInstancePrimaryNetworkInterface: {
+				Type:             schema.TypeList,
+				MinItems:         1,
+				MaxItems:         1,
+				Required:         true,
+				DiffSuppressFunc: applyOnce,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						isInstanceNicName: {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						isInstanceNicPortSpeed: {
+							Type:             schema.TypeInt,
+							Required:         true,
+							DiffSuppressFunc: applyOnce,
+						},
+						isInstanceNicPrimaryIpv4Address: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						isInstanceNicSecurityGroups: {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Set:      schema.HashString,
+						},
+						isInstanceNicSubnet: {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+
+			isInstanceGeneration: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "gc",
+				DiffSuppressFunc: applyOnce,
+				ValidateFunc:     validateGeneration,
+			},
+
+			isInstanceResourceGroup: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+			},
+
+			isInstanceUserData: {
+				Type:             schema.TypeString,
+				ForceNew:         true,
+				Optional:         true,
+				DiffSuppressFunc: applyOnce,
+			},
+
+			isInstanceImage: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
+			},
+
+			isInstanceCPU: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						isInstanceCPUArch: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						isInstanceCPUCores: {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						isInstanceCPUFrequency: {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+					},
+				},
+			},
+
+			isInstanceGpu: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						isInstanceGpuCores: {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						isInstanceGpuCount: {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						isInstanceGpuMemory: {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						isInstanceGpuManufacturer: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						isInstanceGpuModel: {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+
+			isInstanceMemory: {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
+			isInstanceStatus: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+	sess, _ := meta.(ClientSession).ISSession()
+
+	profile := d.Get(isInstanceProfile).(string)
+	var body = models.PostInstancesParamsBody{
+		Name: d.Get(isInstanceName).(string),
+		Vpc: &models.PostInstancesParamsBodyVpc{
+			ID: strfmt.UUID(d.Get(isInstanceVPC).(string)),
+		},
+		Zone: &models.NameReference{
+			Name: d.Get(isInstanceZone).(string),
+		},
+		Profile: &models.PostInstancesParamsBodyProfile{
+			Name: profile,
+		},
+		Flavor: &models.PostInstancesParamsBodyFlavor{
+			Name: profile,
+		},
+		Image: &models.PostInstancesParamsBodyImage{
+			ID: strfmt.UUID(d.Get(isInstanceImage).(string)),
+		},
+		Generation: models.Generation(d.Get(isInstanceGeneration).(string)),
+	}
+
+	// implement boovol, nics, vols
+
+	if primnicintf, ok := d.GetOk(isInstancePrimaryNetworkInterface); ok {
+		primnic := primnicintf.([]interface{})[0].(map[string]interface{})
+		portspeedintf := (primnic[isInstanceNicPortSpeed].(int))
+		subnetintf, _ := primnic[isInstanceNicSubnet]
+		var primnicobj = models.PostInstancesParamsBodyPrimaryNetworkInterface{
+			Subnet: &models.PostInstancesParamsBodyPrimaryNetworkInterfaceSubnet{
+				ID: strfmt.UUID(subnetintf.(string)),
+			},
+			PortSpeed: int64(portspeedintf),
+		}
+		secgrpintf, ok := primnic[isInstanceNicSecurityGroups]
+		if ok {
+			secgrpSet := secgrpintf.(*schema.Set)
+			if secgrpSet.Len() != 0 {
+				var secgrpobjs = make([]*models.PostInstancesParamsBodyPrimaryNetworkInterfaceSecurityGroupsItems, secgrpSet.Len())
+				for i, secgrpIntf := range secgrpSet.List() {
+					secgrpobjs[i] = &models.PostInstancesParamsBodyPrimaryNetworkInterfaceSecurityGroupsItems{
+						ID: strfmt.UUID(secgrpIntf.(string)),
+					}
+				}
+				primnicobj.SecurityGroups = models.PostInstancesParamsBodyPrimaryNetworkInterfaceSecurityGroups(secgrpobjs)
+			}
+		}
+
+		body.PrimaryNetworkInterface = &primnicobj
+	}
+
+	keySet := d.Get(isInstanceKeys).(*schema.Set)
+	if keySet.Len() != 0 {
+		keyobjs := make([]*models.PostInstancesParamsBodyKeysItems, keySet.Len())
+		for i, key := range keySet.List() {
+			keyobjs[i] = &models.PostInstancesParamsBodyKeysItems{
+				ID: strfmt.UUID(key.(string)),
+			}
+		}
+		body.Keys = models.PostInstancesParamsBodyKeys(keyobjs)
+	}
+
+	if userdata, ok := d.GetOk(isInstanceUserData); ok {
+		body.UserData = userdata.(string)
+	}
+
+	if rg, ok := d.GetOk(isInstanceResourceGroup); ok {
+		body.ResourceGroup = &models.PostInstancesParamsBodyResourceGroup{
+			ID: strfmt.UUID(rg.(string)),
+		}
+	}
+
+	instanceC := compute.NewInstanceClient(sess)
+	instance, err := instanceC.Create(&body)
+	if err != nil {
+		log.Printf("[DEBUG] Instance err %s", isErrorToString(err))
+		return err
+	}
+
+	d.SetId(instance.ID.String())
+	log.Printf("[INFO] Instance : %s", instance.ID.String())
+
+	_, err = isWaitForInstanceAvailable(instanceC, d.Id(), d)
+	if err != nil {
+		return err
+	}
+
+	return resourceIBMisInstanceRead(d, meta)
+}
+
+func isWaitForInstanceAvailable(instanceC *compute.InstanceClient, id string, d *schema.ResourceData) (interface{}, error) {
+	log.Printf("Waiting for instance (%s) to be available.", id)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"retry", isInstanceProvisioning},
+		Target:     []string{isInstanceProvisioningDone},
+		Refresh:    isInstanceRefreshFunc(instanceC, id),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	return stateConf.WaitForState()
+}
+
+func isInstanceRefreshFunc(instanceC *compute.InstanceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		instance, err := instanceC.Get(id)
+		if err != nil {
+			return nil, "", err
+		}
+
+		if instance.Status == "available" || instance.Status == "failed" || instance.Status == "running" {
+			return instance, isInstanceProvisioningDone, nil
+		}
+
+		return instance, isInstanceProvisioning, nil
+	}
+}
+
+func resourceIBMisInstanceRead(d *schema.ResourceData, meta interface{}) error {
+	sess, _ := meta.(ClientSession).ISSession()
+	instanceC := compute.NewInstanceClient(sess)
+
+	instance, err := instanceC.Get(d.Id())
+	if err != nil {
+		return err
+	}
+
+	d.Set(isInstanceName, instance.Name)
+	if instance.Profile != nil {
+		d.Set(isInstanceProfile, instance.Profile.Name)
+	} else {
+		d.Set(isInstanceProfile, instance.Flavor.Name)
+	}
+	cpuList := make([]map[string]interface{}, 0)
+	if instance.CPU != nil {
+		currentCPU := map[string]interface{}{}
+		currentCPU[isInstanceCPUArch] = instance.CPU.Architecture
+		currentCPU[isInstanceCPUCores] = instance.CPU.Cores
+		currentCPU[isInstanceCPUFrequency] = instance.CPU.Frequency
+		cpuList = append(cpuList, currentCPU)
+	}
+	d.Set(isInstanceCPU, cpuList)
+
+	d.Set(isInstanceMemory, instance.Memory)
+	gpuList := make([]map[string]interface{}, 0)
+	if instance.Gpu != nil {
+		currentGpu := map[string]interface{}{}
+		currentGpu[isInstanceGpuManufacturer] = instance.Gpu.Manufacturer
+		currentGpu[isInstanceGpuModel] = instance.Gpu.Model
+		currentGpu[isInstanceGpuCores] = instance.Gpu.Cores
+		currentGpu[isInstanceGpuCount] = instance.Gpu.Count
+		currentGpu[isInstanceGpuMemory] = instance.Gpu.Memory
+		gpuList = append(gpuList, currentGpu)
+
+	}
+	d.Set(isInstanceGpu, gpuList)
+
+	primaryNicList := make([]map[string]interface{}, 0)
+	if instance.PrimaryNetworkInterface != nil {
+		currentPrimNic := map[string]interface{}{}
+		currentPrimNic["id"] = instance.PrimaryNetworkInterface.ID.String()
+		currentPrimNic[isInstanceNicName] = instance.PrimaryNetworkInterface.Name
+		currentPrimNic[isInstanceNicPrimaryIpv4Address] = instance.PrimaryNetworkInterface.PrimaryIPV4Address
+		primaryNicList = append(primaryNicList, currentPrimNic)
+	}
+	d.Set(isInstancePrimaryNetworkInterface, primaryNicList)
+
+	d.Set(isInstanceImage, instance.Image.ID.String())
+	d.Set(isInstanceStatus, instance.Status)
+	d.Set(isInstanceVPC, instance.Vpc.ID.String())
+	d.Set(isInstanceZone, instance.Zone.Name)
+
+	return nil
+}
+
+func resourceIBMisInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+
+	sess, _ := meta.(ClientSession).ISSession()
+	instanceC := compute.NewInstanceClient(sess)
+
+	name := ""
+	profile := ""
+	if d.HasChange(isInstanceName) {
+		name = d.Get(isInstanceName).(string)
+	}
+	if d.HasChange(isInstanceProfile) {
+		profile = d.Get(isInstanceProfile).(string)
+	}
+
+	_, err := instanceC.Update(d.Id(), name, profile)
+	if err != nil {
+		return err
+	}
+
+	return resourceIBMisInstanceRead(d, meta)
+}
+
+func resourceIBMisInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+
+	sess, _ := meta.(ClientSession).ISSession()
+	instanceC := compute.NewInstanceClient(sess)
+	err := instanceC.Delete(d.Id())
+	if err != nil {
+		return err
+	}
+
+	_, err = isWaitForInstanceDelete(d, meta)
+	if err != nil {
+		return err
+	}
+
+	d.SetId("")
+	return nil
+}
+
+func resourceIBMisInstanceExists(d *schema.ResourceData, meta interface{}) (bool, error) {
+	sess, _ := meta.(ClientSession).ISSession()
+	instanceC := compute.NewInstanceClient(sess)
+
+	_, err := instanceC.Get(d.Id())
+	if err != nil {
+		iserror, ok := err.(iserrors.RiaasError)
+		if ok {
+			if len(iserror.Payload.Errors) == 1 &&
+				iserror.Payload.Errors[0].Code == "not_found" {
+				return false, nil
+			}
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func isWaitForInstanceDelete(d *schema.ResourceData, meta interface{}) (interface{}, error) {
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
+	instanceC := compute.NewInstanceClient(sess)
+
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{isInstanceDeleting, isInstanceAvailable},
+		Target:  []string{isInstanceDeleteDone},
+		Refresh: func() (interface{}, string, error) {
+			instance, err := instanceC.Get(d.Id())
+			if err != nil {
+				iserror, ok := err.(iserrors.RiaasError)
+				if ok {
+					if len(iserror.Payload.Errors) == 1 &&
+						iserror.Payload.Errors[0].Code == "not_found" {
+						return instance, isInstanceDeleteDone, nil
+					}
+				}
+				return instance, "", err
+			}
+			if instance.Status == isInstanceFailed {
+				return instance, instance.Status, fmt.Errorf("The  instance %s failed to delete: %v", d.Id(), err)
+			}
+			return instance, instance.Status, nil
+		},
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	return stateConf.WaitForState()
+}
