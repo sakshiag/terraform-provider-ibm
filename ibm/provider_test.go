@@ -273,7 +273,7 @@ func init() {
 	isImage = os.Getenv("SL_IMAGE")
 	if isImage == "" {
 		isImage = "7eb4e35b-4257-56f8-d7da-326d85452591"
-		fmt.Println("[INFO] Set the environment variable SL_IMAGE for testing ibm_is_instance, ibm_is_floatingip else it is set to default value '7eb4e35b-4257-56f8-d7da-326d85452591'")
+		fmt.Println("[INFO] Set the environment variable SL_IMAGE for testing ibm_is_instance, ibm_is_floating_ip else it is set to default value '7eb4e35b-4257-56f8-d7da-326d85452591'")
 	}
 
 }
