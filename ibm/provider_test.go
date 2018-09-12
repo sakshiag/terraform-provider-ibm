@@ -48,6 +48,7 @@ var regionName string
 var ISZoneName string
 var ISCIDR string
 var isImage string
+var instanceProfileName string
 
 
 func init() {
@@ -274,6 +275,12 @@ func init() {
 	if isImage == "" {
 		isImage = "7eb4e35b-4257-56f8-d7da-326d85452591"
 		fmt.Println("[INFO] Set the environment variable SL_IMAGE for testing ibm_is_instance, ibm_is_floating_ip else it is set to default value '7eb4e35b-4257-56f8-d7da-326d85452591'")
+	}
+
+	instanceProfileName = os.Getenv("SL_INSTANCE_PROFILE")
+	if instanceProfileName == "" {
+		instanceProfileName = "b-2x4"
+		fmt.Println("[INFO] Set the environment variable SL_INSTANCE_PROFILE for testing ibm_container_cluster resource else it is set to default value 'b-2x4'")
 	}
 
 }
