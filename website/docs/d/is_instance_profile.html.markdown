@@ -15,7 +15,7 @@ Import the details of an existing IBM Cloud virtual server instance profile as a
 
 ```hcl
 
-data " "ibm_is_instance_profile" "profile" {
+data "ibm_is_instance_profile" "profile" {
 	name = "b-2x4"
 }
 

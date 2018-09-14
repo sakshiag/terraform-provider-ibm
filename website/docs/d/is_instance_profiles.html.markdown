@@ -15,7 +15,7 @@ Import the details of an existing IBM Cloud virtual server instance profiles as 
 
 ```hcl
 
-data " "ibm_is_instance_profiles" "ds_instance_profiles" {
+data "ibm_is_instance_profiles" "ds_instance_profiles" {
 }
 
 ```

@@ -18,7 +18,7 @@ resource "ibm_is_vpc" "testacc_vpc" {
     name = "test"
 }
 
-data " "ibm_is_vpc" "ds_vpc" {
+data "ibm_is_vpc" "ds_vpc" {
     name = "test"
 }
 

@@ -79,7 +79,7 @@ Nested `primary_network_interface` blocks have the following structure:
   * `security_groups` - (Optional, string) Comma separated IDs of security groups.
 * `user-data` - (Optional, string) User data to transfer to the server instance. 
 * `resource_group` - (Optional, string) The resource group to which the instance belongs.
-* `tags` - (Optional, array of strings) Tags associated with the gateway. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
+* `tags` - (Optional, array of strings) Tags associated with the instance. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 

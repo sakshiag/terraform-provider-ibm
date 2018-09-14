@@ -31,7 +31,7 @@ The following arguments are supported:
 * `name` - (Optional, string) The security group name.
 * `vpc` - (Required, string) The vpc id. 
 * `resource_group` - (Optional, string) The resource group to which the security group belongs.
-* `tags` - (Optional, array of strings) Tags associated with the gateway. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
+* `tags` - (Optional, array of strings) Tags associated with the security group. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 

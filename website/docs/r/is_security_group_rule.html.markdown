@@ -6,7 +6,7 @@ description: |-
   Manages IBM Security Group Rule.
 ---
 
-# ibm\_is_security_group
+# ibm\_is_security_group_rule
 
 Provides a security group rule resource. This allows security group rule to be created, updated, and cancelled.
 
