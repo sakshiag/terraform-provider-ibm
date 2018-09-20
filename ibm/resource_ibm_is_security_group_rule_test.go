@@ -46,7 +46,7 @@ func testAccCheckIBMISSecurityGroupRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		secgrpID, ruleID, err := parseISSecurityGroupRuleTerraformID(rs.Primary.ID)
+		secgrpID, ruleID, err := parseISTerraformID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
@@ -76,7 +76,7 @@ func testAccCheckIBMISSecurityGroupRuleExists(n string, securityGroup **models.S
 
 		sess, _ := testAccProvider.Meta().(ClientSession).ISSession()
 		securityGroupC := network.NewSecurityGroupClient(sess)
-		secgrpID, ruleID, err := parseISSecurityGroupRuleTerraformID(rs.Primary.ID)
+		secgrpID, ruleID, err := parseISTerraformID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}

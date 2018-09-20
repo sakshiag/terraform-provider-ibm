@@ -171,7 +171,7 @@ func resourceIBMISSecurityGroupRuleCreate(d *schema.ResourceData, meta interface
 func resourceIBMISSecurityGroupRuleRead(d *schema.ResourceData, meta interface{}) error {
 	sess, _ := meta.(ClientSession).ISSession()
 	sgC := network.NewSecurityGroupClient(sess)
-	secgrpID, ruleID, err := parseISSecurityGroupRuleTerraformID(d.Id())
+	secgrpID, ruleID, err := parseISTerraformID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -259,7 +259,7 @@ func resourceIBMISSecurityGroupRuleDelete(d *schema.ResourceData, meta interface
 	sess, _ := meta.(ClientSession).ISSession()
 	sgC := network.NewSecurityGroupClient(sess)
 
-	secgrpID, ruleID, err := parseISSecurityGroupRuleTerraformID(d.Id())
+	secgrpID, ruleID, err := parseISTerraformID(d.Id())
 	if err != nil {
 		return err
 	}
@@ -281,7 +281,7 @@ func resourceIBMISSecurityGroupRuleExists(d *schema.ResourceData, meta interface
 	sess, _ := meta.(ClientSession).ISSession()
 	sgC := network.NewSecurityGroupClient(sess)
 
-	secgrpID, ruleID, err := parseISSecurityGroupRuleTerraformID(d.Id())
+	secgrpID, ruleID, err := parseISTerraformID(d.Id())
 	if err != nil {
 		return false, err
 	}
@@ -299,7 +299,7 @@ func resourceIBMISSecurityGroupRuleExists(d *schema.ResourceData, meta interface
 	return true, nil
 }
 
-func parseISSecurityGroupRuleTerraformID(s string) (string, string, error) {
+func parseISTerraformID(s string) (string, string, error) {
 	segments := strings.Split(s, ".")
 	if len(segments) != 2 {
 		return "", "", fmt.Errorf("invalid terraform Id %s (incorrect number of segments)", s)
@@ -354,7 +354,7 @@ func parseIBMISSecurityGroupRuleDictionary(d *schema.ResourceData, tag string) (
 	parsed.icmpCode = -1
 	parsed.portMin = -1
 	parsed.portMax = -1
-	parsed.secgrpID, parsed.ruleID, err = parseISSecurityGroupRuleTerraformID(d.Id())
+	parsed.secgrpID, parsed.ruleID, err = parseISTerraformID(d.Id())
 	if err != nil {
 		parsed.secgrpID = d.Get(isSecurityGroupID).(string)
 	}
@@ -418,10 +418,10 @@ func parseIBMISSecurityGroupRuleDictionary(d *schema.ResourceData, tag string) (
 	return parsed, nil
 }
 
-func makeTerraformRuleID(secgrpID, ruleID string) string {
+func makeTerraformRuleID(id1, id2 string) string {
 	// Include both group and rule id to create a unique Terraform id.  As a bonus,
 	// we can extract the group id as needed for API calls such as READ.
-	return secgrpID + "." + ruleID
+	return id1 + "." + id2
 }
 
 func extractRuleRemote(remote *models.SecurityGroupRuleRemote) (string, error) {
