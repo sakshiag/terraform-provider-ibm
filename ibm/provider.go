@@ -185,6 +185,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_iam_service_policy":                    resourceIBMIAMServicePolicy(),
 			"ibm_is_floating_ip":                        resourceIBMISFloatingIP(),
 			"ibm_is_instance":                           resourceIBMISInstance(),
+			"ibm_is_instance_nic":                       resourceIBMISInstanceNIC(),
 			"ibm_is_network_acl":                        resourceIBMISNetworkACL(),
 			"ibm_is_public_gateway":                     resourceIBMISPublicGateway(),
 			"ibm_is_security_group":                     resourceIBMISSecurityGroup(),
