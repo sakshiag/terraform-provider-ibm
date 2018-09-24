@@ -68,15 +68,20 @@ The following arguments are supported:
 * `vpc` - (Required, string) The vpc id. 
 * `zone` - (Required, string) Name of the zone. 
 * `profile` - (Required, string) The profile name. 
-* `image` - (Required, string) ID of the image. 
+* `image` - (Optional, string) ID of the image. 
+  **NOTE**: Conflicts with `boot_volume`.
+* `boot_volume` - (Optional, string) ID of the boot volume. 
+  **NOTE**: Conflicts with `image`.
 * `keys` - (Required, list) Comma separated IDs of ssh keys. 
 * `generation` - (Optional, string) Generation of the server instance. valid values are gc, gt. Defaults to gc. 
-* `primary_network_interface` - A nested block describing the primary network interface of this instance.
-Nested `primary_network_interface` blocks have the following structure:
+* `primary_network_interface` - (Required, list) A nested block describing the primary network interface of this instance. We can have only one primary network interface. We can add multiple network interface using [ibm_is_instance_nic](../r/is_instance_nic.html.markdown).
+Nested `primary_network_interface` block have the following structure:
   * `name` - (Optional, string) The name of the network interface.
   * `port_speed` - (Required, int) Speed of the network interface.
   * `subnet` -  (Required, string) ID of the subnet.
   * `security_groups` - (Optional, string) Comma separated IDs of security groups.
+
+* `volumes` - (Optional, list) Comma separated IDs of volumes. 
 * `user-data` - (Optional, string) User data to transfer to the server instance. 
 * `resource_group` - (Optional, string) The resource group to which the instance belongs.
 * `tags` - (Optional, array of strings) Tags associated with the instance. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.

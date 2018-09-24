@@ -32,10 +32,10 @@ const (
 	isInstanceProfile                 = "profile"
 	isInstanceResourceGroup           = "resource_group"
 	isInstanceUserData                = "user_data"
-	isInstanceVolumeAttachments       = "volume_attachments"
+	isInstanceVolumes                 = "volumes"
 	isInstanceVPC                     = "vpc"
 	isInstanceZone                    = "zone"
-	isInstanceBootVolumeAttachment    = "boot_volume_attachment"
+	isInstanceBootVolume              = "boot_volume"
 	isInstanceVolAttName              = "name"
 	isInstanceVolAttResourcceGroup    = "resource_group"
 	isInstanceVolAttTags              = "tags"
@@ -189,9 +189,25 @@ func resourceIBMISInstance() *schema.Resource {
 			},
 
 			isInstanceImage: {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				ConflictsWith: []string{isInstanceBootVolume},
+			},
+
+			isInstanceBootVolume: {
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				ConflictsWith: []string{isInstanceImage},
+			},
+
+			isInstanceVolumes: {
+				Type:             schema.TypeSet,
+				Optional:         true,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				Set:              schema.HashString,
+				DiffSuppressFunc: applyOnce,
 			},
 
 			isInstanceCPU: {
@@ -275,10 +291,29 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 		Flavor: &models.PostInstancesParamsBodyFlavor{
 			Name: profile,
 		},
-		Image: &models.PostInstancesParamsBodyImage{
-			ID: strfmt.UUID(d.Get(isInstanceImage).(string)),
-		},
 		Generation: models.Generation(d.Get(isInstanceGeneration).(string)),
+	}
+
+	var imageID, bootvol string
+
+	if img, ok := d.GetOk(isInstanceImage); ok {
+		imageID = img.(string)
+		body.Image = &models.PostInstancesParamsBodyImage{
+			ID: strfmt.UUID(imageID),
+		}
+	}
+
+	if boot, ok := d.GetOk(isInstanceBootVolume); ok {
+		bootvol = boot.(string)
+		body.BootVolumeAttachment = &models.PostInstancesParamsBodyBootVolumeAttachment{
+			Volume: &models.PostInstancesParamsBodyBootVolumeAttachmentVolume{
+				ID: strfmt.UUID(bootvol),
+			},
+		}
+	}
+
+	if imageID == "" && bootvol == "" {
+		return fmt.Errorf("%s or %s need to be provided", isInstanceImage, isInstanceBootVolume)
 	}
 
 	// implement boovol, nics, vols
@@ -319,6 +354,19 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 			}
 		}
 		body.Keys = models.PostInstancesParamsBodyKeys(keyobjs)
+	}
+
+	volSet := d.Get(isInstanceVolumes).(*schema.Set)
+	if volSet.Len() != 0 {
+		volobjs := make([]*models.PostInstancesParamsBodyVolumeAttachmentsItems, volSet.Len())
+		for i, vol := range volSet.List() {
+			volobjs[i] = &models.PostInstancesParamsBodyVolumeAttachmentsItems{
+				Volume: &models.PostInstancesParamsBodyVolumeAttachmentsItemsVolume{
+					ID: strfmt.UUID(vol.(string)),
+				},
+			}
+		}
+		body.VolumeAttachments = models.PostInstancesParamsBodyVolumeAttachments(volobjs)
 	}
 
 	if userdata, ok := d.GetOk(isInstanceUserData); ok {
@@ -428,10 +476,29 @@ func resourceIBMisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.Set(isInstancePrimaryNetworkInterface, primaryNicList)
 
-	d.Set(isInstanceImage, instance.Image.ID.String())
+	if instance.Image != nil {
+		d.Set(isInstanceImage, instance.Image.ID.String())
+	}
+
+	if instance.BootVolumeAttachment != nil {
+		d.Set(isInstanceBootVolume, instance.BootVolumeAttachment.ID.String())
+
+	}
+
 	d.Set(isInstanceStatus, instance.Status)
 	d.Set(isInstanceVPC, instance.Vpc.ID.String())
 	d.Set(isInstanceZone, instance.Zone.Name)
+
+	var volumes []string
+	volumes = make([]string, len(instance.VolumeAttachments), len(instance.VolumeAttachments))
+	if instance.VolumeAttachments != nil {
+		for i := 0; i < len(instance.VolumeAttachments); i++ {
+			if instance.VolumeAttachments[i] != nil {
+				volumes[i] = instance.VolumeAttachments[i].ID.String()
+			}
+		}
+	}
+	d.Set(isInstanceVolumes, volumes)
 
 	return nil
 }
