@@ -30,7 +30,6 @@ func (m *PatchInstancesInstanceIDNetworkInterfacesIDParamsBody) Validate(formats
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

@@ -7,6 +7,7 @@ package models
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -26,13 +27,11 @@ type Instance struct {
 	CPU *InstanceCPU `json:"cpu,omitempty"`
 
 	// The date and time that the instance was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The CRN for this instance
 	Crn string `json:"crn,omitempty"`
-
-	// flavor
-	Flavor *ResourceReference `json:"flavor,omitempty"`
 
 	// generation
 	Generation Generation `json:"generation,omitempty"`
@@ -45,6 +44,7 @@ type Instance struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this instance
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// image
@@ -60,119 +60,140 @@ type Instance struct {
 	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
 	Name string `json:"name,omitempty"`
 
-	// network interfaces
-	NetworkInterfaces InstanceNetworkInterfaces `json:"network_interfaces,omitempty"`
+	// Collection of the instance's network interfaces, not including the primary network interface
+	NetworkInterfaces []*NetworkInterfaceReference `json:"network_interfaces"`
 
 	// primary network interface
 	PrimaryNetworkInterface *NetworkInterfaceReference `json:"primary_network_interface,omitempty"`
 
 	// profile
-	Profile *ResourceReference `json:"profile,omitempty"`
+	Profile *NameReference `json:"profile,omitempty"`
 
 	// resource group
-	ResourceGroup *ResourceReference `json:"resource_group,omitempty"`
+	ResourceGroup *GroupReference `json:"resource_group,omitempty"`
 
 	// The status of the instance
+	// Enum: [stopped starting running pausing paused resuming stopping restarting]
 	Status string `json:"status,omitempty"`
 
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
 
 	// instance Type
+	// Enum: [virtual]
 	Type string `json:"type,omitempty"`
 
-	// volume attachments
-	VolumeAttachments InstanceVolumeAttachments `json:"volume_attachments,omitempty"`
+	// Collection of volume interfaces
+	VolumeAttachments []*VolumeAttachmentReference `json:"volume_attachments,omitempty"`
 
 	// vpc
 	Vpc *ResourceReference `json:"vpc,omitempty"`
 
 	// zone
-	Zone *InstanceZone `json:"zone,omitempty"`
+	Zone *ZoneReference `json:"zone,omitempty"`
 }
 
 // Validate validates this instance
 func (m *Instance) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCPU(formats); err != nil {
-		// prop
+	if err := m.validateBootVolumeAttachment(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateFlavor(formats); err != nil {
-		// prop
+	if err := m.validateCPU(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCreatedAt(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateGeneration(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGpu(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateImage(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMemory(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateNetworkInterfaces(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePrimaryNetworkInterface(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateProfile(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateVolumeAttachments(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateVpc(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateZone(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Instance) validateBootVolumeAttachment(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.BootVolumeAttachment) { // not required
+		return nil
+	}
+
+	if m.BootVolumeAttachment != nil {
+		if err := m.BootVolumeAttachment.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("boot_volume_attachment")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -183,7 +204,6 @@ func (m *Instance) validateCPU(formats strfmt.Registry) error {
 	}
 
 	if m.CPU != nil {
-
 		if err := m.CPU.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cpu")
@@ -195,20 +215,14 @@ func (m *Instance) validateCPU(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Instance) validateFlavor(formats strfmt.Registry) error {
+func (m *Instance) validateCreatedAt(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Flavor) { // not required
+	if swag.IsZero(m.CreatedAt) { // not required
 		return nil
 	}
 
-	if m.Flavor != nil {
-
-		if err := m.Flavor.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("flavor")
-			}
-			return err
-		}
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
 	}
 
 	return nil
@@ -237,7 +251,6 @@ func (m *Instance) validateGpu(formats strfmt.Registry) error {
 	}
 
 	if m.Gpu != nil {
-
 		if err := m.Gpu.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gpu")
@@ -262,6 +275,19 @@ func (m *Instance) validateHref(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Instance) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Instance) validateImage(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Image) { // not required
@@ -269,7 +295,6 @@ func (m *Instance) validateImage(formats strfmt.Registry) error {
 	}
 
 	if m.Image != nil {
-
 		if err := m.Image.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("image")
@@ -315,6 +340,49 @@ func (m *Instance) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Instance) validateNetworkInterfaces(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NetworkInterfaces) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.NetworkInterfaces); i++ {
+		if swag.IsZero(m.NetworkInterfaces[i]) { // not required
+			continue
+		}
+
+		if m.NetworkInterfaces[i] != nil {
+			if err := m.NetworkInterfaces[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("network_interfaces" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *Instance) validatePrimaryNetworkInterface(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.PrimaryNetworkInterface) { // not required
+		return nil
+	}
+
+	if m.PrimaryNetworkInterface != nil {
+		if err := m.PrimaryNetworkInterface.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("primary_network_interface")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *Instance) validateProfile(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Profile) { // not required
@@ -322,7 +390,6 @@ func (m *Instance) validateProfile(formats strfmt.Registry) error {
 	}
 
 	if m.Profile != nil {
-
 		if err := m.Profile.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("profile")
@@ -341,7 +408,6 @@ func (m *Instance) validateResourceGroup(formats strfmt.Registry) error {
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
@@ -366,20 +432,28 @@ func init() {
 }
 
 const (
+
 	// InstanceStatusStopped captures enum value "stopped"
 	InstanceStatusStopped string = "stopped"
+
 	// InstanceStatusStarting captures enum value "starting"
 	InstanceStatusStarting string = "starting"
+
 	// InstanceStatusRunning captures enum value "running"
 	InstanceStatusRunning string = "running"
+
 	// InstanceStatusPausing captures enum value "pausing"
 	InstanceStatusPausing string = "pausing"
+
 	// InstanceStatusPaused captures enum value "paused"
 	InstanceStatusPaused string = "paused"
+
 	// InstanceStatusResuming captures enum value "resuming"
 	InstanceStatusResuming string = "resuming"
+
 	// InstanceStatusStopping captures enum value "stopping"
 	InstanceStatusStopping string = "stopping"
+
 	// InstanceStatusRestarting captures enum value "restarting"
 	InstanceStatusRestarting string = "restarting"
 )
@@ -406,15 +480,6 @@ func (m *Instance) validateStatus(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Instance) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
-	}
-
-	return nil
-}
-
 var instanceTypeTypePropEnum []interface{}
 
 func init() {
@@ -428,6 +493,7 @@ func init() {
 }
 
 const (
+
 	// InstanceTypeVirtual captures enum value "virtual"
 	InstanceTypeVirtual string = "virtual"
 )
@@ -454,6 +520,31 @@ func (m *Instance) validateType(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Instance) validateVolumeAttachments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.VolumeAttachments) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.VolumeAttachments); i++ {
+		if swag.IsZero(m.VolumeAttachments[i]) { // not required
+			continue
+		}
+
+		if m.VolumeAttachments[i] != nil {
+			if err := m.VolumeAttachments[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("volume_attachments" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 func (m *Instance) validateVpc(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Vpc) { // not required
@@ -461,7 +552,6 @@ func (m *Instance) validateVpc(formats strfmt.Registry) error {
 	}
 
 	if m.Vpc != nil {
-
 		if err := m.Vpc.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("vpc")
@@ -480,7 +570,6 @@ func (m *Instance) validateZone(formats strfmt.Registry) error {
 	}
 
 	if m.Zone != nil {
-
 		if err := m.Zone.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("zone")

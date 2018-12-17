@@ -21,7 +21,7 @@ func NewZoneClient(sess *session.Session) *ZoneClient {
 }
 
 // List ..
-func (f *ZoneClient) List(region string) (models.GetRegionsRegionNameZonesOKBodyZones, error) {
+func (f *ZoneClient) List(region string) ([]*models.Zone, error) {
 	params := geography.NewGetRegionsRegionNameZonesParams().WithRegionName(region)
 	resp, err := f.session.Riaas.Geography.GetRegionsRegionNameZones(params, session.Auth(f.session))
 

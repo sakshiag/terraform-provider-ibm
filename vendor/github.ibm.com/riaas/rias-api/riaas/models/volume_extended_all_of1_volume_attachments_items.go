@@ -23,19 +23,28 @@ type VolumeExtendedAllOf1VolumeAttachmentsItems struct {
 
 // UnmarshalJSON unmarshals this object from a JSON structure
 func (m *VolumeExtendedAllOf1VolumeAttachmentsItems) UnmarshalJSON(raw []byte) error {
-
+	// AO0
 	var aO0 ResourceReference
 	if err := swag.ReadJSON(raw, &aO0); err != nil {
 		return err
 	}
 	m.ResourceReference = aO0
 
+	// now for regular properties
+	var propsVolumeExtendedAllOf1VolumeAttachmentsItems struct {
+		Server *ResourceReference `json:"server,omitempty"`
+	}
+	if err := swag.ReadJSON(raw, &propsVolumeExtendedAllOf1VolumeAttachmentsItems); err != nil {
+		return err
+	}
+	m.Server = propsVolumeExtendedAllOf1VolumeAttachmentsItems.Server
+
 	return nil
 }
 
 // MarshalJSON marshals this object to a JSON structure
 func (m VolumeExtendedAllOf1VolumeAttachmentsItems) MarshalJSON() ([]byte, error) {
-	var _parts [][]byte
+	_parts := make([][]byte, 0, 1)
 
 	aO0, err := swag.WriteJSON(m.ResourceReference)
 	if err != nil {
@@ -43,6 +52,17 @@ func (m VolumeExtendedAllOf1VolumeAttachmentsItems) MarshalJSON() ([]byte, error
 	}
 	_parts = append(_parts, aO0)
 
+	// now for regular properties
+	var propsVolumeExtendedAllOf1VolumeAttachmentsItems struct {
+		Server *ResourceReference `json:"server,omitempty"`
+	}
+	propsVolumeExtendedAllOf1VolumeAttachmentsItems.Server = m.Server
+
+	jsonDataPropsVolumeExtendedAllOf1VolumeAttachmentsItems, errVolumeExtendedAllOf1VolumeAttachmentsItems := swag.WriteJSON(propsVolumeExtendedAllOf1VolumeAttachmentsItems)
+	if errVolumeExtendedAllOf1VolumeAttachmentsItems != nil {
+		return nil, errVolumeExtendedAllOf1VolumeAttachmentsItems
+	}
+	_parts = append(_parts, jsonDataPropsVolumeExtendedAllOf1VolumeAttachmentsItems)
 	return swag.ConcatJSON(_parts...), nil
 }
 
@@ -50,12 +70,12 @@ func (m VolumeExtendedAllOf1VolumeAttachmentsItems) MarshalJSON() ([]byte, error
 func (m *VolumeExtendedAllOf1VolumeAttachmentsItems) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	// validation for a type composition with ResourceReference
 	if err := m.ResourceReference.Validate(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateServer(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -72,7 +92,6 @@ func (m *VolumeExtendedAllOf1VolumeAttachmentsItems) validateServer(formats strf
 	}
 
 	if m.Server != nil {
-
 		if err := m.Server.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("server")

@@ -77,6 +77,11 @@ type DeleteInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIpsAddr
 
 	*/
 	NetworkInterfaceID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -149,6 +154,17 @@ func (o *DeleteInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIps
 	o.NetworkInterfaceID = networkInterfaceID
 }
 
+// WithVersion adds the version to the delete instances instance ID network interfaces network interface ID floating ips address params
+func (o *DeleteInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIpsAddressParams) WithVersion(version string) *DeleteInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIpsAddressParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the delete instances instance ID network interfaces network interface ID floating ips address params
+func (o *DeleteInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIpsAddressParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIpsAddressParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -170,6 +186,15 @@ func (o *DeleteInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIps
 	// path param network_interface_id
 	if err := r.SetPathParam("network_interface_id", o.NetworkInterfaceID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

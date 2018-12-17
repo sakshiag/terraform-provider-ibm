@@ -30,12 +30,10 @@ func (m *PatchFloatingIpsIDParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTarget(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -65,7 +63,6 @@ func (m *PatchFloatingIpsIDParamsBody) validateTarget(formats strfmt.Registry) e
 	}
 
 	if m.Target != nil {
-
 		if err := m.Target.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("target")

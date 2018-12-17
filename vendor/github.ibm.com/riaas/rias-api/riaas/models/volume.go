@@ -19,10 +19,8 @@ import (
 // swagger:model volume
 type Volume struct {
 
-	// If set to true, this volume will be automatically deleted if the only server it is attached to is deleted
-	AutoDelete *bool `json:"auto_delete,omitempty"`
-
 	// The billing term for the volume
+	// Enum: [hourly monthly]
 	BillingTerm *string `json:"billing_term,omitempty"`
 
 	// The capacity of the volume in gigabytes
@@ -31,6 +29,7 @@ type Volume struct {
 	Capacity int64 `json:"capacity,omitempty"`
 
 	// The date and time that the volume was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The CRN for this volume
@@ -44,9 +43,11 @@ type Volume struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this volume
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The bandwidth for the volume
+	// Enum: [1000 10000 100000]
 	Iops int64 `json:"iops,omitempty"`
 
 	// The user-defined name for this volume
@@ -63,16 +64,18 @@ type Volume struct {
 	SourceSnapshot *ResourceReference `json:"source_snapshot,omitempty"`
 
 	// The status of the volume
+	// Enum: [pending available pending_deletion]
 	Status string `json:"status,omitempty"`
 
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
 
 	// The volume type
+	// Enum: [boot data]
 	Type string `json:"type,omitempty"`
 
 	// zone
-	Zone *VolumeZone `json:"zone,omitempty"`
+	Zone *ZoneReference `json:"zone,omitempty"`
 }
 
 // Validate validates this volume
@@ -80,67 +83,58 @@ func (m *Volume) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBillingTerm(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCapacity(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateCreatedAt(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateEncryptionKey(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateIops(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProfile(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSourceSnapshot(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateZone(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -163,8 +157,10 @@ func init() {
 }
 
 const (
+
 	// VolumeBillingTermHourly captures enum value "hourly"
 	VolumeBillingTermHourly string = "hourly"
+
 	// VolumeBillingTermMonthly captures enum value "monthly"
 	VolumeBillingTermMonthly string = "monthly"
 )
@@ -208,6 +204,19 @@ func (m *Volume) validateCapacity(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Volume) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Volume) validateEncryptionKey(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.EncryptionKey) { // not required
@@ -215,7 +224,6 @@ func (m *Volume) validateEncryptionKey(formats strfmt.Registry) error {
 	}
 
 	if m.EncryptionKey != nil {
-
 		if err := m.EncryptionKey.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("encryption_key")
@@ -234,6 +242,19 @@ func (m *Volume) validateHref(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Volume) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -294,7 +315,6 @@ func (m *Volume) validateProfile(formats strfmt.Registry) error {
 	}
 
 	if m.Profile != nil {
-
 		if err := m.Profile.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("profile")
@@ -313,7 +333,6 @@ func (m *Volume) validateResourceGroup(formats strfmt.Registry) error {
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
@@ -332,7 +351,6 @@ func (m *Volume) validateSourceSnapshot(formats strfmt.Registry) error {
 	}
 
 	if m.SourceSnapshot != nil {
-
 		if err := m.SourceSnapshot.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("source_snapshot")
@@ -357,10 +375,13 @@ func init() {
 }
 
 const (
+
 	// VolumeStatusPending captures enum value "pending"
 	VolumeStatusPending string = "pending"
+
 	// VolumeStatusAvailable captures enum value "available"
 	VolumeStatusAvailable string = "available"
+
 	// VolumeStatusPendingDeletion captures enum value "pending_deletion"
 	VolumeStatusPendingDeletion string = "pending_deletion"
 )
@@ -387,15 +408,6 @@ func (m *Volume) validateStatus(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Volume) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
-	}
-
-	return nil
-}
-
 var volumeTypeTypePropEnum []interface{}
 
 func init() {
@@ -409,8 +421,10 @@ func init() {
 }
 
 const (
+
 	// VolumeTypeBoot captures enum value "boot"
 	VolumeTypeBoot string = "boot"
+
 	// VolumeTypeData captures enum value "data"
 	VolumeTypeData string = "data"
 )
@@ -444,7 +458,6 @@ func (m *Volume) validateZone(formats strfmt.Registry) error {
 	}
 
 	if m.Zone != nil {
-
 		if err := m.Zone.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("zone")

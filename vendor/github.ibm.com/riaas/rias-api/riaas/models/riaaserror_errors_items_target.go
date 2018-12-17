@@ -23,6 +23,7 @@ type RiaaserrorErrorsItemsTarget struct {
 	Name string `json:"name,omitempty"`
 
 	// The type of input where the problem was
+	// Enum: [field parameter header]
 	Type string `json:"type,omitempty"`
 }
 
@@ -31,7 +32,6 @@ func (m *RiaaserrorErrorsItemsTarget) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -54,10 +54,13 @@ func init() {
 }
 
 const (
+
 	// RiaaserrorErrorsItemsTargetTypeField captures enum value "field"
 	RiaaserrorErrorsItemsTargetTypeField string = "field"
+
 	// RiaaserrorErrorsItemsTargetTypeParameter captures enum value "parameter"
 	RiaaserrorErrorsItemsTargetTypeParameter string = "parameter"
+
 	// RiaaserrorErrorsItemsTargetTypeHeader captures enum value "header"
 	RiaaserrorErrorsItemsTargetTypeHeader string = "header"
 )

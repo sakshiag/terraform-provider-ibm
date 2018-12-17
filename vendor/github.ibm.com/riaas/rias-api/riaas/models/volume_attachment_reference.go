@@ -15,20 +15,21 @@ import (
 // VolumeAttachmentReference VolumeAttachmentVolumeReference
 // swagger:model volume_attachment_reference
 type VolumeAttachmentReference struct {
-	ResourceReference
+	GroupReference
 
 	VolumeAttachmentReferenceAllOf1
 }
 
 // UnmarshalJSON unmarshals this object from a JSON structure
 func (m *VolumeAttachmentReference) UnmarshalJSON(raw []byte) error {
-
-	var aO0 ResourceReference
+	// AO0
+	var aO0 GroupReference
 	if err := swag.ReadJSON(raw, &aO0); err != nil {
 		return err
 	}
-	m.ResourceReference = aO0
+	m.GroupReference = aO0
 
+	// AO1
 	var aO1 VolumeAttachmentReferenceAllOf1
 	if err := swag.ReadJSON(raw, &aO1); err != nil {
 		return err
@@ -40,9 +41,9 @@ func (m *VolumeAttachmentReference) UnmarshalJSON(raw []byte) error {
 
 // MarshalJSON marshals this object to a JSON structure
 func (m VolumeAttachmentReference) MarshalJSON() ([]byte, error) {
-	var _parts [][]byte
+	_parts := make([][]byte, 0, 2)
 
-	aO0, err := swag.WriteJSON(m.ResourceReference)
+	aO0, err := swag.WriteJSON(m.GroupReference)
 	if err != nil {
 		return nil, err
 	}
@@ -61,10 +62,11 @@ func (m VolumeAttachmentReference) MarshalJSON() ([]byte, error) {
 func (m *VolumeAttachmentReference) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.ResourceReference.Validate(formats); err != nil {
+	// validation for a type composition with GroupReference
+	if err := m.GroupReference.Validate(formats); err != nil {
 		res = append(res, err)
 	}
-
+	// validation for a type composition with VolumeAttachmentReferenceAllOf1
 	if err := m.VolumeAttachmentReferenceAllOf1.Validate(formats); err != nil {
 		res = append(res, err)
 	}

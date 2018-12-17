@@ -33,6 +33,7 @@ type PostKeysParamsBody struct {
 	Tags []string `json:"tags,omitempty"`
 
 	// The cryptosystem used by this key
+	// Enum: [rsa]
 	Type *string `json:"type,omitempty"`
 }
 
@@ -41,22 +42,14 @@ func (m *PostKeysParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -86,22 +79,12 @@ func (m *PostKeysParamsBody) validateResourceGroup(formats strfmt.Registry) erro
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *PostKeysParamsBody) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil
@@ -120,6 +103,7 @@ func init() {
 }
 
 const (
+
 	// PostKeysParamsBodyTypeRsa captures enum value "rsa"
 	PostKeysParamsBodyTypeRsa string = "rsa"
 )

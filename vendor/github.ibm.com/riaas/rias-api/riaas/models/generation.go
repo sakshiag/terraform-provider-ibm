@@ -19,8 +19,10 @@ import (
 type Generation string
 
 const (
+
 	// GenerationGt captures enum value "gt"
 	GenerationGt Generation = "gt"
+
 	// GenerationGc captures enum value "gc"
 	GenerationGc Generation = "gc"
 )

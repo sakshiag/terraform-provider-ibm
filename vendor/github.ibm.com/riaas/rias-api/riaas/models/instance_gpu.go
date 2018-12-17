@@ -30,6 +30,7 @@ type InstanceGpu struct {
 	Count int64 `json:"count,omitempty"`
 
 	// The manufacturer of the GPU
+	// Enum: [nvidia]
 	Manufacturer string `json:"manufacturer,omitempty"`
 
 	// The amount of memory in megabytes
@@ -39,6 +40,7 @@ type InstanceGpu struct {
 	Memory int64 `json:"memory,omitempty"`
 
 	// The model number of the GPU
+	// Enum: [k40 k80]
 	Model string `json:"model,omitempty"`
 }
 
@@ -47,27 +49,22 @@ func (m *InstanceGpu) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCores(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCount(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateManufacturer(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMemory(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateModel(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -116,6 +113,7 @@ func init() {
 }
 
 const (
+
 	// InstanceGpuManufacturerNvidia captures enum value "nvidia"
 	InstanceGpuManufacturerNvidia string = "nvidia"
 )
@@ -176,8 +174,10 @@ func init() {
 }
 
 const (
+
 	// InstanceGpuModelK40 captures enum value "k40"
 	InstanceGpuModelK40 string = "k40"
+
 	// InstanceGpuModelK80 captures enum value "k80"
 	InstanceGpuModelK80 string = "k80"
 )

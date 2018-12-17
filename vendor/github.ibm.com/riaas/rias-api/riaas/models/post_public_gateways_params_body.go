@@ -42,32 +42,22 @@ func (m *PostPublicGatewaysParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateFloatingIP(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVpc(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateZone(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -84,7 +74,6 @@ func (m *PostPublicGatewaysParamsBody) validateFloatingIP(formats strfmt.Registr
 	}
 
 	if m.FloatingIP != nil {
-
 		if err := m.FloatingIP.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("floating_ip")
@@ -116,22 +105,12 @@ func (m *PostPublicGatewaysParamsBody) validateResourceGroup(formats strfmt.Regi
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *PostPublicGatewaysParamsBody) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil
@@ -144,7 +123,6 @@ func (m *PostPublicGatewaysParamsBody) validateVpc(formats strfmt.Registry) erro
 	}
 
 	if m.Vpc != nil {
-
 		if err := m.Vpc.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("vpc")
@@ -163,7 +141,6 @@ func (m *PostPublicGatewaysParamsBody) validateZone(formats strfmt.Registry) err
 	}
 
 	if m.Zone != nil {
-
 		if err := m.Zone.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("zone")

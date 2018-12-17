@@ -95,6 +95,11 @@ type GetFloatingIpsParams struct {
 
 	*/
 	Tag *string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*ZoneName
 	  Filters the collection to resources within the specified zone
 
@@ -183,6 +188,17 @@ func (o *GetFloatingIpsParams) SetTag(tag *string) {
 	o.Tag = tag
 }
 
+// WithVersion adds the version to the get floating ips params
+func (o *GetFloatingIpsParams) WithVersion(version string) *GetFloatingIpsParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get floating ips params
+func (o *GetFloatingIpsParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WithZoneName adds the zoneName to the get floating ips params
 func (o *GetFloatingIpsParams) WithZoneName(zoneName *string) *GetFloatingIpsParams {
 	o.SetZoneName(zoneName)
@@ -264,6 +280,15 @@ func (o *GetFloatingIpsParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 			}
 		}
 
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if o.ZoneName != nil {

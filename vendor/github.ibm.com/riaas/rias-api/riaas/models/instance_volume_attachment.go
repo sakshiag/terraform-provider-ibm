@@ -20,30 +20,34 @@ import (
 type InstanceVolumeAttachment struct {
 
 	// The date and time that the volume was attached
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
-	// The CRN for this volume
-	Crn string `json:"crn,omitempty"`
+	// If set to true, this volume will be automatically deleted if the only server it is attached to is deleted
+	DeleteVolumeOnInstanceDelete *bool `json:"delete_volume_on_instance_delete,omitempty"`
 
 	// The URL for this volume interface
 	// Pattern: ^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this volume interface
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The user-defined name for this volume interface
 	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
 	Name string `json:"name,omitempty"`
 
-	// resource group
-	ResourceGroup *ResourceReference `json:"resource_group,omitempty"`
-
 	// status
+	// Enum: [attaching attached detaching]
 	Status string `json:"status,omitempty"`
 
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
+
+	// type
+	// Enum: [boot data]
+	Type string `json:"type,omitempty"`
 
 	// volume
 	Volume *ResourceReference `json:"volume,omitempty"`
@@ -53,39 +57,50 @@ type InstanceVolumeAttachment struct {
 func (m *InstanceVolumeAttachment) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateTags(formats); err != nil {
-		// prop
+	if err := m.validateType(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateVolume(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *InstanceVolumeAttachment) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -96,6 +111,19 @@ func (m *InstanceVolumeAttachment) validateHref(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *InstanceVolumeAttachment) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -115,25 +143,6 @@ func (m *InstanceVolumeAttachment) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *InstanceVolumeAttachment) validateResourceGroup(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ResourceGroup) { // not required
-		return nil
-	}
-
-	if m.ResourceGroup != nil {
-
-		if err := m.ResourceGroup.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("resource_group")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 var instanceVolumeAttachmentTypeStatusPropEnum []interface{}
 
 func init() {
@@ -147,10 +156,13 @@ func init() {
 }
 
 const (
+
 	// InstanceVolumeAttachmentStatusAttaching captures enum value "attaching"
 	InstanceVolumeAttachmentStatusAttaching string = "attaching"
+
 	// InstanceVolumeAttachmentStatusAttached captures enum value "attached"
 	InstanceVolumeAttachmentStatusAttached string = "attached"
+
 	// InstanceVolumeAttachmentStatusDetaching captures enum value "detaching"
 	InstanceVolumeAttachmentStatusDetaching string = "detaching"
 )
@@ -177,10 +189,44 @@ func (m *InstanceVolumeAttachment) validateStatus(formats strfmt.Registry) error
 	return nil
 }
 
-func (m *InstanceVolumeAttachment) validateTags(formats strfmt.Registry) error {
+var instanceVolumeAttachmentTypeTypePropEnum []interface{}
 
-	if swag.IsZero(m.Tags) { // not required
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["boot","data"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		instanceVolumeAttachmentTypeTypePropEnum = append(instanceVolumeAttachmentTypeTypePropEnum, v)
+	}
+}
+
+const (
+
+	// InstanceVolumeAttachmentTypeBoot captures enum value "boot"
+	InstanceVolumeAttachmentTypeBoot string = "boot"
+
+	// InstanceVolumeAttachmentTypeData captures enum value "data"
+	InstanceVolumeAttachmentTypeData string = "data"
+)
+
+// prop value enum
+func (m *InstanceVolumeAttachment) validateTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, instanceVolumeAttachmentTypeTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *InstanceVolumeAttachment) validateType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Type) { // not required
 		return nil
+	}
+
+	// value enum
+	if err := m.validateTypeEnum("type", "body", m.Type); err != nil {
+		return err
 	}
 
 	return nil
@@ -193,7 +239,6 @@ func (m *InstanceVolumeAttachment) validateVolume(formats strfmt.Registry) error
 	}
 
 	if m.Volume != nil {
-
 		if err := m.Volume.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("volume")

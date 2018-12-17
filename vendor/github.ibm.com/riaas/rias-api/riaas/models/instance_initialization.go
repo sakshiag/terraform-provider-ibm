@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -16,8 +18,8 @@ import (
 // swagger:model InstanceInitialization
 type InstanceInitialization struct {
 
-	// keys
-	Keys InstanceInitializationKeys `json:"keys"`
+	// Collection of keys used at initialization of instance
+	Keys []*KeyReference `json:"keys"`
 
 	// password
 	Password *InstanceInitializationPassword `json:"password,omitempty"`
@@ -27,14 +29,42 @@ type InstanceInitialization struct {
 func (m *InstanceInitialization) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateKeys(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validatePassword(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *InstanceInitialization) validateKeys(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Keys) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Keys); i++ {
+		if swag.IsZero(m.Keys[i]) { // not required
+			continue
+		}
+
+		if m.Keys[i] != nil {
+			if err := m.Keys[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("keys" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -45,7 +75,6 @@ func (m *InstanceInitialization) validatePassword(formats strfmt.Registry) error
 	}
 
 	if m.Password != nil {
-
 		if err := m.Password.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("password")

@@ -22,7 +22,7 @@ func NewImageClient(sess *session.Session) *ImageClient {
 }
 
 // ListWithFilter ...
-func (f *ImageClient) ListWithFilter(tag, visibility, start string) (models.GetImagesOKBodyImages, string, error) {
+func (f *ImageClient) ListWithFilter(tag, visibility, start string) ([]*models.Image, string, error) {
 	params := compute.NewGetImagesParams()
 	if tag != "" {
 		params = params.WithTag(&tag)
@@ -41,11 +41,11 @@ func (f *ImageClient) ListWithFilter(tag, visibility, start string) (models.GetI
 		return nil, "", errors.ToError(err)
 	}
 
-	return resp.Payload.Images, utils.GetNext(resp.Payload.Next), nil
+	return resp.Payload.Images, utils.GetPageLink(resp.Payload.Next), nil
 }
 
 // List ...
-func (f *ImageClient) List(start string) (models.GetImagesOKBodyImages, string, error) {
+func (f *ImageClient) List(start string) ([]*models.Image, string, error) {
 	return f.ListWithFilter("", "", start)
 }
 

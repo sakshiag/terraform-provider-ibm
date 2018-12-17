@@ -1619,18 +1619,30 @@
 			"revisionTime": "2018-05-24T00:26:36Z"
 		},
 		{
-			"checksumSHA1": "Ejhku4sW1gxcV9v/ZP2mhMejDPU=",
+			"checksumSHA1": "taEgvYH//9Vi0aRQAwpZstVcvXA=",
 			"path": "github.ibm.com/Bluemix/riaas-go-client",
-			"revision": "c79a60604bc49f51586c929c0bdd9f2597cfea14",
-			"revisionTime": "2018-08-23T10:32:29Z",
+			"revision": "1428f4218e3d50c3a6a91a57cba5a06f5f03ba60",
+			"revisionTime": "2018-11-19T03:20:38Z",
 			"tree": true
 		},
 		{
-			"checksumSHA1": "gYIJy1cyQnyp2HXq1zdY8mLF1Vc=",
+			"checksumSHA1": "dJ5qMw1Hq9tpdXDarbF4dv/uLtI=",
 			"path": "github.ibm.com/riaas/rias-api",
-			"revision": "4b2afefa119d6f4e40a45c6d4a052503d919c3de",
-			"revisionTime": "2018-07-24T20:15:41Z",
+			"revision": "212d42377ea24d3c4a29f555c2dee80e44006199",
+			"revisionTime": "2019-01-07T06:54:48Z",
 			"tree": true
+		},
+		{
+			"checksumSHA1": "Ck+9pn6CzhIvUYAxxKf4OH5kKc0=",
+			"path": "github.ibm.com/riaas/rias-api/riaas/client/l_baas",
+			"revision": "da1a8f62b158549357dac0e2bedbb22f7dfa8d6b",
+			"revisionTime": "2018-11-05T03:54:47Z"
+		},
+		{
+			"checksumSHA1": "WkZQdJd3rdRcFlTF0jUc6ACmkuQ=",
+			"path": "github.ibm.com/riaas/rias-api/riaas/client/v_p_naa_s",
+			"revision": "da1a8f62b158549357dac0e2bedbb22f7dfa8d6b",
+			"revisionTime": "2018-11-05T03:54:47Z"
 		},
 		{
 			"checksumSHA1": "vE43s37+4CJ2CDU6TlOUOYE0K9c=",

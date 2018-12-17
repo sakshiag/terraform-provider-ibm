@@ -13,8 +13,9 @@ import (
 
 	"github.ibm.com/riaas/rias-api/riaas/client/compute"
 	"github.ibm.com/riaas/rias-api/riaas/client/geography"
+	"github.ibm.com/riaas/rias-api/riaas/client/l_baas"
 	"github.ibm.com/riaas/rias-api/riaas/client/network"
-	"github.ibm.com/riaas/rias-api/riaas/client/storage"
+	"github.ibm.com/riaas/rias-api/riaas/client/v_p_naa_s"
 )
 
 // Default riaas HTTP client.
@@ -41,9 +42,6 @@ func NewHTTPClient(formats strfmt.Registry) *Riaas {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Riaas {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -55,6 +53,11 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Ria
 
 // New creates a new riaas client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *Riaas {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(Riaas)
 	cli.Transport = transport
 
@@ -62,9 +65,11 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Riaas {
 
 	cli.Geography = geography.New(transport, formats)
 
+	cli.LBaas = l_baas.New(transport, formats)
+
 	cli.Network = network.New(transport, formats)
 
-	cli.Storage = storage.New(transport, formats)
+	cli.VPNaaS = v_p_naa_s.New(transport, formats)
 
 	return cli
 }
@@ -114,9 +119,11 @@ type Riaas struct {
 
 	Geography *geography.Client
 
+	LBaas *l_baas.Client
+
 	Network *network.Client
 
-	Storage *storage.Client
+	VPNaaS *v_p_naa_s.Client
 
 	Transport runtime.ClientTransport
 }
@@ -129,8 +136,10 @@ func (c *Riaas) SetTransport(transport runtime.ClientTransport) {
 
 	c.Geography.SetTransport(transport)
 
+	c.LBaas.SetTransport(transport)
+
 	c.Network.SetTransport(transport)
 
-	c.Storage.SetTransport(transport)
+	c.VPNaaS.SetTransport(transport)
 
 }

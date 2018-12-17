@@ -192,8 +192,6 @@ func Provider() terraform.ResourceProvider {
 			"ibm_is_security_group_rule":                resourceIBMISSecurityGroupRule(),
 			"ibm_is_subnet":                             resourceIBMISSubnet(),
 			"ibm_is_ssh_key":                            resourceIBMISSSHKey(),
-			"ibm_is_volume_snapshot":                    resourceIBMISVolumeSnapshot(),
-			"ibm_is_volume":                             resourceIBMISVolume(),
 			"ibm_is_vpc":                                resourceIBMISVPC(),
 			"ibm_lb":                                    resourceIBMLb(),
 			"ibm_lbaas":                                 resourceIBMLbaas(),

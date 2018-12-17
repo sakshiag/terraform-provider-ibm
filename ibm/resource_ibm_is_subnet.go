@@ -68,6 +68,7 @@ func resourceIBMISSubnet() *schema.Resource {
 				Type:          schema.TypeInt,
 				ForceNew:      true,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{isSubnetIpv4CidrBlock},
 			},
 
@@ -281,7 +282,7 @@ func resourceIBMISSubnetDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func isWaitForSubnetDeleted(subnetC *network.SubnetClient, id string, timeout time.Duration) (interface{}, error) {
-	log.Printf("Waiting for subnet (%s) to be available.", id)
+	log.Printf("Waiting for subnet (%s) to be deleted.", id)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"retry", isSubnetDeleting},
@@ -299,7 +300,6 @@ func isSubnetDeleteRefreshFunc(subnetC *network.SubnetClient, id string) resourc
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] delete function here")
 		subnet, err := subnetC.Get(id)
-		log.Printf("[DEBUG] err = %p", err)
 		if err == nil {
 			return subnet, isSubnetDeleting, nil
 		}

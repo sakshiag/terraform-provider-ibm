@@ -23,12 +23,12 @@ func NewPublicGatewayClient(sess *session.Session) *PublicGatewayClient {
 }
 
 // List ...
-func (f *PublicGatewayClient) List(start string) (models.GetPublicGatewaysOKBodyPublicGateways, string, error) {
+func (f *PublicGatewayClient) List(start string) ([]*models.PublicGateway, string, error) {
 	return f.ListWithFilter(nil, start)
 }
 
 // ListWithFilter ...
-func (f *PublicGatewayClient) ListWithFilter(tag *string, start string) (models.GetPublicGatewaysOKBodyPublicGateways, string, error) {
+func (f *PublicGatewayClient) ListWithFilter(tag *string, start string) ([]*models.PublicGateway, string, error) {
 	params := network.NewGetPublicGatewaysParams()
 	if tag != nil {
 		params = params.WithTag(tag)

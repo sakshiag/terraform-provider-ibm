@@ -36,6 +36,6 @@ func testDSCheckIBMISVPCConfig(name string) string {
 		    name = "%s"
 		}
 		data "ibm_is_vpc" "ds_vpc" {
-		    name = "%s"
-		}`, name, name)
+		    name = "${ibm_is_vpc.testacc_vpc.name}"
+		}`, name)
 }

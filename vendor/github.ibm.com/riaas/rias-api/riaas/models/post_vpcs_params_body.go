@@ -36,17 +36,10 @@ func (m *PostVpcsParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDefaultNetworkACL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -63,7 +56,6 @@ func (m *PostVpcsParamsBody) validateDefaultNetworkACL(formats strfmt.Registry) 
 	}
 
 	if m.DefaultNetworkACL != nil {
-
 		if err := m.DefaultNetworkACL.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("default_network_acl")
@@ -83,15 +75,6 @@ func (m *PostVpcsParamsBody) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(m.Name), `^[A-Za-z][-A-Za-z0-9_]*$`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *PostVpcsParamsBody) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil

@@ -7,6 +7,7 @@ package models
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -20,19 +21,18 @@ import (
 type InstanceNetworkInterface struct {
 
 	// The date and time that the network interface was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
-	// The CRN for this network interface
-	Crn string `json:"crn,omitempty"`
-
-	// floating ips
-	FloatingIps InstanceNetworkInterfaceFloatingIps `json:"floating_ips,omitempty"`
+	// Array of references to floating IPs associated with this network interface
+	FloatingIps []*FloatingIPReference `json:"floating_ips,omitempty"`
 
 	// The URL for this network interface
 	// Pattern: ^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this network interface
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The user-defined name for this network interface
@@ -48,16 +48,14 @@ type InstanceNetworkInterface struct {
 	// The primary IPv6 address in compressed notation as specified by RFC 5952
 	PrimaryIPV6Address string `json:"primary_ipv6_address,omitempty"`
 
-	// resource group
-	ResourceGroup *ResourceReference `json:"resource_group,omitempty"`
-
 	// Collection seconary IP addresses
 	SecondaryAddresses []string `json:"secondary_addresses,omitempty"`
 
-	// security groups
-	SecurityGroups InstanceNetworkInterfaceSecurityGroups `json:"security_groups,omitempty"`
+	// Collection of security groups
+	SecurityGroups []*ResourceReference `json:"security_groups,omitempty"`
 
 	// The status of the volume
+	// Enum: [available failed pending]
 	Status string `json:"status,omitempty"`
 
 	// subnet
@@ -67,6 +65,7 @@ type InstanceNetworkInterface struct {
 	Tags []string `json:"tags,omitempty"`
 
 	// The type of this network interface as it relates to a instance
+	// Enum: [primary secondary]
 	Type string `json:"type,omitempty"`
 }
 
@@ -74,49 +73,83 @@ type InstanceNetworkInterface struct {
 func (m *InstanceNetworkInterface) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateFloatingIps(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateSecondaryAddresses(formats); err != nil {
-		// prop
+	if err := m.validateSecurityGroups(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateSubnet(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *InstanceNetworkInterface) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *InstanceNetworkInterface) validateFloatingIps(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.FloatingIps) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.FloatingIps); i++ {
+		if swag.IsZero(m.FloatingIps[i]) { // not required
+			continue
+		}
+
+		if m.FloatingIps[i] != nil {
+			if err := m.FloatingIps[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("floating_ips" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -127,6 +160,19 @@ func (m *InstanceNetworkInterface) validateHref(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *InstanceNetworkInterface) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -146,29 +192,26 @@ func (m *InstanceNetworkInterface) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *InstanceNetworkInterface) validateResourceGroup(formats strfmt.Registry) error {
+func (m *InstanceNetworkInterface) validateSecurityGroups(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.ResourceGroup) { // not required
+	if swag.IsZero(m.SecurityGroups) { // not required
 		return nil
 	}
 
-	if m.ResourceGroup != nil {
-
-		if err := m.ResourceGroup.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("resource_group")
-			}
-			return err
+	for i := 0; i < len(m.SecurityGroups); i++ {
+		if swag.IsZero(m.SecurityGroups[i]) { // not required
+			continue
 		}
-	}
 
-	return nil
-}
+		if m.SecurityGroups[i] != nil {
+			if err := m.SecurityGroups[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("security_groups" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
 
-func (m *InstanceNetworkInterface) validateSecondaryAddresses(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.SecondaryAddresses) { // not required
-		return nil
 	}
 
 	return nil
@@ -187,10 +230,13 @@ func init() {
 }
 
 const (
+
 	// InstanceNetworkInterfaceStatusAvailable captures enum value "available"
 	InstanceNetworkInterfaceStatusAvailable string = "available"
+
 	// InstanceNetworkInterfaceStatusFailed captures enum value "failed"
 	InstanceNetworkInterfaceStatusFailed string = "failed"
+
 	// InstanceNetworkInterfaceStatusPending captures enum value "pending"
 	InstanceNetworkInterfaceStatusPending string = "pending"
 )
@@ -224,22 +270,12 @@ func (m *InstanceNetworkInterface) validateSubnet(formats strfmt.Registry) error
 	}
 
 	if m.Subnet != nil {
-
 		if err := m.Subnet.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("subnet")
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *InstanceNetworkInterface) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil
@@ -258,8 +294,10 @@ func init() {
 }
 
 const (
+
 	// InstanceNetworkInterfaceTypePrimary captures enum value "primary"
 	InstanceNetworkInterfaceTypePrimary string = "primary"
+
 	// InstanceNetworkInterfaceTypeSecondary captures enum value "secondary"
 	InstanceNetworkInterfaceTypeSecondary string = "secondary"
 )

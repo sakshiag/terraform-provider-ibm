@@ -88,6 +88,6 @@ func New(iamtoken, apiEndpointURL string, debug bool) (*Session, error) {
 // Auth ...
 func Auth(sess *Session) runtime.ClientAuthInfoWriter {
 	return runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, _ strfmt.Registry) error {
-		return r.SetHeaderParam("X-Auth-Token", sess.IAMToken)
+		return r.SetHeaderParam("Authorization", sess.IAMToken)
 	})
 }

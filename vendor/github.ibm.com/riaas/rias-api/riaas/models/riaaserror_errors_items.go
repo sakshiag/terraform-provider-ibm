@@ -37,17 +37,14 @@ func (m *RiaaserrorErrorsItems) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCode(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMoreInfo(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTarget(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -90,7 +87,6 @@ func (m *RiaaserrorErrorsItems) validateTarget(formats strfmt.Registry) error {
 	}
 
 	if m.Target != nil {
-
 		if err := m.Target.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("target")

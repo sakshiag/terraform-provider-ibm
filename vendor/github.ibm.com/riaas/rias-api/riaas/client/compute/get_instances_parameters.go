@@ -110,6 +110,11 @@ type GetInstancesParams struct {
 
 	*/
 	Tag *string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*VpcCrn
 	  Filters the collection to resources within the VPC of the specified CRN
 
@@ -244,6 +249,17 @@ func (o *GetInstancesParams) WithTag(tag *string) *GetInstancesParams {
 // SetTag adds the tag to the get instances params
 func (o *GetInstancesParams) SetTag(tag *string) {
 	o.Tag = tag
+}
+
+// WithVersion adds the version to the get instances params
+func (o *GetInstancesParams) WithVersion(version string) *GetInstancesParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get instances params
+func (o *GetInstancesParams) SetVersion(version string) {
+	o.Version = version
 }
 
 // WithVpcCrn adds the vpcCrn to the get instances params
@@ -408,6 +424,15 @@ func (o *GetInstancesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.
 			}
 		}
 
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if o.VpcCrn != nil {

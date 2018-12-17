@@ -27,7 +27,6 @@ func (m *PatchSecurityGroupsIDParamsBody) Validate(formats strfmt.Registry) erro
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

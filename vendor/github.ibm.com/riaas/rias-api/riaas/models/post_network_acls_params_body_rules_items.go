@@ -20,6 +20,7 @@ import (
 type PostNetworkAclsParamsBodyRulesItems struct {
 
 	// Whether to allow or deny matching traffic
+	// Enum: [allow deny]
 	Action string `json:"action,omitempty"`
 
 	// The ICMP traffic code to allow. Valid values from 0 to 255. If unspecified, all codes are allowed. This can only be specified if type is also specified.
@@ -29,6 +30,7 @@ type PostNetworkAclsParamsBodyRulesItems struct {
 	Destination string `json:"destination,omitempty"`
 
 	// Whether the traffic to be matched is ingress or egress
+	// Enum: [ingress egress]
 	Direction string `json:"direction,omitempty"`
 
 	// The user-defined name for this network ACL rule
@@ -56,17 +58,14 @@ func (m *PostNetworkAclsParamsBodyRulesItems) Validate(formats strfmt.Registry) 
 	var res []error
 
 	if err := m.validateAction(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDirection(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -89,8 +88,10 @@ func init() {
 }
 
 const (
+
 	// PostNetworkAclsParamsBodyRulesItemsActionAllow captures enum value "allow"
 	PostNetworkAclsParamsBodyRulesItemsActionAllow string = "allow"
+
 	// PostNetworkAclsParamsBodyRulesItemsActionDeny captures enum value "deny"
 	PostNetworkAclsParamsBodyRulesItemsActionDeny string = "deny"
 )
@@ -130,8 +131,10 @@ func init() {
 }
 
 const (
+
 	// PostNetworkAclsParamsBodyRulesItemsDirectionIngress captures enum value "ingress"
 	PostNetworkAclsParamsBodyRulesItemsDirectionIngress string = "ingress"
+
 	// PostNetworkAclsParamsBodyRulesItemsDirectionEgress captures enum value "egress"
 	PostNetworkAclsParamsBodyRulesItemsDirectionEgress string = "egress"
 )

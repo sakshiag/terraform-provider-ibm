@@ -25,12 +25,12 @@ func NewSubnetClient(sess *session.Session) *SubnetClient {
 }
 
 // List ...
-func (f *SubnetClient) List(start string) (models.GetSubnetsOKBodySubnets, string, error) {
+func (f *SubnetClient) List(start string) ([]*models.Subnet, string, error) {
 	return f.ListWithFilter("", "", "", "", "", start)
 }
 
 // ListWithFilter ...
-func (f *SubnetClient) ListWithFilter(tag, zoneName, vpcID, networkaclID, resourcegroupID, start string) (models.GetSubnetsOKBodySubnets, string, error) {
+func (f *SubnetClient) ListWithFilter(tag, zoneName, vpcID, networkaclID, resourcegroupID, start string) ([]*models.Subnet, string, error) {
 	params := network.NewGetSubnetsParams()
 	if tag != "" {
 		params = params.WithTag(&tag)

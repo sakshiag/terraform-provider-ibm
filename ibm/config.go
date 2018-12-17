@@ -506,7 +506,8 @@ func (c *Config) ClientSession() (interface{}, error) {
 		session.iamUUMConfigErr = fmt.Errorf("Error occured while configuring Bluemix IAMUUM Service: %q", err)
 	}
 	session.iamUUMServiceAPI = iamuum
-	issession, err := issession.New(strings.Split(sess.BluemixSession.Config.IAMAccessToken, " ")[1], c.RiaasEndPoint, true)
+
+	issession, err := issession.New(sess.BluemixSession.Config.IAMAccessToken, c.RiaasEndPoint, true)
 	if err != nil {
 		session.isConfigErr = err
 		return nil, err

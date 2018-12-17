@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.ibm.com/riaas/rias-api/riaas/models"
+	models "github.ibm.com/riaas/rias-api/riaas/models"
 )
 
 // NewPostVpcsVpcIDAddressPrefixesParams creates a new PostVpcsVpcIDAddressPrefixesParams object
@@ -66,6 +66,11 @@ type PostVpcsVpcIDAddressPrefixesParams struct {
 
 	/*Body*/
 	Body *models.PostVpcsVpcIDAddressPrefixesParamsBody
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*VpcID
 	  The VPC identifier
 
@@ -121,6 +126,17 @@ func (o *PostVpcsVpcIDAddressPrefixesParams) SetBody(body *models.PostVpcsVpcIDA
 	o.Body = body
 }
 
+// WithVersion adds the version to the post vpcs vpc ID address prefixes params
+func (o *PostVpcsVpcIDAddressPrefixesParams) WithVersion(version string) *PostVpcsVpcIDAddressPrefixesParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the post vpcs vpc ID address prefixes params
+func (o *PostVpcsVpcIDAddressPrefixesParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WithVpcID adds the vpcID to the post vpcs vpc ID address prefixes params
 func (o *PostVpcsVpcIDAddressPrefixesParams) WithVpcID(vpcID string) *PostVpcsVpcIDAddressPrefixesParams {
 	o.SetVpcID(vpcID)
@@ -142,6 +158,15 @@ func (o *PostVpcsVpcIDAddressPrefixesParams) WriteToRequest(r runtime.ClientRequ
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
 			return err
 		}
 	}

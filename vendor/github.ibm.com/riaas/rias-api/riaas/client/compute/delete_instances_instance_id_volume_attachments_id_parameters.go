@@ -72,6 +72,11 @@ type DeleteInstancesInstanceIDVolumeAttachmentsIDParams struct {
 
 	*/
 	InstanceID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -133,6 +138,17 @@ func (o *DeleteInstancesInstanceIDVolumeAttachmentsIDParams) SetInstanceID(insta
 	o.InstanceID = instanceID
 }
 
+// WithVersion adds the version to the delete instances instance ID volume attachments ID params
+func (o *DeleteInstancesInstanceIDVolumeAttachmentsIDParams) WithVersion(version string) *DeleteInstancesInstanceIDVolumeAttachmentsIDParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the delete instances instance ID volume attachments ID params
+func (o *DeleteInstancesInstanceIDVolumeAttachmentsIDParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteInstancesInstanceIDVolumeAttachmentsIDParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -149,6 +165,15 @@ func (o *DeleteInstancesInstanceIDVolumeAttachmentsIDParams) WriteToRequest(r ru
 	// path param instance_id
 	if err := r.SetPathParam("instance_id", o.InstanceID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

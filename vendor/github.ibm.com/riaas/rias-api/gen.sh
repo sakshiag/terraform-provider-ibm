@@ -1,5 +1,5 @@
 rm -rf riaas/*
-swagger generate client -f swagger.yaml  -A riaas -t riaas/
+swagger generate client --with-flatten=full -f swagger.yaml  -A riaas -t riaas/
 for x in `find riaas -name '*.go'`
 do
 sed -n '

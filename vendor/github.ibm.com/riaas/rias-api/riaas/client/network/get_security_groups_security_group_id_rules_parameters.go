@@ -67,6 +67,11 @@ type GetSecurityGroupsSecurityGroupIDRulesParams struct {
 
 	*/
 	SecurityGroupID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,6 +122,17 @@ func (o *GetSecurityGroupsSecurityGroupIDRulesParams) SetSecurityGroupID(securit
 	o.SecurityGroupID = securityGroupID
 }
 
+// WithVersion adds the version to the get security groups security group ID rules params
+func (o *GetSecurityGroupsSecurityGroupIDRulesParams) WithVersion(version string) *GetSecurityGroupsSecurityGroupIDRulesParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get security groups security group ID rules params
+func (o *GetSecurityGroupsSecurityGroupIDRulesParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetSecurityGroupsSecurityGroupIDRulesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -128,6 +144,15 @@ func (o *GetSecurityGroupsSecurityGroupIDRulesParams) WriteToRequest(r runtime.C
 	// path param security_group_id
 	if err := r.SetPathParam("security_group_id", o.SecurityGroupID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

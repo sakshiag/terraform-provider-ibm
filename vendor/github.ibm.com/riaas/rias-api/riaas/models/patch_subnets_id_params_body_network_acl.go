@@ -25,6 +25,7 @@ type PatchSubnetsIDParamsBodyNetworkACL struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this resource
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The user-defined name for this resource
@@ -37,12 +38,14 @@ func (m *PatchSubnetsIDParamsBodyNetworkACL) Validate(formats strfmt.Registry) e
 	var res []error
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -59,6 +62,19 @@ func (m *PatchSubnetsIDParamsBodyNetworkACL) validateHref(formats strfmt.Registr
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *PatchSubnetsIDParamsBodyNetworkACL) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 

@@ -67,6 +67,11 @@ type GetRegionsRegionNameZonesZoneNameParams struct {
 
 	*/
 	RegionName string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*ZoneName
 	  The zone name
 
@@ -122,6 +127,17 @@ func (o *GetRegionsRegionNameZonesZoneNameParams) SetRegionName(regionName strin
 	o.RegionName = regionName
 }
 
+// WithVersion adds the version to the get regions region name zones zone name params
+func (o *GetRegionsRegionNameZonesZoneNameParams) WithVersion(version string) *GetRegionsRegionNameZonesZoneNameParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get regions region name zones zone name params
+func (o *GetRegionsRegionNameZonesZoneNameParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WithZoneName adds the zoneName to the get regions region name zones zone name params
 func (o *GetRegionsRegionNameZonesZoneNameParams) WithZoneName(zoneName string) *GetRegionsRegionNameZonesZoneNameParams {
 	o.SetZoneName(zoneName)
@@ -144,6 +160,15 @@ func (o *GetRegionsRegionNameZonesZoneNameParams) WriteToRequest(r runtime.Clien
 	// path param region_name
 	if err := r.SetPathParam("region_name", o.RegionName); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	// path param zone_name

@@ -20,6 +20,7 @@ import (
 type PostInstancesInstanceIDActionsParamsBody struct {
 
 	// The type of action
+	// Enum: [start stop reboot reset]
 	Type string `json:"type,omitempty"`
 }
 
@@ -28,7 +29,6 @@ func (m *PostInstancesInstanceIDActionsParamsBody) Validate(formats strfmt.Regis
 	var res []error
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -51,12 +51,16 @@ func init() {
 }
 
 const (
+
 	// PostInstancesInstanceIDActionsParamsBodyTypeStart captures enum value "start"
 	PostInstancesInstanceIDActionsParamsBodyTypeStart string = "start"
+
 	// PostInstancesInstanceIDActionsParamsBodyTypeStop captures enum value "stop"
 	PostInstancesInstanceIDActionsParamsBodyTypeStop string = "stop"
+
 	// PostInstancesInstanceIDActionsParamsBodyTypeReboot captures enum value "reboot"
 	PostInstancesInstanceIDActionsParamsBodyTypeReboot string = "reboot"
+
 	// PostInstancesInstanceIDActionsParamsBodyTypeReset captures enum value "reset"
 	PostInstancesInstanceIDActionsParamsBodyTypeReset string = "reset"
 )

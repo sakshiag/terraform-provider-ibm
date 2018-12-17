@@ -33,17 +33,14 @@ func (m *PatchSubnetsIDParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNetworkACL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePublicGateway(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -73,7 +70,6 @@ func (m *PatchSubnetsIDParamsBody) validateNetworkACL(formats strfmt.Registry) e
 	}
 
 	if m.NetworkACL != nil {
-
 		if err := m.NetworkACL.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("network_acl")
@@ -92,7 +88,6 @@ func (m *PatchSubnetsIDParamsBody) validatePublicGateway(formats strfmt.Registry
 	}
 
 	if m.PublicGateway != nil {
-
 		if err := m.PublicGateway.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("public_gateway")

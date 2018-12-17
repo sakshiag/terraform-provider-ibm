@@ -33,12 +33,10 @@ func (m *PostVpcsVpcIDAddressPrefixesParamsBodyZone) Validate(formats strfmt.Reg
 	var res []error
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

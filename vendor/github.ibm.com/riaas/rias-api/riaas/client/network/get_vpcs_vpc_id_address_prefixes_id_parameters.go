@@ -67,6 +67,11 @@ type GetVpcsVpcIDAddressPrefixesIDParams struct {
 
 	*/
 	ID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*VpcID
 	  The VPC identifier
 
@@ -122,6 +127,17 @@ func (o *GetVpcsVpcIDAddressPrefixesIDParams) SetID(id string) {
 	o.ID = id
 }
 
+// WithVersion adds the version to the get vpcs vpc ID address prefixes ID params
+func (o *GetVpcsVpcIDAddressPrefixesIDParams) WithVersion(version string) *GetVpcsVpcIDAddressPrefixesIDParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get vpcs vpc ID address prefixes ID params
+func (o *GetVpcsVpcIDAddressPrefixesIDParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WithVpcID adds the vpcID to the get vpcs vpc ID address prefixes ID params
 func (o *GetVpcsVpcIDAddressPrefixesIDParams) WithVpcID(vpcID string) *GetVpcsVpcIDAddressPrefixesIDParams {
 	o.SetVpcID(vpcID)
@@ -144,6 +160,15 @@ func (o *GetVpcsVpcIDAddressPrefixesIDParams) WriteToRequest(r runtime.ClientReq
 	// path param id
 	if err := r.SetPathParam("id", o.ID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	// path param vpc_id

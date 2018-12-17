@@ -33,12 +33,10 @@ func (m *PostVpcsVpcIDAddressPrefixesParamsBody) Validate(formats strfmt.Registr
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateZone(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -68,7 +66,6 @@ func (m *PostVpcsVpcIDAddressPrefixesParamsBody) validateZone(formats strfmt.Reg
 	}
 
 	if m.Zone != nil {
-
 		if err := m.Zone.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("zone")

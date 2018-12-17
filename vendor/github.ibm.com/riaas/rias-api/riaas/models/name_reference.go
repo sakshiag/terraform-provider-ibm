@@ -13,13 +13,18 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// NameReference NameIdentity
-//
-// The name identity of the resource
-// swagger:model NameReference
+// NameReference NameReference
+// swagger:model name_reference
 type NameReference struct {
 
-	// The name for this zone
+	// The CRN for this resource
+	Crn string `json:"crn,omitempty"`
+
+	// The URL for this resource
+	// Pattern: ^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$
+	Href string `json:"href,omitempty"`
+
+	// The user-defined name for this resource
 	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
 	Name string `json:"name,omitempty"`
 }
@@ -28,14 +33,30 @@ type NameReference struct {
 func (m *NameReference) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateHref(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *NameReference) validateHref(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Href) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -39,27 +39,18 @@ func (m *PostFloatingIpsParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTarget(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateZone(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -89,22 +80,12 @@ func (m *PostFloatingIpsParamsBody) validateResourceGroup(formats strfmt.Registr
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *PostFloatingIpsParamsBody) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil
@@ -117,7 +98,6 @@ func (m *PostFloatingIpsParamsBody) validateTarget(formats strfmt.Registry) erro
 	}
 
 	if m.Target != nil {
-
 		if err := m.Target.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("target")
@@ -136,7 +116,6 @@ func (m *PostFloatingIpsParamsBody) validateZone(formats strfmt.Registry) error 
 	}
 
 	if m.Zone != nil {
-
 		if err := m.Zone.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("zone")

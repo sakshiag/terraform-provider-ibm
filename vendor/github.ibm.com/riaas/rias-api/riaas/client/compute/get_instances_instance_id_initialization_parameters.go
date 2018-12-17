@@ -67,6 +67,11 @@ type GetInstancesInstanceIDInitializationParams struct {
 
 	*/
 	InstanceID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,6 +122,17 @@ func (o *GetInstancesInstanceIDInitializationParams) SetInstanceID(instanceID st
 	o.InstanceID = instanceID
 }
 
+// WithVersion adds the version to the get instances instance ID initialization params
+func (o *GetInstancesInstanceIDInitializationParams) WithVersion(version string) *GetInstancesInstanceIDInitializationParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get instances instance ID initialization params
+func (o *GetInstancesInstanceIDInitializationParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetInstancesInstanceIDInitializationParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -128,6 +144,15 @@ func (o *GetInstancesInstanceIDInitializationParams) WriteToRequest(r runtime.Cl
 	// path param instance_id
 	if err := r.SetPathParam("instance_id", o.InstanceID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

@@ -25,12 +25,15 @@ type SecurityGroupRule struct {
 	Code *int64 `json:"code,omitempty"`
 
 	// The direction of traffic to enforce (ingress, egress)
+	// Enum: [ingress egress]
 	Direction string `json:"direction,omitempty"`
 
 	// The unique identifier for a security group rule
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The IP version to enforce (ipv4, ipv6). The format of 'remote.address' or 'remote.cidr_block' must match this field, if they are used. Also, if 'remote' references another security group (ie. using remote.id, remote.name, remote.crn) then this rule will only apply to IP addresses (network interfaces) in that group which match this ip_version.
+	// Enum: [ipv4 ipv6]
 	IPVersion string `json:"ip_version,omitempty"`
 
 	// The inclusive upper TCP/UDP port bound to enforce. For a single port, set port_min and port_max to5606 the same value. Valid values from 1 to 65535.
@@ -40,6 +43,7 @@ type SecurityGroupRule struct {
 	PortMin *int64 `json:"port_min,omitempty"`
 
 	// The protocol to enforce. Must be one of (icmp, tcp, udp, all). Defaults to 'all' if omitted.
+	// Enum: [all icmp tcp udp]
 	Protocol *string `json:"protocol,omitempty"`
 
 	// remote
@@ -54,22 +58,22 @@ func (m *SecurityGroupRule) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDirection(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateIPVersion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProtocol(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRemote(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -92,8 +96,10 @@ func init() {
 }
 
 const (
+
 	// SecurityGroupRuleDirectionIngress captures enum value "ingress"
 	SecurityGroupRuleDirectionIngress string = "ingress"
+
 	// SecurityGroupRuleDirectionEgress captures enum value "egress"
 	SecurityGroupRuleDirectionEgress string = "egress"
 )
@@ -120,6 +126,19 @@ func (m *SecurityGroupRule) validateDirection(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *SecurityGroupRule) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 var securityGroupRuleTypeIPVersionPropEnum []interface{}
 
 func init() {
@@ -133,8 +152,10 @@ func init() {
 }
 
 const (
+
 	// SecurityGroupRuleIPVersionIPV4 captures enum value "ipv4"
 	SecurityGroupRuleIPVersionIPV4 string = "ipv4"
+
 	// SecurityGroupRuleIPVersionIPV6 captures enum value "ipv6"
 	SecurityGroupRuleIPVersionIPV6 string = "ipv6"
 )
@@ -174,12 +195,16 @@ func init() {
 }
 
 const (
+
 	// SecurityGroupRuleProtocolAll captures enum value "all"
 	SecurityGroupRuleProtocolAll string = "all"
+
 	// SecurityGroupRuleProtocolIcmp captures enum value "icmp"
 	SecurityGroupRuleProtocolIcmp string = "icmp"
+
 	// SecurityGroupRuleProtocolTCP captures enum value "tcp"
 	SecurityGroupRuleProtocolTCP string = "tcp"
+
 	// SecurityGroupRuleProtocolUDP captures enum value "udp"
 	SecurityGroupRuleProtocolUDP string = "udp"
 )
@@ -213,7 +238,6 @@ func (m *SecurityGroupRule) validateRemote(formats strfmt.Registry) error {
 	}
 
 	if m.Remote != nil {
-
 		if err := m.Remote.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("remote")

@@ -40,17 +40,14 @@ func (m *InstanceProfile) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateGeneration(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

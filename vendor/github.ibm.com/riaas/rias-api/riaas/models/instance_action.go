@@ -20,9 +20,11 @@ import (
 type InstanceAction struct {
 
 	// The date and time that the action was completed
+	// Format: date-time
 	CompletedAt strfmt.DateTime `json:"completed_at,omitempty"`
 
 	// The date and time that the action was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The URL for this action
@@ -30,15 +32,22 @@ type InstanceAction struct {
 	Href string `json:"href,omitempty"`
 
 	// The identifier for this action
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
+	// The reason for this action
+	Reason string `json:"reason,omitempty"`
+
 	// The date and time that the action was started
+	// Format: date-time
 	StartedAt strfmt.DateTime `json:"started_at,omitempty"`
 
 	// The current status of this action
+	// Enum: [pending running failed completed]
 	Status string `json:"status,omitempty"`
 
 	// The type of action
+	// Enum: [start stop reboot reset]
 	Type string `json:"type,omitempty"`
 }
 
@@ -46,24 +55,63 @@ type InstanceAction struct {
 func (m *InstanceAction) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCompletedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStartedAt(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *InstanceAction) validateCompletedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CompletedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("completed_at", "body", "date-time", m.CompletedAt.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *InstanceAction) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -74,6 +122,32 @@ func (m *InstanceAction) validateHref(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *InstanceAction) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *InstanceAction) validateStartedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.StartedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("started_at", "body", "date-time", m.StartedAt.String(), formats); err != nil {
 		return err
 	}
 
@@ -93,12 +167,16 @@ func init() {
 }
 
 const (
+
 	// InstanceActionStatusPending captures enum value "pending"
 	InstanceActionStatusPending string = "pending"
+
 	// InstanceActionStatusRunning captures enum value "running"
 	InstanceActionStatusRunning string = "running"
+
 	// InstanceActionStatusFailed captures enum value "failed"
 	InstanceActionStatusFailed string = "failed"
+
 	// InstanceActionStatusCompleted captures enum value "completed"
 	InstanceActionStatusCompleted string = "completed"
 )
@@ -138,12 +216,16 @@ func init() {
 }
 
 const (
+
 	// InstanceActionTypeStart captures enum value "start"
 	InstanceActionTypeStart string = "start"
+
 	// InstanceActionTypeStop captures enum value "stop"
 	InstanceActionTypeStop string = "stop"
+
 	// InstanceActionTypeReboot captures enum value "reboot"
 	InstanceActionTypeReboot string = "reboot"
+
 	// InstanceActionTypeReset captures enum value "reset"
 	InstanceActionTypeReset string = "reset"
 )

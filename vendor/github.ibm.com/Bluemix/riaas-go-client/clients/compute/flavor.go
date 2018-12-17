@@ -22,7 +22,7 @@ func NewFlavorClient(sess *session.Session) *FlavorClient {
 }
 
 // List ...
-func (f *FlavorClient) List(start string) (models.GetFlavorsOKBodyFlavors, string, error) {
+func (f *FlavorClient) List(start string) ([]*models.Flavor, string, error) {
 	params := compute.NewGetFlavorsParams()
 	if start != "" {
 		params = params.WithStart(&start)
@@ -32,7 +32,7 @@ func (f *FlavorClient) List(start string) (models.GetFlavorsOKBodyFlavors, strin
 	if err != nil {
 		return nil, "", errors.ToError(err)
 	}
-	return resp.Payload.Flavors, utils.GetNext(resp.Payload.Next), nil
+	return resp.Payload.Flavors, utils.GetPageLink(resp.Payload.Next), nil
 }
 
 // Get ...

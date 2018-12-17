@@ -38,12 +38,12 @@ func NewSecurityGroupClient(sess *session.Session) *SecurityGroupClient {
 }
 
 // List ...
-func (f *SecurityGroupClient) List(start string) (models.GetSecurityGroupsOKBodySecurityGroups, string, error) {
+func (f *SecurityGroupClient) List(start string) ([]*models.SecurityGroup, string, error) {
 	return f.ListWithFilter("", "", "", start)
 }
 
 // ListWithFilter ...
-func (f *SecurityGroupClient) ListWithFilter(tag, vpcID, resourcegroupID, start string) (models.GetSecurityGroupsOKBodySecurityGroups, string, error) {
+func (f *SecurityGroupClient) ListWithFilter(tag, vpcID, resourcegroupID, start string) ([]*models.SecurityGroup, string, error) {
 	params := network.NewGetSecurityGroupsParams()
 	if tag != "" {
 		params = params.WithTag(&tag)
@@ -113,7 +113,7 @@ func (f *SecurityGroupClient) Update(id, name string) (*models.SecurityGroup, er
 }
 
 // ListNetworkInterfaces ...
-func (f *SecurityGroupClient) ListNetworkInterfaces(secgrpID string) (models.GetSecurityGroupsSecurityGroupIDNetworkInterfacesOKBodyNetworkInterfaces, error) {
+func (f *SecurityGroupClient) ListNetworkInterfaces(secgrpID string) ([]*models.InstanceNetworkInterface, error) {
 	params := network.NewGetSecurityGroupsSecurityGroupIDNetworkInterfacesParams()
 	params = params.WithSecurityGroupID(secgrpID)
 
@@ -156,7 +156,7 @@ func (f *SecurityGroupClient) AddNetworkInterface(secgrpID, networkIntfID string
 }
 
 // ListRules ...
-func (f *SecurityGroupClient) ListRules(secgrpID string) (models.GetSecurityGroupsSecurityGroupIDRulesOKBodyRules, error) {
+func (f *SecurityGroupClient) ListRules(secgrpID string) ([]*models.SecurityGroupRule, error) {
 	params := network.NewGetSecurityGroupsSecurityGroupIDRulesParams()
 	params = params.WithSecurityGroupID(secgrpID)
 

@@ -10,68 +10,112 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // NetworkInterfaceReference NetworkInterfaceReference
 // swagger:model network_interface_reference
 type NetworkInterfaceReference struct {
-	ResourceReference
 
-	NetworkInterfaceReferenceAllOf1
-}
+	// The URL for this resource
+	// Pattern: ^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$
+	Href string `json:"href,omitempty"`
 
-// UnmarshalJSON unmarshals this object from a JSON structure
-func (m *NetworkInterfaceReference) UnmarshalJSON(raw []byte) error {
+	// The unique identifier for this resource
+	// Format: uuid
+	ID strfmt.UUID `json:"id,omitempty"`
 
-	var aO0 ResourceReference
-	if err := swag.ReadJSON(raw, &aO0); err != nil {
-		return err
-	}
-	m.ResourceReference = aO0
+	// The user-defined name for this resource
+	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
+	Name string `json:"name,omitempty"`
 
-	var aO1 NetworkInterfaceReferenceAllOf1
-	if err := swag.ReadJSON(raw, &aO1); err != nil {
-		return err
-	}
-	m.NetworkInterfaceReferenceAllOf1 = aO1
+	// The primary IPv4 address
+	PrimaryIPV4Address string `json:"primary_ipv4_address,omitempty"`
 
-	return nil
-}
-
-// MarshalJSON marshals this object to a JSON structure
-func (m NetworkInterfaceReference) MarshalJSON() ([]byte, error) {
-	var _parts [][]byte
-
-	aO0, err := swag.WriteJSON(m.ResourceReference)
-	if err != nil {
-		return nil, err
-	}
-	_parts = append(_parts, aO0)
-
-	aO1, err := swag.WriteJSON(m.NetworkInterfaceReferenceAllOf1)
-	if err != nil {
-		return nil, err
-	}
-	_parts = append(_parts, aO1)
-
-	return swag.ConcatJSON(_parts...), nil
+	// subnet
+	Subnet *ResourceReference `json:"subnet,omitempty"`
 }
 
 // Validate validates this network interface reference
 func (m *NetworkInterfaceReference) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.ResourceReference.Validate(formats); err != nil {
+	if err := m.validateHref(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.NetworkInterfaceReferenceAllOf1.Validate(formats); err != nil {
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSubnet(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *NetworkInterfaceReference) validateHref(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Href) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *NetworkInterfaceReference) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *NetworkInterfaceReference) validateName(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Name) { // not required
+		return nil
+	}
+
+	if err := validate.Pattern("name", "body", string(m.Name), `^[A-Za-z][-A-Za-z0-9_]*$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *NetworkInterfaceReference) validateSubnet(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Subnet) { // not required
+		return nil
+	}
+
+	if m.Subnet != nil {
+		if err := m.Subnet.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("subnet")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

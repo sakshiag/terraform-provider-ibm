@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.ibm.com/riaas/rias-api/riaas/models"
+	models "github.ibm.com/riaas/rias-api/riaas/models"
 )
 
 // NewPostNetworkAclsNetworkACLIDRulesParams creates a new PostNetworkAclsNetworkACLIDRulesParams object
@@ -71,6 +71,11 @@ type PostNetworkAclsNetworkACLIDRulesParams struct {
 
 	*/
 	NetworkACLID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -132,6 +137,17 @@ func (o *PostNetworkAclsNetworkACLIDRulesParams) SetNetworkACLID(networkACLID st
 	o.NetworkACLID = networkACLID
 }
 
+// WithVersion adds the version to the post network acls network ACL ID rules params
+func (o *PostNetworkAclsNetworkACLIDRulesParams) WithVersion(version string) *PostNetworkAclsNetworkACLIDRulesParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the post network acls network ACL ID rules params
+func (o *PostNetworkAclsNetworkACLIDRulesParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *PostNetworkAclsNetworkACLIDRulesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -149,6 +165,15 @@ func (o *PostNetworkAclsNetworkACLIDRulesParams) WriteToRequest(r runtime.Client
 	// path param network_acl_id
 	if err := r.SetPathParam("network_acl_id", o.NetworkACLID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

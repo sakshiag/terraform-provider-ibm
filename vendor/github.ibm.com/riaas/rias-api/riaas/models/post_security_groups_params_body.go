@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -22,8 +24,8 @@ type PostSecurityGroupsParamsBody struct {
 	// resource group
 	ResourceGroup *PostSecurityGroupsParamsBodyResourceGroup `json:"resource_group,omitempty"`
 
-	// rules
-	Rules PostSecurityGroupsParamsBodyRules `json:"rules,omitempty"`
+	// Collection of rule templates for rules to be created along with the security group
+	Rules []*SecurityGroupRuleTemplate `json:"rules,omitempty"`
 
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
@@ -37,17 +39,14 @@ func (m *PostSecurityGroupsParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateTags(formats); err != nil {
-		// prop
+	if err := m.validateRules(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateVpc(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -64,7 +63,6 @@ func (m *PostSecurityGroupsParamsBody) validateResourceGroup(formats strfmt.Regi
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
@@ -76,10 +74,26 @@ func (m *PostSecurityGroupsParamsBody) validateResourceGroup(formats strfmt.Regi
 	return nil
 }
 
-func (m *PostSecurityGroupsParamsBody) validateTags(formats strfmt.Registry) error {
+func (m *PostSecurityGroupsParamsBody) validateRules(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Tags) { // not required
+	if swag.IsZero(m.Rules) { // not required
 		return nil
+	}
+
+	for i := 0; i < len(m.Rules); i++ {
+		if swag.IsZero(m.Rules[i]) { // not required
+			continue
+		}
+
+		if m.Rules[i] != nil {
+			if err := m.Rules[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("rules" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -92,7 +106,6 @@ func (m *PostSecurityGroupsParamsBody) validateVpc(formats strfmt.Registry) erro
 	}
 
 	if m.Vpc != nil {
-
 		if err := m.Vpc.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("vpc")

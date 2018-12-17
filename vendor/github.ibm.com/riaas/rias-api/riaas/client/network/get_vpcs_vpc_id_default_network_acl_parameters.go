@@ -62,6 +62,11 @@ for the get vpcs vpc ID default network ACL operation typically these are writte
 */
 type GetVpcsVpcIDDefaultNetworkACLParams struct {
 
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*VpcID
 	  The VPC identifier
 
@@ -106,6 +111,17 @@ func (o *GetVpcsVpcIDDefaultNetworkACLParams) SetHTTPClient(client *http.Client)
 	o.HTTPClient = client
 }
 
+// WithVersion adds the version to the get vpcs vpc ID default network ACL params
+func (o *GetVpcsVpcIDDefaultNetworkACLParams) WithVersion(version string) *GetVpcsVpcIDDefaultNetworkACLParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get vpcs vpc ID default network ACL params
+func (o *GetVpcsVpcIDDefaultNetworkACLParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WithVpcID adds the vpcID to the get vpcs vpc ID default network ACL params
 func (o *GetVpcsVpcIDDefaultNetworkACLParams) WithVpcID(vpcID string) *GetVpcsVpcIDDefaultNetworkACLParams {
 	o.SetVpcID(vpcID)
@@ -124,6 +140,15 @@ func (o *GetVpcsVpcIDDefaultNetworkACLParams) WriteToRequest(r runtime.ClientReq
 		return err
 	}
 	var res []error
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
+	}
 
 	// path param vpc_id
 	if err := r.SetPathParam("vpc_id", o.VpcID); err != nil {

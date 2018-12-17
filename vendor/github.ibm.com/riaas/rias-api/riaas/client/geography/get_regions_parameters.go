@@ -21,7 +21,7 @@ import (
 // NewGetRegionsParams creates a new GetRegionsParams object
 // with the default values initialized.
 func NewGetRegionsParams() *GetRegionsParams {
-
+	var ()
 	return &GetRegionsParams{
 
 		timeout: cr.DefaultTimeout,
@@ -31,7 +31,7 @@ func NewGetRegionsParams() *GetRegionsParams {
 // NewGetRegionsParamsWithTimeout creates a new GetRegionsParams object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewGetRegionsParamsWithTimeout(timeout time.Duration) *GetRegionsParams {
-
+	var ()
 	return &GetRegionsParams{
 
 		timeout: timeout,
@@ -41,7 +41,7 @@ func NewGetRegionsParamsWithTimeout(timeout time.Duration) *GetRegionsParams {
 // NewGetRegionsParamsWithContext creates a new GetRegionsParams object
 // with the default values initialized, and the ability to set a context for a request
 func NewGetRegionsParamsWithContext(ctx context.Context) *GetRegionsParams {
-
+	var ()
 	return &GetRegionsParams{
 
 		Context: ctx,
@@ -51,7 +51,7 @@ func NewGetRegionsParamsWithContext(ctx context.Context) *GetRegionsParams {
 // NewGetRegionsParamsWithHTTPClient creates a new GetRegionsParams object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewGetRegionsParamsWithHTTPClient(client *http.Client) *GetRegionsParams {
-
+	var ()
 	return &GetRegionsParams{
 		HTTPClient: client,
 	}
@@ -61,6 +61,13 @@ func NewGetRegionsParamsWithHTTPClient(client *http.Client) *GetRegionsParams {
 for the get regions operation typically these are written to a http.Request
 */
 type GetRegionsParams struct {
+
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -99,6 +106,17 @@ func (o *GetRegionsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithVersion adds the version to the get regions params
+func (o *GetRegionsParams) WithVersion(version string) *GetRegionsParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get regions params
+func (o *GetRegionsParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetRegionsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -106,6 +124,15 @@ func (o *GetRegionsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 		return err
 	}
 	var res []error
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

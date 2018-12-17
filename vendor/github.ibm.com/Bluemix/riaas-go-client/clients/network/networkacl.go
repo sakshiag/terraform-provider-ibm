@@ -24,12 +24,12 @@ func NewNetworkAclClient(sess *session.Session) *NetworkAclClient {
 }
 
 // List ...
-func (f *NetworkAclClient) List(start string) (models.GetNetworkAclsOKBodyNetworkAcls, string, error) {
+func (f *NetworkAclClient) List(start string) ([]*models.NetworkACL, string, error) {
 	return f.ListWithFilter("", "", start)
 }
 
 // ListWithFilter ...
-func (f *NetworkAclClient) ListWithFilter(tag, resourcegroupID, start string) (models.GetNetworkAclsOKBodyNetworkAcls, string, error) {
+func (f *NetworkAclClient) ListWithFilter(tag, resourcegroupID, start string) ([]*models.NetworkACL, string, error) {
 	params := network.NewGetNetworkAclsParams()
 	if tag != "" {
 		params = params.WithTag(&tag)
@@ -95,7 +95,7 @@ func (f *NetworkAclClient) Update(id, name string) (*models.NetworkACL, error) {
 }
 
 // ListRules ...
-func (f *NetworkAclClient) ListRules(aclID, start string) (models.GetNetworkAclsNetworkACLIDRulesOKBodyRules, string, error) {
+func (f *NetworkAclClient) ListRules(aclID, start string) ([]*models.NetworkACLRule, string, error) {
 	params := network.NewGetNetworkAclsNetworkACLIDRulesParams()
 	params = params.WithNetworkACLID(aclID)
 	if start != "" {

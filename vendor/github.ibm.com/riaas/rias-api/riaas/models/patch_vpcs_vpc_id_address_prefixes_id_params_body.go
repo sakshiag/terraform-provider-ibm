@@ -30,7 +30,6 @@ func (m *PatchVpcsVpcIDAddressPrefixesIDParamsBody) Validate(formats strfmt.Regi
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

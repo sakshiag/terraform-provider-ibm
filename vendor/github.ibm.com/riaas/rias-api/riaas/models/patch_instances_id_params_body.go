@@ -22,7 +22,7 @@ type PatchInstancesIDParamsBody struct {
 	Name string `json:"name,omitempty"`
 
 	// profile
-	Profile *PatchInstancesIDParamsBodyProfile `json:"profile,omitempty"`
+	Profile *NameLocator `json:"profile,omitempty"`
 }
 
 // Validate validates this patch instances Id params body
@@ -30,12 +30,10 @@ func (m *PatchInstancesIDParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProfile(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -65,7 +63,6 @@ func (m *PatchInstancesIDParamsBody) validateProfile(formats strfmt.Registry) er
 	}
 
 	if m.Profile != nil {
-
 		if err := m.Profile.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("profile")

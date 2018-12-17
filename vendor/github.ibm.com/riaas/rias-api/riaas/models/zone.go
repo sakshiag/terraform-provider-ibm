@@ -31,6 +31,7 @@ type Zone struct {
 	Region *ZoneRegion `json:"region,omitempty"`
 
 	// status
+	// Enum: [available unavailable impaired]
 	Status string `json:"status,omitempty"`
 }
 
@@ -39,22 +40,18 @@ func (m *Zone) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateRegion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -97,7 +94,6 @@ func (m *Zone) validateRegion(formats strfmt.Registry) error {
 	}
 
 	if m.Region != nil {
-
 		if err := m.Region.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("region")
@@ -122,10 +118,13 @@ func init() {
 }
 
 const (
+
 	// ZoneStatusAvailable captures enum value "available"
 	ZoneStatusAvailable string = "available"
+
 	// ZoneStatusUnavailable captures enum value "unavailable"
 	ZoneStatusUnavailable string = "unavailable"
+
 	// ZoneStatusImpaired captures enum value "impaired"
 	ZoneStatusImpaired string = "impaired"
 )

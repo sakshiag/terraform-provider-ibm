@@ -6,7 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -20,32 +20,32 @@ import (
 type PostInstancesParamsBody struct {
 
 	// boot volume attachment
-	BootVolumeAttachment *PostInstancesParamsBodyBootVolumeAttachment `json:"boot_volume_attachment,omitempty"`
+	BootVolumeAttachment *VolumeAttachmentTemplate `json:"boot_volume_attachment,omitempty"`
 
 	// flavor
-	Flavor *PostInstancesParamsBodyFlavor `json:"flavor,omitempty"`
+	Flavor *NameLocator `json:"flavor,omitempty"`
 
 	// generation
 	Generation Generation `json:"generation,omitempty"`
 
 	// image
-	Image *PostInstancesParamsBodyImage `json:"image,omitempty"`
+	Image *ResourceLocator `json:"image,omitempty"`
 
-	// keys
-	Keys PostInstancesParamsBodyKeys `json:"keys,omitempty"`
+	// The public SSH keys to install on the server; if no keys are provided the server will be inaccessible unless the image used provides a means of access
+	Keys []*KeyLocator `json:"keys,omitempty"`
 
-	// The user-defined name for this instance
+	// The user-defined name for this server
 	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
 	Name string `json:"name,omitempty"`
 
-	// network interfaces
-	NetworkInterfaces PostInstancesParamsBodyNetworkInterfaces `json:"network_interfaces,omitempty"`
+	// Collection of network interfaces to create for the server
+	NetworkInterfaces []*NetworkInterfaceTemplate `json:"network_interfaces,omitempty"`
 
 	// primary network interface
-	PrimaryNetworkInterface *PostInstancesParamsBodyPrimaryNetworkInterface `json:"primary_network_interface,omitempty"`
+	PrimaryNetworkInterface *PrimaryNetworkInterfaceTemplate `json:"primary_network_interface,omitempty"`
 
 	// profile
-	Profile *PostInstancesParamsBodyProfile `json:"profile,omitempty"`
+	Profile *NameLocator `json:"profile,omitempty"`
 
 	// resource group
 	ResourceGroup *PostInstancesParamsBodyResourceGroup `json:"resource_group,omitempty"`
@@ -53,20 +53,17 @@ type PostInstancesParamsBody struct {
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
 
-	// instance Type
-	Type *string `json:"type,omitempty"`
-
-	// User data to be made available when setting up the instance
+	// User data to be made available when setting up the server
 	UserData string `json:"user_data,omitempty"`
 
-	// volume attachments
-	VolumeAttachments PostInstancesParamsBodyVolumeAttachments `json:"volume_attachments,omitempty"`
+	// Collection of volume interfaces
+	VolumeAttachments []*VolumeAttachmentTemplate `json:"volume_attachments,omitempty"`
 
 	// vpc
-	Vpc *PostInstancesParamsBodyVpc `json:"vpc,omitempty"`
+	Vpc *ResourceLocator `json:"vpc,omitempty"`
 
 	// zone
-	Zone *NameReference `json:"zone,omitempty"`
+	Zone *ZoneReference `json:"zone,omitempty"`
 }
 
 // Validate validates this post instances params body
@@ -74,62 +71,54 @@ func (m *PostInstancesParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBootVolumeAttachment(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFlavor(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGeneration(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateImage(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateKeys(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateNetworkInterfaces(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validatePrimaryNetworkInterface(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateProfile(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateTags(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateType(formats); err != nil {
-		// prop
+	if err := m.validateVolumeAttachments(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateVpc(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateZone(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -146,7 +135,6 @@ func (m *PostInstancesParamsBody) validateBootVolumeAttachment(formats strfmt.Re
 	}
 
 	if m.BootVolumeAttachment != nil {
-
 		if err := m.BootVolumeAttachment.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("boot_volume_attachment")
@@ -165,7 +153,6 @@ func (m *PostInstancesParamsBody) validateFlavor(formats strfmt.Registry) error 
 	}
 
 	if m.Flavor != nil {
-
 		if err := m.Flavor.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("flavor")
@@ -200,13 +187,37 @@ func (m *PostInstancesParamsBody) validateImage(formats strfmt.Registry) error {
 	}
 
 	if m.Image != nil {
-
 		if err := m.Image.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("image")
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *PostInstancesParamsBody) validateKeys(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Keys) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Keys); i++ {
+		if swag.IsZero(m.Keys[i]) { // not required
+			continue
+		}
+
+		if m.Keys[i] != nil {
+			if err := m.Keys[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("keys" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -225,6 +236,31 @@ func (m *PostInstancesParamsBody) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *PostInstancesParamsBody) validateNetworkInterfaces(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.NetworkInterfaces) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.NetworkInterfaces); i++ {
+		if swag.IsZero(m.NetworkInterfaces[i]) { // not required
+			continue
+		}
+
+		if m.NetworkInterfaces[i] != nil {
+			if err := m.NetworkInterfaces[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("network_interfaces" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 func (m *PostInstancesParamsBody) validatePrimaryNetworkInterface(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.PrimaryNetworkInterface) { // not required
@@ -232,7 +268,6 @@ func (m *PostInstancesParamsBody) validatePrimaryNetworkInterface(formats strfmt
 	}
 
 	if m.PrimaryNetworkInterface != nil {
-
 		if err := m.PrimaryNetworkInterface.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("primary_network_interface")
@@ -251,7 +286,6 @@ func (m *PostInstancesParamsBody) validateProfile(formats strfmt.Registry) error
 	}
 
 	if m.Profile != nil {
-
 		if err := m.Profile.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("profile")
@@ -270,7 +304,6 @@ func (m *PostInstancesParamsBody) validateResourceGroup(formats strfmt.Registry)
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
@@ -282,49 +315,26 @@ func (m *PostInstancesParamsBody) validateResourceGroup(formats strfmt.Registry)
 	return nil
 }
 
-func (m *PostInstancesParamsBody) validateTags(formats strfmt.Registry) error {
+func (m *PostInstancesParamsBody) validateVolumeAttachments(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Tags) { // not required
+	if swag.IsZero(m.VolumeAttachments) { // not required
 		return nil
 	}
 
-	return nil
-}
+	for i := 0; i < len(m.VolumeAttachments); i++ {
+		if swag.IsZero(m.VolumeAttachments[i]) { // not required
+			continue
+		}
 
-var postInstancesParamsBodyTypeTypePropEnum []interface{}
+		if m.VolumeAttachments[i] != nil {
+			if err := m.VolumeAttachments[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("volume_attachments" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
 
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["virtual"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		postInstancesParamsBodyTypeTypePropEnum = append(postInstancesParamsBodyTypeTypePropEnum, v)
-	}
-}
-
-const (
-	// PostInstancesParamsBodyTypeVirtual captures enum value "virtual"
-	PostInstancesParamsBodyTypeVirtual string = "virtual"
-)
-
-// prop value enum
-func (m *PostInstancesParamsBody) validateTypeEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, postInstancesParamsBodyTypeTypePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *PostInstancesParamsBody) validateType(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Type) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := m.validateTypeEnum("type", "body", *m.Type); err != nil {
-		return err
 	}
 
 	return nil
@@ -337,7 +347,6 @@ func (m *PostInstancesParamsBody) validateVpc(formats strfmt.Registry) error {
 	}
 
 	if m.Vpc != nil {
-
 		if err := m.Vpc.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("vpc")
@@ -356,7 +365,6 @@ func (m *PostInstancesParamsBody) validateZone(formats strfmt.Registry) error {
 	}
 
 	if m.Zone != nil {
-
 		if err := m.Zone.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("zone")

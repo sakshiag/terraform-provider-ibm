@@ -95,6 +95,11 @@ type GetPublicGatewaysParams struct {
 
 	*/
 	Tag *string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*VpcCrn
 	  Filters the collection to resources within the VPC of the specified CRN
 
@@ -196,6 +201,17 @@ func (o *GetPublicGatewaysParams) WithTag(tag *string) *GetPublicGatewaysParams 
 // SetTag adds the tag to the get public gateways params
 func (o *GetPublicGatewaysParams) SetTag(tag *string) {
 	o.Tag = tag
+}
+
+// WithVersion adds the version to the get public gateways params
+func (o *GetPublicGatewaysParams) WithVersion(version string) *GetPublicGatewaysParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get public gateways params
+func (o *GetPublicGatewaysParams) SetVersion(version string) {
+	o.Version = version
 }
 
 // WithVpcCrn adds the vpcCrn to the get public gateways params
@@ -312,6 +328,15 @@ func (o *GetPublicGatewaysParams) WriteToRequest(r runtime.ClientRequest, reg st
 			}
 		}
 
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if o.VpcCrn != nil {

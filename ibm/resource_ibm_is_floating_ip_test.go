@@ -98,7 +98,7 @@ func testAccCheckIBMISFloatingIPConfig(vpcname, subnetname, sshname, publicKey, 
 		name = "%s"
 		vpc = "${ibm_is_vpc.testacc_vpc.id}"
 		zone = "%s"
-		ipv4_cidr_block = "10.0.3.0/24"
+		ipv4_cidr_block = "%s"
 	}
 	
 	resource "ibm_is_ssh_key" "testacc_sshkey" {
@@ -109,7 +109,7 @@ func testAccCheckIBMISFloatingIPConfig(vpcname, subnetname, sshname, publicKey, 
 	resource "ibm_is_instance" "testacc_instance" {
 		name        = "%s"
 		image       = "%s"
-		profile     = "b-2x4"
+		profile     = "%s"
 		primary_network_interface = {
 			port_speed  = "100"
 			subnet      = "${ibm_is_subnet.testacc_subnet.id}"
@@ -124,5 +124,5 @@ func testAccCheckIBMISFloatingIPConfig(vpcname, subnetname, sshname, publicKey, 
 		target = "${ibm_is_instance.testacc_instance.primary_network_interface.0.id}"
 	}
 	
-`, vpcname, subnetname, ISZoneName, sshname, publicKey, instancename, isImage, ISZoneName, name)
+`, vpcname, subnetname, ISZoneName, ISCIDR, sshname, publicKey, instancename, isImage, instanceProfileName, ISZoneName, name)
 }

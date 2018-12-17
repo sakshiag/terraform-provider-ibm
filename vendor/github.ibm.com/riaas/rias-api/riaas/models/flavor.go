@@ -58,27 +58,22 @@ func (m *Flavor) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateCPU(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateGpu(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMemory(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -95,7 +90,6 @@ func (m *Flavor) validateCPU(formats strfmt.Registry) error {
 	}
 
 	if m.CPU != nil {
-
 		if err := m.CPU.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cpu")
@@ -114,7 +108,6 @@ func (m *Flavor) validateGpu(formats strfmt.Registry) error {
 	}
 
 	if m.Gpu != nil {
-
 		if err := m.Gpu.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gpu")

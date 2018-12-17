@@ -20,6 +20,7 @@ import (
 type NetworkACLRule struct {
 
 	// Whether to allow or deny matching traffic
+	// Enum: [allow deny]
 	Action string `json:"action,omitempty"`
 
 	// before
@@ -29,12 +30,14 @@ type NetworkACLRule struct {
 	Code *int64 `json:"code,omitempty"`
 
 	// The date and time that the network ACL Rule was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The destination IP address or CIDR block
 	Destination string `json:"destination,omitempty"`
 
 	// Whether the traffic to be matched is ingress or egress
+	// Enum: [ingress egress]
 	Direction string `json:"direction,omitempty"`
 
 	// The URL for this network ACL
@@ -42,9 +45,11 @@ type NetworkACLRule struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this network ACL rule
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The IP version for this rule
+	// Enum: [ipv4 ipv6]
 	IPVersion string `json:"ip_version,omitempty"`
 
 	// The user-defined name for this network ACL
@@ -72,32 +77,34 @@ func (m *NetworkACLRule) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAction(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBefore(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateCreatedAt(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateDirection(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateIPVersion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -120,8 +127,10 @@ func init() {
 }
 
 const (
+
 	// NetworkACLRuleActionAllow captures enum value "allow"
 	NetworkACLRuleActionAllow string = "allow"
+
 	// NetworkACLRuleActionDeny captures enum value "deny"
 	NetworkACLRuleActionDeny string = "deny"
 )
@@ -155,13 +164,25 @@ func (m *NetworkACLRule) validateBefore(formats strfmt.Registry) error {
 	}
 
 	if m.Before != nil {
-
 		if err := m.Before.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("before")
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *NetworkACLRule) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
 	}
 
 	return nil
@@ -180,8 +201,10 @@ func init() {
 }
 
 const (
+
 	// NetworkACLRuleDirectionIngress captures enum value "ingress"
 	NetworkACLRuleDirectionIngress string = "ingress"
+
 	// NetworkACLRuleDirectionEgress captures enum value "egress"
 	NetworkACLRuleDirectionEgress string = "egress"
 )
@@ -221,6 +244,19 @@ func (m *NetworkACLRule) validateHref(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *NetworkACLRule) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 var networkAclRuleTypeIPVersionPropEnum []interface{}
 
 func init() {
@@ -234,8 +270,10 @@ func init() {
 }
 
 const (
+
 	// NetworkACLRuleIPVersionIPV4 captures enum value "ipv4"
 	NetworkACLRuleIPVersionIPV4 string = "ipv4"
+
 	// NetworkACLRuleIPVersionIPV6 captures enum value "ipv6"
 	NetworkACLRuleIPVersionIPV6 string = "ipv6"
 )

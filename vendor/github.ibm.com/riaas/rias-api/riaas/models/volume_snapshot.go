@@ -20,6 +20,7 @@ import (
 type VolumeSnapshot struct {
 
 	// The date and time that the snapshot was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The CRN for this snapshot
@@ -30,6 +31,7 @@ type VolumeSnapshot struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this snapshot
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The user-defined name for this snapshot
@@ -40,6 +42,7 @@ type VolumeSnapshot struct {
 	ResourceGroup *ResourceReference `json:"resource_group,omitempty"`
 
 	// The status of the snapshot
+	// Enum: [pending complete]
 	Status string `json:"status,omitempty"`
 
 	// A collection of tags for this resource
@@ -50,34 +53,46 @@ type VolumeSnapshot struct {
 func (m *VolumeSnapshot) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *VolumeSnapshot) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -88,6 +103,19 @@ func (m *VolumeSnapshot) validateHref(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *VolumeSnapshot) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -114,7 +142,6 @@ func (m *VolumeSnapshot) validateResourceGroup(formats strfmt.Registry) error {
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
@@ -139,8 +166,10 @@ func init() {
 }
 
 const (
+
 	// VolumeSnapshotStatusPending captures enum value "pending"
 	VolumeSnapshotStatusPending string = "pending"
+
 	// VolumeSnapshotStatusComplete captures enum value "complete"
 	VolumeSnapshotStatusComplete string = "complete"
 )
@@ -162,15 +191,6 @@ func (m *VolumeSnapshot) validateStatus(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *VolumeSnapshot) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil

@@ -36,12 +36,6 @@ func (m *PostPublicGatewaysParamsBodyFloatingIP) Validate(formats strfmt.Registr
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -59,15 +53,6 @@ func (m *PostPublicGatewaysParamsBodyFloatingIP) validateName(formats strfmt.Reg
 
 	if err := validate.Pattern("name", "body", string(m.Name), `^[A-Za-z][-A-Za-z0-9_]*$`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *PostPublicGatewaysParamsBodyFloatingIP) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil

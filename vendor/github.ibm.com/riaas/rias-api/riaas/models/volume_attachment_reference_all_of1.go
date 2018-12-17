@@ -25,7 +25,6 @@ func (m *VolumeAttachmentReferenceAllOf1) Validate(formats strfmt.Registry) erro
 	var res []error
 
 	if err := m.validateVolume(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -42,7 +41,6 @@ func (m *VolumeAttachmentReferenceAllOf1) validateVolume(formats strfmt.Registry
 	}
 
 	if m.Volume != nil {
-
 		if err := m.Volume.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("volume")

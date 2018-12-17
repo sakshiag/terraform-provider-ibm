@@ -20,6 +20,7 @@ import (
 type Key struct {
 
 	// The date and time that the key was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The CRN for this key
@@ -33,9 +34,11 @@ type Key struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this key
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The length of this key
+	// Enum: [2048 4096]
 	Length *int32 `json:"length,omitempty"`
 
 	// The user-defined name for this key
@@ -52,6 +55,7 @@ type Key struct {
 	Tags []string `json:"tags,omitempty"`
 
 	// The cryptosystem used by this key
+	// Enum: [rsa]
 	Type *string `json:"type,omitempty"`
 }
 
@@ -59,39 +63,50 @@ type Key struct {
 func (m *Key) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateLength(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateType(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Key) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -102,6 +117,19 @@ func (m *Key) validateHref(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Key) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -162,22 +190,12 @@ func (m *Key) validateResourceGroup(formats strfmt.Registry) error {
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *Key) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil
@@ -196,6 +214,7 @@ func init() {
 }
 
 const (
+
 	// KeyTypeRsa captures enum value "rsa"
 	KeyTypeRsa string = "rsa"
 )

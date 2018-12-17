@@ -23,12 +23,12 @@ func NewVPCClient(sess *session.Session) *VPCClient {
 }
 
 // List ...
-func (f *VPCClient) List(start string) (models.GetVpcsOKBodyVpcs, string, error) {
+func (f *VPCClient) List(start string) ([]*models.Vpc, string, error) {
 	return f.ListWithFilter("", start)
 }
 
 // ListWithFilter ...
-func (f *VPCClient) ListWithFilter(tag, start string) (models.GetVpcsOKBodyVpcs, string, error) {
+func (f *VPCClient) ListWithFilter(tag, start string) ([]*models.Vpc, string, error) {
 	params := network.NewGetVpcsParams()
 	if tag != "" {
 		params = params.WithTag(&tag)
@@ -116,7 +116,7 @@ func (f *VPCClient) UpdateDefaultNWACL(id, aclid string) (*models.NetworkACL, er
 }
 
 // ListPrefixes ...
-func (f *VPCClient) ListPrefixes(id string) (models.GetVpcsVpcIDAddressPrefixesOKBodyAddressPrefixes, error) {
+func (f *VPCClient) ListPrefixes(id string) ([]*models.AddressPoolPrefix, error) {
 	params := network.NewGetVpcsVpcIDAddressPrefixesParams().WithVpcID(id)
 	resp, err := f.session.Riaas.Network.GetVpcsVpcIDAddressPrefixes(params, session.Auth(f.session))
 	if err != nil {
@@ -124,4 +124,15 @@ func (f *VPCClient) ListPrefixes(id string) (models.GetVpcsVpcIDAddressPrefixesO
 	}
 
 	return resp.Payload.AddressPrefixes, nil
+}
+
+// GetSecurityGroups ...
+func (f *VPCClient) GetSecurityGroup(id string) (*models.DefaultSecurityGroup, error) {
+	params := network.NewGetVpcsVpcIDDefaultSecurityGroupParams().WithVpcID(id)
+	resp, err := f.session.Riaas.Network.GetVpcsVpcIDDefaultSecurityGroup(params, session.Auth(f.session))
+	if err != nil {
+		return nil, errors.ToError(err)
+	}
+
+	return resp.Payload, nil
 }

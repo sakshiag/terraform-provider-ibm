@@ -72,6 +72,11 @@ type GetFloatingIpsIDTagsTagNameParams struct {
 
 	*/
 	TagName string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -133,6 +138,17 @@ func (o *GetFloatingIpsIDTagsTagNameParams) SetTagName(tagName string) {
 	o.TagName = tagName
 }
 
+// WithVersion adds the version to the get floating ips ID tags tag name params
+func (o *GetFloatingIpsIDTagsTagNameParams) WithVersion(version string) *GetFloatingIpsIDTagsTagNameParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get floating ips ID tags tag name params
+func (o *GetFloatingIpsIDTagsTagNameParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetFloatingIpsIDTagsTagNameParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -149,6 +165,15 @@ func (o *GetFloatingIpsIDTagsTagNameParams) WriteToRequest(r runtime.ClientReque
 	// path param tag_name
 	if err := r.SetPathParam("tag_name", o.TagName); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

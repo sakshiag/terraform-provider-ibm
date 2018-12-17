@@ -72,6 +72,11 @@ type DeleteNetworkAclsNetworkACLIDRulesIDParams struct {
 
 	*/
 	NetworkACLID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -133,6 +138,17 @@ func (o *DeleteNetworkAclsNetworkACLIDRulesIDParams) SetNetworkACLID(networkACLI
 	o.NetworkACLID = networkACLID
 }
 
+// WithVersion adds the version to the delete network acls network ACL ID rules ID params
+func (o *DeleteNetworkAclsNetworkACLIDRulesIDParams) WithVersion(version string) *DeleteNetworkAclsNetworkACLIDRulesIDParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the delete network acls network ACL ID rules ID params
+func (o *DeleteNetworkAclsNetworkACLIDRulesIDParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *DeleteNetworkAclsNetworkACLIDRulesIDParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -149,6 +165,15 @@ func (o *DeleteNetworkAclsNetworkACLIDRulesIDParams) WriteToRequest(r runtime.Cl
 	// path param network_acl_id
 	if err := r.SetPathParam("network_acl_id", o.NetworkACLID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

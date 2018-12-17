@@ -20,3 +20,18 @@ func GetNext(next *models.Next) string {
 	q := u.Query()
 	return q.Get("start")
 }
+
+// GetPageLink ...
+func GetPageLink(pageLink *models.PageLink) string {
+	if pageLink == nil {
+		return ""
+	}
+
+	u, err := url.Parse(pageLink.Href)
+	if err != nil {
+		return ""
+	}
+
+	q := u.Query()
+	return q.Get("start")
+}

@@ -1637,6 +1637,37 @@ func (a *Client) GetVpcsVpcIDDefaultNetworkACL(params *GetVpcsVpcIDDefaultNetwor
 }
 
 /*
+GetVpcsVpcIDDefaultSecurityGroup retrieves default security group
+
+This request retrieves the default security group for the VPC specified by the identifier in the URL. The default security group is applied to any new network interfaces in the VPC which do not specify a security group.
+*/
+func (a *Client) GetVpcsVpcIDDefaultSecurityGroup(params *GetVpcsVpcIDDefaultSecurityGroupParams, authInfo runtime.ClientAuthInfoWriter) (*GetVpcsVpcIDDefaultSecurityGroupOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetVpcsVpcIDDefaultSecurityGroupParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "GetVpcsVpcIDDefaultSecurityGroup",
+		Method:             "GET",
+		PathPattern:        "/vpcs/{vpc_id}/default_security_group",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetVpcsVpcIDDefaultSecurityGroupReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetVpcsVpcIDDefaultSecurityGroupOK), nil
+
+}
+
+/*
 PatchFloatingIpsID updates specified floating IP
 
 This request updates a floating IP's name, tags, and/or target.

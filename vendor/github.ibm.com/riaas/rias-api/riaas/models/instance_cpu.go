@@ -22,6 +22,7 @@ import (
 type InstanceCPU struct {
 
 	// The CPU architecture
+	// Enum: [amd64 powerpc]
 	Architecture string `json:"architecture,omitempty"`
 
 	// The number of logical CPU cores per CPU
@@ -39,17 +40,14 @@ func (m *InstanceCPU) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateArchitecture(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateCores(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFrequency(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -72,8 +70,10 @@ func init() {
 }
 
 const (
+
 	// InstanceCPUArchitectureAmd64 captures enum value "amd64"
 	InstanceCPUArchitectureAmd64 string = "amd64"
+
 	// InstanceCPUArchitecturePowerpc captures enum value "powerpc"
 	InstanceCPUArchitecturePowerpc string = "powerpc"
 )

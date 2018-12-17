@@ -99,7 +99,7 @@ func testAccCheckIBMISInstanceNicConfig(vpcname, subnetname, sshname, publicKey,
 		name = "%s"
 		vpc = "${ibm_is_vpc.testacc_vpc.id}"
 		zone = "%s"
-		ipv4_cidr_block = "10.0.3.0/24"
+		ipv4_cidr_block = "%s"
 	}
 	
 	resource "ibm_is_ssh_key" "testacc_sshkey" {
@@ -110,7 +110,7 @@ func testAccCheckIBMISInstanceNicConfig(vpcname, subnetname, sshname, publicKey,
 	resource "ibm_is_instance" "testacc_instance" {
 		name        = "%s"
 		image       = "%s"
-		profile     = "b-2x4"
+		profile     = "%s"
 		primary_network_interface = {
 			port_speed  = "100"
 			subnet      = "${ibm_is_subnet.testacc_subnet.id}"
@@ -127,5 +127,5 @@ func testAccCheckIBMISInstanceNicConfig(vpcname, subnetname, sshname, publicKey,
 		subnet = "${ibm_is_subnet.testacc_subnet.id}"
 	}
 	
-`, vpcname, subnetname, ISZoneName, sshname, publicKey, name, isImage, ISZoneName, nicname)
+`, vpcname, subnetname, ISZoneName, ISCIDR, sshname, publicKey, name, isImage, instanceProfileName, ISZoneName, nicname)
 }

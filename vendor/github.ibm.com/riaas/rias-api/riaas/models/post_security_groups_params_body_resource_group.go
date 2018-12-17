@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // PostSecurityGroupsParamsBodyResourceGroup idreference
@@ -17,6 +18,7 @@ import (
 type PostSecurityGroupsParamsBodyResourceGroup struct {
 
 	// The unique identifier for this resource
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 }
 
@@ -24,9 +26,26 @@ type PostSecurityGroupsParamsBodyResourceGroup struct {
 func (m *PostSecurityGroupsParamsBodyResourceGroup) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *PostSecurityGroupsParamsBodyResourceGroup) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 

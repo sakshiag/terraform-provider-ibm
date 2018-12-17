@@ -17,6 +17,9 @@ import (
 // swagger:model patchInstancesInstanceIdVolumeAttachmentsIdParamsBody
 type PatchInstancesInstanceIDVolumeAttachmentsIDParamsBody struct {
 
+	// If set to true, this volume will be automatically deleted if the only server it is attached to is deleted
+	DeleteVolumeOnInstanceDelete *bool `json:"delete_volume_on_instance_delete,omitempty"`
+
 	// The user-defined name for this volumeattachment
 	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
 	Name string `json:"name,omitempty"`
@@ -27,7 +30,6 @@ func (m *PatchInstancesInstanceIDVolumeAttachmentsIDParamsBody) Validate(formats
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 

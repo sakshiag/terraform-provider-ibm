@@ -20,6 +20,7 @@ import (
 type Vpc struct {
 
 	// The date and time that the VPC was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The CRN for this VPC
@@ -28,11 +29,15 @@ type Vpc struct {
 	// default network acl
 	DefaultNetworkACL *ResourceReference `json:"default_network_acl,omitempty"`
 
+	// default security group
+	DefaultSecurityGroup *ResourceReference `json:"default_security_group,omitempty"`
+
 	// The URL for this VPC
 	// Pattern: ^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this VPC
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// Indicates whether this is the default VPC for the account
@@ -46,6 +51,7 @@ type Vpc struct {
 	ResourceGroup *ResourceReference `json:"resource_group,omitempty"`
 
 	// status
+	// Enum: [available pending]
 	Status string `json:"status,omitempty"`
 
 	// A collection of tags for this resource
@@ -56,39 +62,54 @@ type Vpc struct {
 func (m *Vpc) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDefaultNetworkACL(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateDefaultSecurityGroup(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Vpc) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -99,10 +120,27 @@ func (m *Vpc) validateDefaultNetworkACL(formats strfmt.Registry) error {
 	}
 
 	if m.DefaultNetworkACL != nil {
-
 		if err := m.DefaultNetworkACL.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("default_network_acl")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Vpc) validateDefaultSecurityGroup(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DefaultSecurityGroup) { // not required
+		return nil
+	}
+
+	if m.DefaultSecurityGroup != nil {
+		if err := m.DefaultSecurityGroup.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("default_security_group")
 			}
 			return err
 		}
@@ -118,6 +156,19 @@ func (m *Vpc) validateHref(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("href", "body", string(m.Href), `^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Vpc) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
 		return err
 	}
 
@@ -144,7 +195,6 @@ func (m *Vpc) validateResourceGroup(formats strfmt.Registry) error {
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
@@ -169,8 +219,10 @@ func init() {
 }
 
 const (
+
 	// VpcStatusAvailable captures enum value "available"
 	VpcStatusAvailable string = "available"
+
 	// VpcStatusPending captures enum value "pending"
 	VpcStatusPending string = "pending"
 )
@@ -192,15 +244,6 @@ func (m *Vpc) validateStatus(formats strfmt.Registry) error {
 	// value enum
 	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *Vpc) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil

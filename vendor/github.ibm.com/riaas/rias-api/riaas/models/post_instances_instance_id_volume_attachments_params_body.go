@@ -17,12 +17,12 @@ import (
 // swagger:model postInstancesInstanceIdVolumeAttachmentsParamsBody
 type PostInstancesInstanceIDVolumeAttachmentsParamsBody struct {
 
+	// If set to true, this volume will be automatically deleted if the only server it is attached to is deleted
+	DeleteVolumeOnInstanceDelete *bool `json:"delete_volume_on_instance_delete,omitempty"`
+
 	// The user-defined name for this subnet
 	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
 	Name string `json:"name,omitempty"`
-
-	// resource group
-	ResourceGroup *PostInstancesInstanceIDVolumeAttachmentsParamsBodyResourceGroup `json:"resource_group,omitempty"`
 
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
@@ -36,22 +36,10 @@ func (m *PostInstancesInstanceIDVolumeAttachmentsParamsBody) Validate(formats st
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVolume(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -74,34 +62,6 @@ func (m *PostInstancesInstanceIDVolumeAttachmentsParamsBody) validateName(format
 	return nil
 }
 
-func (m *PostInstancesInstanceIDVolumeAttachmentsParamsBody) validateResourceGroup(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ResourceGroup) { // not required
-		return nil
-	}
-
-	if m.ResourceGroup != nil {
-
-		if err := m.ResourceGroup.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("resource_group")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *PostInstancesInstanceIDVolumeAttachmentsParamsBody) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
-	}
-
-	return nil
-}
-
 func (m *PostInstancesInstanceIDVolumeAttachmentsParamsBody) validateVolume(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Volume) { // not required
@@ -109,7 +69,6 @@ func (m *PostInstancesInstanceIDVolumeAttachmentsParamsBody) validateVolume(form
 	}
 
 	if m.Volume != nil {
-
 		if err := m.Volume.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("volume")

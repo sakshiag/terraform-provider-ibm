@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -24,8 +26,8 @@ type PostNetworkAclsParamsBody struct {
 	// resource group
 	ResourceGroup *PostNetworkAclsParamsBodyResourceGroup `json:"resource_group,omitempty"`
 
-	// rules
-	Rules PostNetworkAclsParamsBodyRules `json:"rules,omitempty"`
+	// Collection of rule templates for rules to be created along with the network ACL
+	Rules []*PostNetworkAclsParamsBodyRulesItems `json:"rules,omitempty"`
 
 	// source network acl
 	SourceNetworkACL *PostNetworkAclsParamsBodySourceNetworkACL `json:"source_network_acl,omitempty"`
@@ -39,22 +41,18 @@ func (m *PostNetworkAclsParamsBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRules(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateSourceNetworkACL(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -84,13 +82,37 @@ func (m *PostNetworkAclsParamsBody) validateResourceGroup(formats strfmt.Registr
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *PostNetworkAclsParamsBody) validateRules(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Rules) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Rules); i++ {
+		if swag.IsZero(m.Rules[i]) { // not required
+			continue
+		}
+
+		if m.Rules[i] != nil {
+			if err := m.Rules[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("rules" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -103,22 +125,12 @@ func (m *PostNetworkAclsParamsBody) validateSourceNetworkACL(formats strfmt.Regi
 	}
 
 	if m.SourceNetworkACL != nil {
-
 		if err := m.SourceNetworkACL.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("source_network_acl")
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *PostNetworkAclsParamsBody) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
 	}
 
 	return nil

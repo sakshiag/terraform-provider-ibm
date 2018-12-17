@@ -22,6 +22,8 @@ const (
 
 	isPublicGatewayProvisioning     = "provisioning"
 	isPublicGatewayProvisioningDone = "available"
+	isPublicGatewayDeleting         = "deleting"
+	isPublicGatewayDeleted          = "done"
 )
 
 func resourceIBMISPublicGateway() *schema.Resource {
@@ -35,6 +37,7 @@ func resourceIBMISPublicGateway() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(60 * time.Minute),
+			Delete: schema.DefaultTimeout(60 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -47,6 +50,7 @@ func resourceIBMISPublicGateway() *schema.Resource {
 			isPublicGatewayFloatingIP: {
 				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -129,7 +133,7 @@ func resourceIBMISPublicGatewayCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func isWaitForPublicGatewayAvailable(publicgwC *network.PublicGatewayClient, id string, d *schema.ResourceData) (interface{}, error) {
-	log.Printf("Waiting for subnet (%s) to be available.", id)
+	log.Printf("Waiting for public gateway (%s) to be available.", id)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"retry", isPublicGatewayProvisioning},
@@ -223,8 +227,49 @@ func resourceIBMISPublicGatewayDelete(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
+	_, err = isWaitForPublicGatewayDeleted(publicgwC, d.Id(), d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return err
+	}
+
 	d.SetId("")
 	return nil
+}
+
+func isWaitForPublicGatewayDeleted(pg *network.PublicGatewayClient, id string, timeout time.Duration) (interface{}, error) {
+	log.Printf("Waiting for public gateway (%s) to be deleted.", id)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"retry", isPublicGatewayDeleting},
+		Target:     []string{},
+		Refresh:    isPublicGatewayDeleteRefreshFunc(pg, id),
+		Timeout:    timeout,
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	return stateConf.WaitForState()
+}
+
+func isPublicGatewayDeleteRefreshFunc(pg *network.PublicGatewayClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		publicGateway, err := pg.Get(id)
+		if err == nil {
+			return publicGateway, isPublicGatewayDeleting, nil
+		}
+
+		iserror, ok := err.(iserrors.RiaasError)
+		if ok {
+			log.Printf("[DEBUG] %s", iserror.Error())
+			if len(iserror.Payload.Errors) == 1 &&
+				iserror.Payload.Errors[0].Code == "not_found" {
+				log.Printf("[DEBUG] returning deleted")
+				return nil, isPublicGatewayDeleted, nil
+			}
+		}
+		log.Printf("[DEBUG] returning x")
+		return nil, isPublicGatewayDeleting, err
+	}
 }
 
 func resourceIBMISPublicGatewayExists(d *schema.ResourceData, meta interface{}) (bool, error) {

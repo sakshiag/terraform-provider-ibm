@@ -20,6 +20,7 @@ import (
 type PostNetworkAclsNetworkACLIDRulesParamsBody struct {
 
 	// Whether to allow or deny matching traffic
+	// Enum: [allow deny]
 	Action string `json:"action,omitempty"`
 
 	// before
@@ -32,6 +33,7 @@ type PostNetworkAclsNetworkACLIDRulesParamsBody struct {
 	Destination string `json:"destination,omitempty"`
 
 	// Whether the traffic to be matched is ingress or egress
+	// Enum: [ingress egress]
 	Direction string `json:"direction,omitempty"`
 
 	// The user-defined name for this public gateway
@@ -59,22 +61,18 @@ func (m *PostNetworkAclsNetworkACLIDRulesParamsBody) Validate(formats strfmt.Reg
 	var res []error
 
 	if err := m.validateAction(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateBefore(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDirection(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -97,8 +95,10 @@ func init() {
 }
 
 const (
+
 	// PostNetworkAclsNetworkACLIDRulesParamsBodyActionAllow captures enum value "allow"
 	PostNetworkAclsNetworkACLIDRulesParamsBodyActionAllow string = "allow"
+
 	// PostNetworkAclsNetworkACLIDRulesParamsBodyActionDeny captures enum value "deny"
 	PostNetworkAclsNetworkACLIDRulesParamsBodyActionDeny string = "deny"
 )
@@ -132,7 +132,6 @@ func (m *PostNetworkAclsNetworkACLIDRulesParamsBody) validateBefore(formats strf
 	}
 
 	if m.Before != nil {
-
 		if err := m.Before.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("before")
@@ -157,8 +156,10 @@ func init() {
 }
 
 const (
+
 	// PostNetworkAclsNetworkACLIDRulesParamsBodyDirectionIngress captures enum value "ingress"
 	PostNetworkAclsNetworkACLIDRulesParamsBodyDirectionIngress string = "ingress"
+
 	// PostNetworkAclsNetworkACLIDRulesParamsBodyDirectionEgress captures enum value "egress"
 	PostNetworkAclsNetworkACLIDRulesParamsBodyDirectionEgress string = "egress"
 )

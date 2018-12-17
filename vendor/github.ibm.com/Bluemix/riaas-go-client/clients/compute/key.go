@@ -22,12 +22,12 @@ func NewKeyClient(sess *session.Session) *KeyClient {
 }
 
 // List ...
-func (f *KeyClient) List(start string) (models.GetKeysOKBodyKeys, string, error) {
+func (f *KeyClient) List(start string) ([]*models.Key, string, error) {
 	return f.ListWithFilter("", "", start)
 }
 
 // ListWithFilter ...
-func (f *KeyClient) ListWithFilter(tag, resourceGroupID, start string) (models.GetKeysOKBodyKeys, string, error) {
+func (f *KeyClient) ListWithFilter(tag, resourceGroupID, start string) ([]*models.Key, string, error) {
 	params := compute.NewGetKeysParams()
 	if tag != "" {
 		params.WithTag(&tag)
@@ -45,7 +45,7 @@ func (f *KeyClient) ListWithFilter(tag, resourceGroupID, start string) (models.G
 		return nil, "", errors.ToError(err)
 	}
 
-	return resp.Payload.Keys, utils.GetNext(resp.Payload.Next), nil
+	return resp.Payload.Keys, utils.GetPageLink(resp.Payload.Next), nil
 }
 
 // Get ...

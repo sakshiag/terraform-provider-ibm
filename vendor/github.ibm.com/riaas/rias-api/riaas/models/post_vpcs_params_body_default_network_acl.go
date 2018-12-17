@@ -23,6 +23,7 @@ type PostVpcsParamsBodyDefaultNetworkACL struct {
 	Crn string `json:"crn,omitempty"`
 
 	// The unique identifier for this network ACL
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The user-defined name for this network ACL
@@ -34,14 +35,30 @@ type PostVpcsParamsBodyDefaultNetworkACL struct {
 func (m *PostVpcsParamsBodyDefaultNetworkACL) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *PostVpcsParamsBodyDefaultNetworkACL) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 

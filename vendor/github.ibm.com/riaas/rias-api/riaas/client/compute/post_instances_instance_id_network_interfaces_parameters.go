@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.ibm.com/riaas/rias-api/riaas/models"
+	models "github.ibm.com/riaas/rias-api/riaas/models"
 )
 
 // NewPostInstancesInstanceIDNetworkInterfacesParams creates a new PostInstancesInstanceIDNetworkInterfacesParams object
@@ -65,12 +65,17 @@ for the post instances instance ID network interfaces operation typically these 
 type PostInstancesInstanceIDNetworkInterfacesParams struct {
 
 	/*Body*/
-	Body *models.PostInstancesInstanceIDNetworkInterfacesParamsBody
+	Body *models.NetworkInterfaceTemplate
 	/*InstanceID
 	  The instance identifier
 
 	*/
 	InstanceID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -111,13 +116,13 @@ func (o *PostInstancesInstanceIDNetworkInterfacesParams) SetHTTPClient(client *h
 }
 
 // WithBody adds the body to the post instances instance ID network interfaces params
-func (o *PostInstancesInstanceIDNetworkInterfacesParams) WithBody(body *models.PostInstancesInstanceIDNetworkInterfacesParamsBody) *PostInstancesInstanceIDNetworkInterfacesParams {
+func (o *PostInstancesInstanceIDNetworkInterfacesParams) WithBody(body *models.NetworkInterfaceTemplate) *PostInstancesInstanceIDNetworkInterfacesParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the post instances instance ID network interfaces params
-func (o *PostInstancesInstanceIDNetworkInterfacesParams) SetBody(body *models.PostInstancesInstanceIDNetworkInterfacesParamsBody) {
+func (o *PostInstancesInstanceIDNetworkInterfacesParams) SetBody(body *models.NetworkInterfaceTemplate) {
 	o.Body = body
 }
 
@@ -130,6 +135,17 @@ func (o *PostInstancesInstanceIDNetworkInterfacesParams) WithInstanceID(instance
 // SetInstanceID adds the instanceId to the post instances instance ID network interfaces params
 func (o *PostInstancesInstanceIDNetworkInterfacesParams) SetInstanceID(instanceID string) {
 	o.InstanceID = instanceID
+}
+
+// WithVersion adds the version to the post instances instance ID network interfaces params
+func (o *PostInstancesInstanceIDNetworkInterfacesParams) WithVersion(version string) *PostInstancesInstanceIDNetworkInterfacesParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the post instances instance ID network interfaces params
+func (o *PostInstancesInstanceIDNetworkInterfacesParams) SetVersion(version string) {
+	o.Version = version
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -149,6 +165,15 @@ func (o *PostInstancesInstanceIDNetworkInterfacesParams) WriteToRequest(r runtim
 	// path param instance_id
 	if err := r.SetPathParam("instance_id", o.InstanceID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

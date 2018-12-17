@@ -31,6 +31,7 @@ type Region struct {
 	Name string `json:"name,omitempty"`
 
 	// status
+	// Enum: [available unavailable]
 	Status string `json:"status,omitempty"`
 }
 
@@ -39,17 +40,14 @@ func (m *Region) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -98,8 +96,10 @@ func init() {
 }
 
 const (
+
 	// RegionStatusAvailable captures enum value "available"
 	RegionStatusAvailable string = "available"
+
 	// RegionStatusUnavailable captures enum value "unavailable"
 	RegionStatusUnavailable string = "unavailable"
 )

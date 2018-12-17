@@ -199,6 +199,7 @@ func resourceIBMISInstance() *schema.Resource {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{isInstanceImage},
 			},
 
@@ -277,18 +278,18 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 	sess, _ := meta.(ClientSession).ISSession()
 
 	profile := d.Get(isInstanceProfile).(string)
-	var body = models.PostInstancesParamsBody{
+	var body = &models.PostInstancesParamsBody{
 		Name: d.Get(isInstanceName).(string),
-		Vpc: &models.PostInstancesParamsBodyVpc{
+		Vpc: &models.ResourceLocator{
 			ID: strfmt.UUID(d.Get(isInstanceVPC).(string)),
 		},
-		Zone: &models.NameReference{
+		Zone: &models.ZoneReference{
 			Name: d.Get(isInstanceZone).(string),
 		},
-		Profile: &models.PostInstancesParamsBodyProfile{
+		Profile: &models.NameLocator{
 			Name: profile,
 		},
-		Flavor: &models.PostInstancesParamsBodyFlavor{
+		Flavor: &models.NameLocator{
 			Name: profile,
 		},
 		Generation: models.Generation(d.Get(isInstanceGeneration).(string)),
@@ -298,17 +299,20 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 
 	if img, ok := d.GetOk(isInstanceImage); ok {
 		imageID = img.(string)
-		body.Image = &models.PostInstancesParamsBodyImage{
+		body.Image = &models.ResourceLocator{
 			ID: strfmt.UUID(imageID),
 		}
 	}
 
 	if boot, ok := d.GetOk(isInstanceBootVolume); ok {
 		bootvol = boot.(string)
-		body.BootVolumeAttachment = &models.PostInstancesParamsBodyBootVolumeAttachment{
-			Volume: &models.PostInstancesParamsBodyBootVolumeAttachmentVolume{
-				ID: strfmt.UUID(bootvol),
-			},
+
+		template := &models.VolumeAttachmentTemplateVolume{}
+		template.ID = strfmt.UUID(bootvol)
+
+		body.BootVolumeAttachment = &models.VolumeAttachmentTemplate{
+
+			Volume: template,
 		}
 	}
 
@@ -322,23 +326,23 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 		primnic := primnicintf.([]interface{})[0].(map[string]interface{})
 		portspeedintf := (primnic[isInstanceNicPortSpeed].(int))
 		subnetintf, _ := primnic[isInstanceNicSubnet]
-		var primnicobj = models.PostInstancesParamsBodyPrimaryNetworkInterface{
-			Subnet: &models.PostInstancesParamsBodyPrimaryNetworkInterfaceSubnet{
-				ID: strfmt.UUID(subnetintf.(string)),
-			},
-			PortSpeed: int64(portspeedintf),
+		var primnicobj = models.PrimaryNetworkInterfaceTemplate{}
+		primnicobj.Subnet = &models.ResourceLocator{
+			ID: strfmt.UUID(subnetintf.(string)),
 		}
+
+		primnicobj.PortSpeed = int64(portspeedintf)
 		secgrpintf, ok := primnic[isInstanceNicSecurityGroups]
 		if ok {
 			secgrpSet := secgrpintf.(*schema.Set)
 			if secgrpSet.Len() != 0 {
-				var secgrpobjs = make([]*models.PostInstancesParamsBodyPrimaryNetworkInterfaceSecurityGroupsItems, secgrpSet.Len())
+				var secgrpobjs = make([]*models.ResourceLocator, secgrpSet.Len())
 				for i, secgrpIntf := range secgrpSet.List() {
-					secgrpobjs[i] = &models.PostInstancesParamsBodyPrimaryNetworkInterfaceSecurityGroupsItems{
+					secgrpobjs[i] = &models.ResourceLocator{
 						ID: strfmt.UUID(secgrpIntf.(string)),
 					}
 				}
-				primnicobj.SecurityGroups = models.PostInstancesParamsBodyPrimaryNetworkInterfaceSecurityGroups(secgrpobjs)
+				primnicobj.SecurityGroups = secgrpobjs
 			}
 		}
 
@@ -347,26 +351,28 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 
 	keySet := d.Get(isInstanceKeys).(*schema.Set)
 	if keySet.Len() != 0 {
-		keyobjs := make([]*models.PostInstancesParamsBodyKeysItems, keySet.Len())
+		keyobjs := make([]*models.KeyLocator, keySet.Len())
 		for i, key := range keySet.List() {
-			keyobjs[i] = &models.PostInstancesParamsBodyKeysItems{
+			keyobjs[i] = &models.KeyLocator{
 				ID: strfmt.UUID(key.(string)),
 			}
 		}
-		body.Keys = models.PostInstancesParamsBodyKeys(keyobjs)
+		body.Keys = keyobjs
 	}
 
 	volSet := d.Get(isInstanceVolumes).(*schema.Set)
 	if volSet.Len() != 0 {
-		volobjs := make([]*models.PostInstancesParamsBodyVolumeAttachmentsItems, volSet.Len())
+		volobjs := make([]*models.VolumeAttachmentTemplate, volSet.Len())
 		for i, vol := range volSet.List() {
-			volobjs[i] = &models.PostInstancesParamsBodyVolumeAttachmentsItems{
-				Volume: &models.PostInstancesParamsBodyVolumeAttachmentsItemsVolume{
-					ID: strfmt.UUID(vol.(string)),
-				},
+
+			template := &models.VolumeAttachmentTemplateVolume{}
+			template.ID = strfmt.UUID(vol.(string))
+
+			volobjs[i] = &models.VolumeAttachmentTemplate{
+				Volume: template,
 			}
 		}
-		body.VolumeAttachments = models.PostInstancesParamsBodyVolumeAttachments(volobjs)
+		body.VolumeAttachments = volobjs
 	}
 
 	if userdata, ok := d.GetOk(isInstanceUserData); ok {
@@ -380,7 +386,7 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	instanceC := compute.NewInstanceClient(sess)
-	instance, err := instanceC.Create(&body)
+	instance, err := instanceC.Create(body)
 	if err != nil {
 		log.Printf("[DEBUG] Instance err %s", isErrorToString(err))
 		return err
@@ -439,8 +445,6 @@ func resourceIBMisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set(isInstanceName, instance.Name)
 	if instance.Profile != nil {
 		d.Set(isInstanceProfile, instance.Profile.Name)
-	} else {
-		d.Set(isInstanceProfile, instance.Flavor.Name)
 	}
 	cpuList := make([]map[string]interface{}, 0)
 	if instance.CPU != nil {

@@ -90,6 +90,11 @@ type GetImagesParams struct {
 
 	*/
 	Tag *string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 	/*Visibility
 	  Filters the collection to images with the specified visibility
 
@@ -167,6 +172,17 @@ func (o *GetImagesParams) SetTag(tag *string) {
 	o.Tag = tag
 }
 
+// WithVersion adds the version to the get images params
+func (o *GetImagesParams) WithVersion(version string) *GetImagesParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the get images params
+func (o *GetImagesParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WithVisibility adds the visibility to the get images params
 func (o *GetImagesParams) WithVisibility(visibility *string) *GetImagesParams {
 	o.SetVisibility(visibility)
@@ -232,6 +248,15 @@ func (o *GetImagesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 			}
 		}
 
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if o.Visibility != nil {

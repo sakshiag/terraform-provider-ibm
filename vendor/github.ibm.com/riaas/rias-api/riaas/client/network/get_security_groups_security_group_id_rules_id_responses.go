@@ -13,7 +13,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.ibm.com/riaas/rias-api/riaas/models"
+	models "github.ibm.com/riaas/rias-api/riaas/models"
 )
 
 // GetSecurityGroupsSecurityGroupIDRulesIDReader is a Reader for the GetSecurityGroupsSecurityGroupIDRulesID structure.

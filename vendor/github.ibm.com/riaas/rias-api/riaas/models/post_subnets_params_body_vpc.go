@@ -23,6 +23,7 @@ type PostSubnetsParamsBodyVpc struct {
 	Crn string `json:"crn,omitempty"`
 
 	// The unique identifier for this VPC
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The user-defined name for this VPC
@@ -34,14 +35,30 @@ type PostSubnetsParamsBodyVpc struct {
 func (m *PostSubnetsParamsBodyVpc) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *PostSubnetsParamsBodyVpc) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -67,6 +67,11 @@ type PutSubnetsSubnetIDPublicGatewayParams struct {
 
 	*/
 	SubnetID string
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,6 +122,17 @@ func (o *PutSubnetsSubnetIDPublicGatewayParams) SetSubnetID(subnetID string) {
 	o.SubnetID = subnetID
 }
 
+// WithVersion adds the version to the put subnets subnet ID public gateway params
+func (o *PutSubnetsSubnetIDPublicGatewayParams) WithVersion(version string) *PutSubnetsSubnetIDPublicGatewayParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the put subnets subnet ID public gateway params
+func (o *PutSubnetsSubnetIDPublicGatewayParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *PutSubnetsSubnetIDPublicGatewayParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -128,6 +144,15 @@ func (o *PutSubnetsSubnetIDPublicGatewayParams) WriteToRequest(r runtime.ClientR
 	// path param subnet_id
 	if err := r.SetPathParam("subnet_id", o.SubnetID); err != nil {
 		return err
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
+			return err
+		}
 	}
 
 	if len(res) > 0 {

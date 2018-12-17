@@ -23,12 +23,12 @@ func NewFloatingIPClient(sess *session.Session) *FloatingIPClient {
 }
 
 // List ...
-func (f *FloatingIPClient) List(start string) (models.GetFloatingIpsOKBodyFloatingIps, string, error) {
+func (f *FloatingIPClient) List(start string) ([]*models.FloatingIP, string, error) {
 	return f.ListWithFilter("", "", "", start)
 }
 
 // ListWithFilter ...
-func (f *FloatingIPClient) ListWithFilter(tag, zoneName, resourcegroupID, start string) (models.GetFloatingIpsOKBodyFloatingIps, string, error) {
+func (f *FloatingIPClient) ListWithFilter(tag, zoneName, resourcegroupID, start string) ([]*models.FloatingIP, string, error) {
 	params := network.NewGetFloatingIpsParams()
 	if tag != "" {
 		params = params.WithTag(&tag)

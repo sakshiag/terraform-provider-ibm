@@ -20,9 +20,11 @@ import (
 type Image struct {
 
 	// The image architecture
+	// Enum: [amd64 powerpc]
 	Architecture string `json:"architecture,omitempty"`
 
 	// The date and time that the image was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The CRN for this image
@@ -32,6 +34,7 @@ type Image struct {
 	File *ImageFile `json:"file,omitempty"`
 
 	// format
+	// Enum: [raw qcow2 vmdk vhdx vdi ova box]
 	Format string `json:"format,omitempty"`
 
 	// The URL for this image
@@ -39,6 +42,7 @@ type Image struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this image
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The user-defined name for this image
@@ -49,12 +53,14 @@ type Image struct {
 	OperatingSystem *ImageOperatingSystem `json:"operating_system,omitempty"`
 
 	// status
+	// Enum: [pending available corrupt]
 	Status string `json:"status,omitempty"`
 
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
 
 	// Whether the image is publicly visible or private to the account
+	// Enum: [public private]
 	Visibility string `json:"visibility,omitempty"`
 }
 
@@ -63,47 +69,42 @@ func (m *Image) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateArchitecture(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateCreatedAt(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateFile(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFormat(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateOperatingSystem(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVisibility(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -126,8 +127,10 @@ func init() {
 }
 
 const (
+
 	// ImageArchitectureAmd64 captures enum value "amd64"
 	ImageArchitectureAmd64 string = "amd64"
+
 	// ImageArchitecturePowerpc captures enum value "powerpc"
 	ImageArchitecturePowerpc string = "powerpc"
 )
@@ -154,6 +157,19 @@ func (m *Image) validateArchitecture(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Image) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Image) validateFile(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.File) { // not required
@@ -161,7 +177,6 @@ func (m *Image) validateFile(formats strfmt.Registry) error {
 	}
 
 	if m.File != nil {
-
 		if err := m.File.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("file")
@@ -186,18 +201,25 @@ func init() {
 }
 
 const (
+
 	// ImageFormatRaw captures enum value "raw"
 	ImageFormatRaw string = "raw"
+
 	// ImageFormatQcow2 captures enum value "qcow2"
 	ImageFormatQcow2 string = "qcow2"
+
 	// ImageFormatVMDK captures enum value "vmdk"
 	ImageFormatVMDK string = "vmdk"
+
 	// ImageFormatVhdx captures enum value "vhdx"
 	ImageFormatVhdx string = "vhdx"
+
 	// ImageFormatVdi captures enum value "vdi"
 	ImageFormatVdi string = "vdi"
+
 	// ImageFormatOva captures enum value "ova"
 	ImageFormatOva string = "ova"
+
 	// ImageFormatBox captures enum value "box"
 	ImageFormatBox string = "box"
 )
@@ -237,6 +259,19 @@ func (m *Image) validateHref(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Image) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *Image) validateName(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Name) { // not required
@@ -257,7 +292,6 @@ func (m *Image) validateOperatingSystem(formats strfmt.Registry) error {
 	}
 
 	if m.OperatingSystem != nil {
-
 		if err := m.OperatingSystem.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("operating_system")
@@ -282,10 +316,13 @@ func init() {
 }
 
 const (
+
 	// ImageStatusPending captures enum value "pending"
 	ImageStatusPending string = "pending"
+
 	// ImageStatusAvailable captures enum value "available"
 	ImageStatusAvailable string = "available"
+
 	// ImageStatusCorrupt captures enum value "corrupt"
 	ImageStatusCorrupt string = "corrupt"
 )
@@ -312,15 +349,6 @@ func (m *Image) validateStatus(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Image) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
-	}
-
-	return nil
-}
-
 var imageTypeVisibilityPropEnum []interface{}
 
 func init() {
@@ -334,8 +362,10 @@ func init() {
 }
 
 const (
+
 	// ImageVisibilityPublic captures enum value "public"
 	ImageVisibilityPublic string = "public"
+
 	// ImageVisibilityPrivate captures enum value "private"
 	ImageVisibilityPrivate string = "private"
 )

@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.ibm.com/riaas/rias-api/riaas/models"
+	models "github.ibm.com/riaas/rias-api/riaas/models"
 )
 
 // NewPostKeysParams creates a new PostKeysParams object
@@ -66,6 +66,11 @@ type PostKeysParams struct {
 
 	/*Body*/
 	Body *models.PostKeysParamsBody
+	/*Version
+	  Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version.
+
+	*/
+	Version string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -116,6 +121,17 @@ func (o *PostKeysParams) SetBody(body *models.PostKeysParamsBody) {
 	o.Body = body
 }
 
+// WithVersion adds the version to the post keys params
+func (o *PostKeysParams) WithVersion(version string) *PostKeysParams {
+	o.SetVersion(version)
+	return o
+}
+
+// SetVersion adds the version to the post keys params
+func (o *PostKeysParams) SetVersion(version string) {
+	o.Version = version
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *PostKeysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -126,6 +142,15 @@ func (o *PostKeysParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regi
 
 	if o.Body != nil {
 		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
+	}
+
+	// query param version
+	qrVersion := o.Version
+	qVersion := qrVersion
+	if qVersion != "" {
+		if err := r.SetQueryParam("version", qVersion); err != nil {
 			return err
 		}
 	}

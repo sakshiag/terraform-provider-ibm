@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// VolumeExtended VolumeAttachmentVolumeReference
+// VolumeExtended VolumeExtendVolumeReference
 // swagger:model volume_extended
 type VolumeExtended struct {
 	Volume
@@ -22,13 +22,14 @@ type VolumeExtended struct {
 
 // UnmarshalJSON unmarshals this object from a JSON structure
 func (m *VolumeExtended) UnmarshalJSON(raw []byte) error {
-
+	// AO0
 	var aO0 Volume
 	if err := swag.ReadJSON(raw, &aO0); err != nil {
 		return err
 	}
 	m.Volume = aO0
 
+	// AO1
 	var aO1 VolumeExtendedAllOf1
 	if err := swag.ReadJSON(raw, &aO1); err != nil {
 		return err
@@ -40,7 +41,7 @@ func (m *VolumeExtended) UnmarshalJSON(raw []byte) error {
 
 // MarshalJSON marshals this object to a JSON structure
 func (m VolumeExtended) MarshalJSON() ([]byte, error) {
-	var _parts [][]byte
+	_parts := make([][]byte, 0, 2)
 
 	aO0, err := swag.WriteJSON(m.Volume)
 	if err != nil {
@@ -61,10 +62,11 @@ func (m VolumeExtended) MarshalJSON() ([]byte, error) {
 func (m *VolumeExtended) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	// validation for a type composition with Volume
 	if err := m.Volume.Validate(formats); err != nil {
 		res = append(res, err)
 	}
-
+	// validation for a type composition with VolumeExtendedAllOf1
 	if err := m.VolumeExtendedAllOf1.Validate(formats); err != nil {
 		res = append(res, err)
 	}

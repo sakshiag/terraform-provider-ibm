@@ -261,13 +261,13 @@ func init() {
 	
 	ISZoneName = os.Getenv("SL_ZONE")
 	if ISZoneName == "" {
-		ISZoneName = "us-south-2"
+		ISZoneName = "us-south-1"
 		fmt.Println("[INFO] Set the environment variable SL_ZONE for testing ibm_is_zone datasource else it is set to default value 'us-south-2'")
 	}
 
 	ISCIDR = os.Getenv("SL_CIDR")
 	if ISCIDR == "" {
-		ISCIDR = "192.168.1.0/24"
+		ISCIDR = "10.240.0.0/24"
 		fmt.Println("[INFO] Set the environment variable SL_CIDR for testing ibm_is_subnet else it is set to default value '192.168.1.0/24'")
 	}
 
@@ -279,7 +279,7 @@ func init() {
 
 	instanceProfileName = os.Getenv("SL_INSTANCE_PROFILE")
 	if instanceProfileName == "" {
-		instanceProfileName = "b-2x4"
+		instanceProfileName = "b-2x8"
 		fmt.Println("[INFO] Set the environment variable SL_INSTANCE_PROFILE for testing ibm_container_cluster resource else it is set to default value 'b-2x4'")
 	}
 

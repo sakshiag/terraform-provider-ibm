@@ -3,7 +3,9 @@ package ibm
 import (
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.ibm.com/Bluemix/riaas-go-client/clients/network"
@@ -21,6 +23,8 @@ const (
 
 	isFloatingIPProvisioning     = "provisioning"
 	isFloatingIPProvisioningDone = "done"
+	isFloatingIPDeleting         = "deleting"
+	isFloatingIPDeleted          = "done"
 )
 
 func resourceIBMISFloatingIP() *schema.Resource {
@@ -31,6 +35,10 @@ func resourceIBMISFloatingIP() *schema.Resource {
 		Delete:   resourceIBMISFloatingIPDelete,
 		Exists:   resourceIBMISFloatingIPExists,
 		Importer: &schema.ResourceImporter{},
+
+		Timeouts: &schema.ResourceTimeout{
+			Delete: schema.DefaultTimeout(60 * time.Minute),
+		},
 
 		Schema: map[string]*schema.Schema{
 			isFloatingIPAddress: {
@@ -176,8 +184,51 @@ func resourceIBMISFloatingIPDelete(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return err
 	}
+
+	_, err = isWaitForFloatingIPDeleted(floatingipC, d.Id(), d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return err
+	}
+
 	d.SetId("")
 	return nil
+}
+
+func isWaitForFloatingIPDeleted(fip *network.FloatingIPClient, id string, timeout time.Duration) (interface{}, error) {
+	log.Printf("Waiting for FloatingIP (%s) to be deleted.", id)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"retry", isFloatingIPDeleting},
+		Target:     []string{},
+		Refresh:    isFloatingIPDeleteRefreshFunc(fip, id),
+		Timeout:    timeout,
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	return stateConf.WaitForState()
+}
+
+func isFloatingIPDeleteRefreshFunc(fip *network.FloatingIPClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		log.Printf("[DEBUG] delete function here")
+		FloatingIP, err := fip.Get(id)
+		if err == nil {
+			return FloatingIP, isFloatingIPDeleting, nil
+		}
+
+		iserror, ok := err.(iserrors.RiaasError)
+		if ok {
+			log.Printf("[DEBUG] %s", iserror.Error())
+			if len(iserror.Payload.Errors) == 1 &&
+				iserror.Payload.Errors[0].Code == "not_found" {
+				log.Printf("[DEBUG] returning deleted")
+				return nil, isFloatingIPDeleted, nil
+			}
+		}
+		log.Printf("[DEBUG] returning x")
+		return nil, isFloatingIPDeleting, err
+	}
 }
 
 func resourceIBMISFloatingIPExists(d *schema.ResourceData, meta interface{}) (bool, error) {

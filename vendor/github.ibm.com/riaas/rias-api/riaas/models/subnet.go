@@ -23,6 +23,7 @@ type Subnet struct {
 	AvailableIPV4AddressCount int64 `json:"available_ipv4_address_count,omitempty"`
 
 	// The date and time that the subnet was created
+	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`
 
 	// The CRN for this subnet
@@ -36,9 +37,11 @@ type Subnet struct {
 	Href string `json:"href,omitempty"`
 
 	// The unique identifier for this subnet
+	// Format: uuid
 	ID strfmt.UUID `json:"id,omitempty"`
 
 	// The IP version(s) supported by this subnet
+	// Enum: [ipv4 ipv6 both]
 	IPVersion string `json:"ip_version,omitempty"`
 
 	// The IPv4 range of the subnet, expressed in CIDR format
@@ -61,6 +64,7 @@ type Subnet struct {
 	ResourceGroup *ResourceReference `json:"resource_group,omitempty"`
 
 	// The status of the subnet
+	// Enum: [pending available]
 	Status string `json:"status,omitempty"`
 
 	// A collection of tags for this resource
@@ -80,64 +84,70 @@ type Subnet struct {
 func (m *Subnet) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateGeneration(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateHref(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateIPVersion(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateNetworkACL(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePublicGateway(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateResourceGroup(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateVpc(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateZone(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Subnet) validateCreatedAt(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date-time", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -170,6 +180,19 @@ func (m *Subnet) validateHref(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Subnet) validateID(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ID) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("id", "body", "uuid", m.ID.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 var subnetTypeIPVersionPropEnum []interface{}
 
 func init() {
@@ -183,10 +206,13 @@ func init() {
 }
 
 const (
+
 	// SubnetIPVersionIPV4 captures enum value "ipv4"
 	SubnetIPVersionIPV4 string = "ipv4"
+
 	// SubnetIPVersionIPV6 captures enum value "ipv6"
 	SubnetIPVersionIPV6 string = "ipv6"
+
 	// SubnetIPVersionBoth captures enum value "both"
 	SubnetIPVersionBoth string = "both"
 )
@@ -233,7 +259,6 @@ func (m *Subnet) validateNetworkACL(formats strfmt.Registry) error {
 	}
 
 	if m.NetworkACL != nil {
-
 		if err := m.NetworkACL.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("network_acl")
@@ -252,7 +277,6 @@ func (m *Subnet) validatePublicGateway(formats strfmt.Registry) error {
 	}
 
 	if m.PublicGateway != nil {
-
 		if err := m.PublicGateway.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("public_gateway")
@@ -271,7 +295,6 @@ func (m *Subnet) validateResourceGroup(formats strfmt.Registry) error {
 	}
 
 	if m.ResourceGroup != nil {
-
 		if err := m.ResourceGroup.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("resource_group")
@@ -296,8 +319,10 @@ func init() {
 }
 
 const (
+
 	// SubnetStatusPending captures enum value "pending"
 	SubnetStatusPending string = "pending"
+
 	// SubnetStatusAvailable captures enum value "available"
 	SubnetStatusAvailable string = "available"
 )
@@ -324,15 +349,6 @@ func (m *Subnet) validateStatus(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Subnet) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
-	}
-
-	return nil
-}
-
 func (m *Subnet) validateVpc(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Vpc) { // not required
@@ -340,7 +356,6 @@ func (m *Subnet) validateVpc(formats strfmt.Registry) error {
 	}
 
 	if m.Vpc != nil {
-
 		if err := m.Vpc.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("vpc")
@@ -359,7 +374,6 @@ func (m *Subnet) validateZone(formats strfmt.Registry) error {
 	}
 
 	if m.Zone != nil {
-
 		if err := m.Zone.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("zone")

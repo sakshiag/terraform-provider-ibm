@@ -21,7 +21,7 @@ func NewRegionClient(sess *session.Session) *RegionClient {
 }
 
 // List ...
-func (f *RegionClient) List() (models.GetRegionsOKBodyRegions, error) {
+func (f *RegionClient) List() ([]*models.Region, error) {
 	params := geography.NewGetRegionsParams()
 	resp, err := f.session.Riaas.Geography.GetRegions(params, session.Auth(f.session))
 

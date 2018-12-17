@@ -24,7 +24,7 @@ func NewInstanceClient(sess *session.Session) *InstanceClient {
 }
 
 // ListWithFilter ...
-func (f *InstanceClient) ListWithFilter(tag, zone, vpcid, subnetid, resourcegroupID, start string) (models.GetInstancesOKBodyInstances, string, error) {
+func (f *InstanceClient) ListWithFilter(tag, zone, vpcid, subnetid, resourcegroupID, start string) ([]*models.Instance, string, error) {
 	params := compute.NewGetInstancesParams()
 
 	if tag != "" {
@@ -53,13 +53,13 @@ func (f *InstanceClient) ListWithFilter(tag, zone, vpcid, subnetid, resourcegrou
 	}
 
 	if resp.Payload.Instances != nil {
-		return resp.Payload.Instances, utils.GetNext(resp.Payload.Next), nil
+		return resp.Payload.Instances, utils.GetPageLink(resp.Payload.Next), nil
 	}
-	return models.GetInstancesOKBodyInstances(resp.Payload.Servers), utils.GetNext(resp.Payload.Next), nil
+	return resp.Payload.Instances, utils.GetPageLink(resp.Payload.Next), nil
 }
 
 // List ...
-func (f *InstanceClient) List(start string) (models.GetInstancesOKBodyInstances, string, error) {
+func (f *InstanceClient) List(start string) ([]*models.Instance, string, error) {
 	return f.ListWithFilter("", "", "", "", "", start)
 }
 
@@ -114,7 +114,7 @@ func (f *InstanceClient) Update(id, name, profileName string) (*models.Instance,
 		body.Name = name
 	}
 	if profileName != "" {
-		var profile = models.PatchInstancesIDParamsBodyProfile{
+		var profile = models.NameLocator{
 			Name: profileName,
 		}
 		body.Profile = &profile
@@ -154,7 +154,7 @@ func (f *InstanceClient) CreateAction(instanceid, actiontype string) (*models.In
 }
 
 // ListActions ...
-func (f *InstanceClient) ListActions(instanceid, start string) (models.GetInstancesInstanceIDActionsOKBodyActions, string, error) {
+func (f *InstanceClient) ListActions(instanceid, start string) ([]*models.InstanceAction, string, error) {
 	params := compute.NewGetInstancesInstanceIDActionsParams().WithInstanceID(instanceid)
 	if start != "" {
 		params = params.WithStart(&start)
@@ -163,7 +163,7 @@ func (f *InstanceClient) ListActions(instanceid, start string) (models.GetInstan
 	if err != nil {
 		return nil, "", errors.ToError(err)
 	}
-	return resp.Payload.Actions, utils.GetNext(resp.Payload.Next), nil
+	return resp.Payload.Actions, utils.GetPageLink(resp.Payload.Next), nil
 }
 
 // GetAction ...
@@ -187,13 +187,13 @@ func (f *InstanceClient) DeleteAction(instanceid, actionid string) error {
 }
 
 // ListProfiles ...
-func (f *InstanceClient) ListProfiles(start string) (models.GetInstanceProfilesOKBodyProfiles, string, error) {
+func (f *InstanceClient) ListProfiles(start string) ([]*models.InstanceProfile, string, error) {
 	params := compute.NewGetInstanceProfilesParams()
 	resp, err := f.session.Riaas.Compute.GetInstanceProfiles(params, session.Auth(f.session))
 	if err != nil {
 		return nil, "", errors.ToError(err)
 	}
-	return resp.Payload.Profiles, utils.GetNext(resp.Payload.Next), nil
+	return resp.Payload.Profiles, utils.GetPageLink(resp.Payload.Next), nil
 }
 
 // GetProfile ...
@@ -207,7 +207,7 @@ func (f *InstanceClient) GetProfile(profileName string) (*models.InstanceProfile
 }
 
 // ListInterfacesWithFilter ...
-func (f *InstanceClient) ListInterfacesWithFilter(instanceid, resourcegroupID, tag string) (models.GetInstancesInstanceIDNetworkInterfacesOKBodyNetworkInterfaces, error) {
+func (f *InstanceClient) ListInterfacesWithFilter(instanceid, resourcegroupID, tag string) ([]*models.InstanceNetworkInterface, error) {
 	params := compute.NewGetInstancesInstanceIDNetworkInterfacesParams().WithInstanceID(instanceid)
 	if resourcegroupID != "" {
 		params = params.WithResourceGroupID(&resourcegroupID)
@@ -224,7 +224,7 @@ func (f *InstanceClient) ListInterfacesWithFilter(instanceid, resourcegroupID, t
 }
 
 // ListInterfaces ...
-func (f *InstanceClient) ListInterfaces(instanceid string) (models.GetInstancesInstanceIDNetworkInterfacesOKBodyNetworkInterfaces, error) {
+func (f *InstanceClient) ListInterfaces(instanceid string) ([]*models.InstanceNetworkInterface, error) {
 	return f.ListInterfacesWithFilter(instanceid, "", "")
 }
 
@@ -242,9 +242,9 @@ func (f *InstanceClient) GetInterface(instanceid, interfaceid string) (*models.I
 
 // AddInterface ...
 func (f *InstanceClient) AddInterface(instanceid, name, subnetID string, portSpeed int, v4address, v6address string,
-	secondaryAddresses, securityGroupIDs []string, resourcegroupID string, tags []string) (*models.InstanceNetworkInterface, error) {
+	secondaryAddresses, securityGroupIDs []string, tags []string) (*models.InstanceNetworkInterface, error) {
 
-	body := models.PostInstancesInstanceIDNetworkInterfacesParamsBody{}
+	body := models.NetworkInterfaceTemplate{}
 	body.Name = name
 	body.PortSpeed = int64(portSpeed)
 	if v6address != "" {
@@ -259,9 +259,9 @@ func (f *InstanceClient) AddInterface(instanceid, name, subnetID string, portSpe
 	}
 
 	if len(securityGroupIDs) != 0 {
-		sgs := make([]*models.PostInstancesInstanceIDNetworkInterfacesParamsBodySecurityGroupsItems, len(securityGroupIDs))
+		sgs := make([]*models.ResourceLocator, len(securityGroupIDs))
 		for i, sgid := range securityGroupIDs {
-			sgref := models.PostInstancesInstanceIDNetworkInterfacesParamsBodySecurityGroupsItems{
+			sgref := models.ResourceLocator{
 				ID: strfmt.UUID(sgid),
 			}
 			sgs[i] = &sgref
@@ -269,17 +269,10 @@ func (f *InstanceClient) AddInterface(instanceid, name, subnetID string, portSpe
 		body.SecurityGroups = sgs
 	}
 
-	subnetref := models.PostInstancesInstanceIDNetworkInterfacesParamsBodySubnet{
+	subnetref := models.ResourceLocator{
 		ID: strfmt.UUID(subnetID),
 	}
 	body.Subnet = &subnetref
-
-	if resourcegroupID != "" {
-		rgref := models.PostInstancesInstanceIDNetworkInterfacesParamsBodyResourceGroup{
-			ID: strfmt.UUID(resourcegroupID),
-		}
-		body.ResourceGroup = &rgref
-	}
 
 	if len(tags) != 0 {
 		body.Tags = tags
@@ -322,7 +315,7 @@ func (f *InstanceClient) UpdateInterface(instanceid, interfaceid, name string, p
 }
 
 // ListInterfaceFloatingIPs ...
-func (f *InstanceClient) ListInterfaceFloatingIPs(instanceid, interfaceid string) (models.GetInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIpsOKBodyFloatingIps, error) {
+func (f *InstanceClient) ListInterfaceFloatingIPs(instanceid, interfaceid string) ([]*models.FloatingIP, error) {
 	params := compute.NewGetInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIpsParams().
 		WithInstanceID(instanceid).WithNetworkInterfaceID(interfaceid)
 	resp, err := f.session.Riaas.Compute.GetInstancesInstanceIDNetworkInterfacesNetworkInterfaceIDFloatingIps(params, session.Auth(f.session))
@@ -367,7 +360,7 @@ func (f *InstanceClient) RemoveInterfaceFloatingIP(instanceid, interfaceid, addr
 }
 
 // ListVolAttachmentsWithFilter ...
-func (f *InstanceClient) ListVolAttachmentsWithFilter(instanceid, resourcegroupID, tag string) (models.GetInstancesInstanceIDVolumeAttachmentsOKBodyVolumeAttachments, error) {
+func (f *InstanceClient) ListVolAttachmentsWithFilter(instanceid, resourcegroupID, tag string) ([]*models.InstanceVolumeAttachment, error) {
 	params := compute.NewGetInstancesInstanceIDVolumeAttachmentsParams().WithInstanceID(instanceid)
 	if resourcegroupID != "" {
 		params = params.WithResourceGroupID(&resourcegroupID)
@@ -384,7 +377,7 @@ func (f *InstanceClient) ListVolAttachmentsWithFilter(instanceid, resourcegroupI
 }
 
 // ListVolAttachments ...
-func (f *InstanceClient) ListVolAttachments(instanceid string) (models.GetInstancesInstanceIDVolumeAttachmentsOKBodyVolumeAttachments, error) {
+func (f *InstanceClient) ListVolAttachments(instanceid string) ([]*models.InstanceVolumeAttachment, error) {
 	return f.ListVolAttachmentsWithFilter(instanceid, "", "")
 }
 
@@ -409,13 +402,6 @@ func (f *InstanceClient) AttachVolume(instanceid, volumeID, name string, resourc
 	}
 	body.Volume = &models.PostInstancesInstanceIDVolumeAttachmentsParamsBodyVolume{
 		ID: strfmt.UUID(volumeID),
-	}
-
-	if resourcegroupID != "" {
-		rgref := models.PostInstancesInstanceIDVolumeAttachmentsParamsBodyResourceGroup{
-			ID: strfmt.UUID(resourcegroupID),
-		}
-		body.ResourceGroup = &rgref
 	}
 
 	if len(tags) != 0 {

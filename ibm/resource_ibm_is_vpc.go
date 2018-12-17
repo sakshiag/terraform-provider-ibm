@@ -2,7 +2,9 @@ package ibm
 
 import (
 	"log"
+	"time"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.ibm.com/Bluemix/riaas-go-client/clients/network"
 	iserrors "github.ibm.com/Bluemix/riaas-go-client/errors"
@@ -15,6 +17,8 @@ const (
 	isVPCResourceGroup     = "resource_group"
 	isVPCStatus            = "status"
 	isVPCTags              = "tags"
+	isVPCDeleting          = "deleting"
+	isVPCDeleted           = "done"
 )
 
 func resourceIBMISVPC() *schema.Resource {
@@ -25,6 +29,11 @@ func resourceIBMISVPC() *schema.Resource {
 		Delete:   resourceIBMISVPCDelete,
 		Exists:   resourceIBMISVPCExists,
 		Importer: &schema.ResourceImporter{},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Delete: schema.DefaultTimeout(60 * time.Minute),
+		},
 
 		Schema: map[string]*schema.Schema{
 			isVPCDefaultNetworkACL: {
@@ -138,8 +147,50 @@ func resourceIBMISVPCDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	_, err = isWaitForVPCDeleted(vpcC, d.Id(), d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return err
+	}
+
 	d.SetId("")
 	return nil
+}
+
+func isWaitForVPCDeleted(vpc *network.VPCClient, id string, timeout time.Duration) (interface{}, error) {
+	log.Printf("Waiting for VPC (%s) to be deleted.", id)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"retry", isVPCDeleting},
+		Target:     []string{},
+		Refresh:    isVPCDeleteRefreshFunc(vpc, id),
+		Timeout:    timeout,
+		Delay:      10 * time.Second,
+		MinTimeout: 10 * time.Second,
+	}
+
+	return stateConf.WaitForState()
+}
+
+func isVPCDeleteRefreshFunc(vpc *network.VPCClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		log.Printf("[DEBUG] delete function here")
+		VPC, err := vpc.Get(id)
+		if err == nil {
+			return VPC, isVPCDeleting, nil
+		}
+
+		iserror, ok := err.(iserrors.RiaasError)
+		if ok {
+			log.Printf("[DEBUG] %s", iserror.Error())
+			if len(iserror.Payload.Errors) == 1 &&
+				iserror.Payload.Errors[0].Code == "not_found" {
+				log.Printf("[DEBUG] returning deleted")
+				return nil, isVPCDeleted, nil
+			}
+		}
+		log.Printf("[DEBUG] returning x")
+		return nil, isVPCDeleting, err
+	}
 }
 
 func resourceIBMISVPCExists(d *schema.ResourceData, meta interface{}) (bool, error) {

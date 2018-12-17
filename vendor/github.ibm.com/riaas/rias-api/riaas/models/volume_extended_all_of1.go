@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -17,16 +19,45 @@ import (
 type VolumeExtendedAllOf1 struct {
 
 	// volume attachments
-	VolumeAttachments VolumeExtendedAllOf1VolumeAttachments `json:"volume_attachments,omitempty"`
+	VolumeAttachments []*VolumeExtendedAllOf1VolumeAttachmentsItems `json:"volume_attachments,omitempty"`
 }
 
 // Validate validates this volume extended all of1
 func (m *VolumeExtendedAllOf1) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateVolumeAttachments(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *VolumeExtendedAllOf1) validateVolumeAttachments(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.VolumeAttachments) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.VolumeAttachments); i++ {
+		if swag.IsZero(m.VolumeAttachments[i]) { // not required
+			continue
+		}
+
+		if m.VolumeAttachments[i] != nil {
+			if err := m.VolumeAttachments[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("volume_attachments" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
