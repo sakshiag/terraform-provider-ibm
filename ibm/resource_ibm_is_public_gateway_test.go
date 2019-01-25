@@ -18,7 +18,7 @@ func TestAccIBMISPublicGateway_basic(t *testing.T) {
 	name1 := fmt.Sprintf("terraformpublicgwuat_create_step_name_%d", acctest.RandInt())
 	//name2 := fmt.Sprintf("terraformpublicgwuat_update_step_name_%d", acctest.RandInt())
 
-	zone := "us-south-2"
+	zone := "us-south-1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

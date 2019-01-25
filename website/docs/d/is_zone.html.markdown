@@ -16,7 +16,7 @@ Import the details of an existing IBM Cloud zone in a particular region as a rea
 ```hcl
 
 data "ibm_is_zone" "ds_zone" {
-    name = "us-south-2"
+    name = "us-south-1"
     region = "us-south"
 }
 

@@ -34,7 +34,8 @@ resource "ibm_is_public_gateway" "testacc_gateway" {
 
 ibm_is_public_gateway provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
 
-* `create` - (Default 60 minutes) Used for creating Instance.
+* `create` - (Default 60 minutes) Used for creating public gateway.
+* `delete` - (Default 60 minutes) Used for deleting public gateway.
 
 ## Argument Reference
 
