@@ -23,6 +23,7 @@ func NewRegionClient(sess *session.Session) *RegionClient {
 // List ...
 func (f *RegionClient) List() ([]*models.Region, error) {
 	params := geography.NewGetRegionsParams()
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.Geography.GetRegions(params, session.Auth(f.session))
 
 	if err != nil {
@@ -34,6 +35,7 @@ func (f *RegionClient) List() ([]*models.Region, error) {
 // Get ...
 func (f *RegionClient) Get(name string) (*models.Region, error) {
 	params := geography.NewGetRegionsNameParams().WithName(name)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.Geography.GetRegionsName(params, session.Auth(f.session))
 
 	if err != nil {

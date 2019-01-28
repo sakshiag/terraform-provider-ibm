@@ -48,6 +48,7 @@ func (f *SubnetClient) ListWithFilter(tag, zoneName, vpcID, networkaclID, resour
 	if resourcegroupID != "" {
 		params = params.WithResourceGroupID(&resourcegroupID)
 	}
+	params.Version = "2019-01-01"
 
 	resp, err := f.session.Riaas.Network.GetSubnets(params, session.Auth(f.session))
 
@@ -61,6 +62,7 @@ func (f *SubnetClient) ListWithFilter(tag, zoneName, vpcID, networkaclID, resour
 // Get ...
 func (f *SubnetClient) Get(id string) (*models.Subnet, error) {
 	params := network.NewGetSubnetsIDParams().WithID(id)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.Network.GetSubnetsID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -128,6 +130,7 @@ func (f *SubnetClient) Create(name, zoneName, vpcID, networkaclID, publicgwID, g
 	}
 
 	params := network.NewPostSubnetsParams().WithBody(&body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.Network.PostSubnets(params, session.Auth(f.session))
 	if err != nil {
 		return nil, riaaserrors.ToError(err)
@@ -139,6 +142,7 @@ func (f *SubnetClient) Create(name, zoneName, vpcID, networkaclID, publicgwID, g
 // Delete ...
 func (f *SubnetClient) Delete(id string) error {
 	params := network.NewDeleteSubnetsIDParams().WithID(id)
+	params.Version = "2019-01-01"
 	_, err := f.session.Riaas.Network.DeleteSubnetsID(params, session.Auth(f.session))
 	return riaaserrors.ToError(err)
 }
@@ -168,6 +172,7 @@ func (f *SubnetClient) Update(id, name, networkaclID, publicgwID string) (*model
 	}
 
 	params := network.NewPatchSubnetsIDParams().WithID(id).WithBody(&body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.Network.PatchSubnetsID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, riaaserrors.ToError(err)

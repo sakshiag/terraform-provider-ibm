@@ -40,7 +40,7 @@ func (f *LoadBalancerClient) ListWithFilter(tag, start, resourcegroupID string) 
 	if resourcegroupID != "" {
 		params = params.WithResourceGroupID(&resourcegroupID)
 	}
-
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancers(params, session.Auth(f.session))
 
 	if err != nil {
@@ -53,6 +53,7 @@ func (f *LoadBalancerClient) ListWithFilter(tag, start, resourcegroupID string) 
 // Create ...
 func (f *LoadBalancerClient) Create(lbaasdef *l_baas.PostLoadBalancersParams) (*models.LoadBalancer, error) {
 	params := l_baas.NewPostLoadBalancersParams().WithBody(lbaasdef.Body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PostLoadBalancers(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -64,6 +65,7 @@ func (f *LoadBalancerClient) Create(lbaasdef *l_baas.PostLoadBalancersParams) (*
 // Delete ...
 func (f *LoadBalancerClient) Delete(id string) error {
 	params := l_baas.NewDeleteLoadBalancersIDParams().WithID(id)
+	params.Version = "2019-01-01"
 	_, err := f.session.Riaas.LBaas.DeleteLoadBalancersID(params, session.Auth(f.session))
 	if err != nil {
 		return errors.ToError(err)
@@ -74,6 +76,7 @@ func (f *LoadBalancerClient) Delete(id string) error {
 // Get ...
 func (f *LoadBalancerClient) Get(id string) (*models.LoadBalancer, error) {
 	params := l_baas.NewGetLoadBalancersIDParams().WithID(id)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -91,6 +94,7 @@ func (f *LoadBalancerClient) Update(id, name string) (*models.LoadBalancer, erro
 	}
 
 	params := l_baas.NewPatchLoadBalancersIDParams().WithID(id).WithBody(body.Body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PatchLoadBalancersID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -102,6 +106,7 @@ func (f *LoadBalancerClient) Update(id, name string) (*models.LoadBalancer, erro
 // GetListeners ...
 func (f *LoadBalancerClient) GetListeners(id string) (*models.ListenerCollection, error) {
 	params := l_baas.NewGetLoadBalancersIDListenersParams().WithID(id)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersIDListeners(params, session.Auth(f.session))
 
 	if err != nil {
@@ -115,6 +120,7 @@ func (f *LoadBalancerClient) GetListeners(id string) (*models.ListenerCollection
 func (f *LoadBalancerClient) CreateListeners(lbaasListners *l_baas.PostLoadBalancersIDListenersParams) (*models.Listener, error) {
 
 	params := l_baas.NewPostLoadBalancersIDListenersParams().WithBody(lbaasListners.Body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PostLoadBalancersIDListeners(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -126,6 +132,7 @@ func (f *LoadBalancerClient) CreateListeners(lbaasListners *l_baas.PostLoadBalan
 // GetPools ...
 func (f *LoadBalancerClient) GetPools(id string) (*models.PoolCollection, error) {
 	params := l_baas.NewGetLoadBalancersIDPoolsParams().WithID(id)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersIDPools(params, session.Auth(f.session))
 
 	if err != nil {
@@ -139,6 +146,7 @@ func (f *LoadBalancerClient) GetPools(id string) (*models.PoolCollection, error)
 func (f *LoadBalancerClient) CreatePool(lbaasPool *l_baas.PostLoadBalancersIDPoolsParams) (*models.Pool, error) {
 
 	params := l_baas.NewPostLoadBalancersIDPoolsParams().WithBody(lbaasPool.Body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PostLoadBalancersIDPools(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -150,6 +158,7 @@ func (f *LoadBalancerClient) CreatePool(lbaasPool *l_baas.PostLoadBalancersIDPoo
 // GetStatistics ...
 func (f *LoadBalancerClient) GetStatistics(id string) (*models.LoadBalancerStatistics, error) {
 	params := l_baas.NewGetLoadBalancersIDStatisticsParams().WithID(id)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersIDStatistics(params, session.Auth(f.session))
 
 	if err != nil {
@@ -162,6 +171,7 @@ func (f *LoadBalancerClient) GetStatistics(id string) (*models.LoadBalancerStati
 // DeleteListener ...
 func (f *LoadBalancerClient) DeleteListener(lbaasId, listenerId string) error {
 	params := l_baas.NewDeleteLoadBalancersIDListenersListenerIDParams().WithID(lbaasId).WithListenerID(listenerId)
+	params.Version = "2019-01-01"
 	_, err := f.session.Riaas.LBaas.DeleteLoadBalancersIDListenersListenerID(params, session.Auth(f.session))
 	if err != nil {
 		return errors.ToError(err)
@@ -172,6 +182,7 @@ func (f *LoadBalancerClient) DeleteListener(lbaasId, listenerId string) error {
 // GetListener ...
 func (f *LoadBalancerClient) GetListener(lbaasId, listenerId string) (*models.Listener, error) {
 	params := l_baas.NewGetLoadBalancersIDListenersListenerIDParams().WithID(lbaasId).WithListenerID(listenerId)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersIDListenersListenerID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -198,6 +209,7 @@ func (f *LoadBalancerClient) UpdateListener(lbaasId, listenerId, crn, href, prot
 		Protocol:            protocol,
 	}
 	params := l_baas.NewPatchLoadBalancersIDListenersListenerIDParams().WithID(lbaasId).WithListenerID(listenerId).WithBody(&body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PatchLoadBalancersIDListenersListenerID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -209,6 +221,7 @@ func (f *LoadBalancerClient) UpdateListener(lbaasId, listenerId, crn, href, prot
 // DeleteListener ...
 func (f *LoadBalancerClient) DeletePool(lbaasId, poolId string) error {
 	params := l_baas.NewDeleteLoadBalancersIDPoolsPoolIDParams().WithID(lbaasId).WithPoolID(poolId)
+	params.Version = "2019-01-01"
 	_, err := f.session.Riaas.LBaas.DeleteLoadBalancersIDPoolsPoolID(params, session.Auth(f.session))
 	if err != nil {
 		return errors.ToError(err)
@@ -219,6 +232,7 @@ func (f *LoadBalancerClient) DeletePool(lbaasId, poolId string) error {
 // GetPool ...
 func (f *LoadBalancerClient) GetPool(lbaasId, poolId string) (*models.Pool, error) {
 	params := l_baas.NewGetLoadBalancersIDPoolsPoolIDParams().WithID(lbaasId).WithPoolID(poolId)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersIDPoolsPoolID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -239,6 +253,7 @@ func (f *LoadBalancerClient) UpdatePool(lbaasId, poolId, algorithm, name, protoc
 		SessionPersistence: &sessionTemplate,
 	}
 	params := l_baas.NewPatchLoadBalancersIDPoolsPoolIDParams().WithID(lbaasId).WithPoolID(poolId).WithBody(&body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PatchLoadBalancersIDPoolsPoolID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -250,6 +265,7 @@ func (f *LoadBalancerClient) UpdatePool(lbaasId, poolId, algorithm, name, protoc
 // GetPoolMembers ...
 func (f *LoadBalancerClient) GetPoolMembers(lbaasId, poolId string) (*models.MemberCollection, error) {
 	params := l_baas.NewGetLoadBalancersIDPoolsPoolIDMembersParams().WithID(lbaasId).WithPoolID(poolId)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersIDPoolsPoolIDMembers(params, session.Auth(f.session))
 
 	if err != nil {
@@ -271,6 +287,7 @@ func (f *LoadBalancerClient) CreatePoolMember(lbaasId, poolId, address string, p
 		Target: &memTemplate,
 	}
 	params := l_baas.NewPostLoadBalancersIDPoolsPoolIDMembersParams().WithID(lbaasId).WithPoolID(poolId).WithBody(&body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PostLoadBalancersIDPoolsPoolIDMembers(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -291,6 +308,7 @@ func (f *LoadBalancerClient) UpdatePoolMember(lbaasId, poolId, memberId, address
 	body.Target = &memTemplate
 
 	params := l_baas.NewPatchLoadBalancersIDPoolsPoolIDMembersMemberIDParams().WithID(lbaasId).WithPoolID(poolId).WithMemberID(memberId).WithBody(body)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.PatchLoadBalancersIDPoolsPoolIDMembersMemberID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -302,6 +320,7 @@ func (f *LoadBalancerClient) UpdatePoolMember(lbaasId, poolId, memberId, address
 // DeletePoolMember ...
 func (f *LoadBalancerClient) DeletePoolMember(lbaasId, poolId, memberId string) error {
 	params := l_baas.NewDeleteLoadBalancersIDPoolsPoolIDMembersMemberIDParams().WithID(lbaasId).WithPoolID(poolId).WithMemberID(memberId)
+	params.Version = "2019-01-01"
 	_, err := f.session.Riaas.LBaas.DeleteLoadBalancersIDPoolsPoolIDMembersMemberID(params, session.Auth(f.session))
 	if err != nil {
 		return errors.ToError(err)
@@ -312,6 +331,7 @@ func (f *LoadBalancerClient) DeletePoolMember(lbaasId, poolId, memberId string) 
 // GetPoolMembers ...
 func (f *LoadBalancerClient) GetPoolMember(lbaasId, poolId, memberId string) (*models.Member, error) {
 	params := l_baas.NewGetLoadBalancersIDPoolsPoolIDMembersMemberIDParams().WithID(lbaasId).WithPoolID(poolId).WithMemberID(memberId)
+	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.LBaas.GetLoadBalancersIDPoolsPoolIDMembersMemberID(params, session.Auth(f.session))
 
 	if err != nil {
