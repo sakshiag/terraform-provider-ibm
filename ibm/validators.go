@@ -190,6 +190,17 @@ func validateMaxConn(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
+func validateKeyLifeTime(v interface{}, k string) (ws []string, errors []error) {
+	secs := v.(int)
+	if secs < 300 || secs > 86400 {
+		errors = append(errors, fmt.Errorf(
+			"%q must be between 300 and 86400",
+			k))
+		return
+	}
+	return
+}
+
 func validateWeight(v interface{}, k string) (ws []string, errors []error) {
 	weight := v.(int)
 	if weight < 0 || weight > 100 {
