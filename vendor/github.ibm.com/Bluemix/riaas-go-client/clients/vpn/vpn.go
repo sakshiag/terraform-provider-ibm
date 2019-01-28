@@ -270,7 +270,7 @@ func (f *VpnClient) List(limit int32, resourceGrpId, start string) (*models.VPNG
 }
 
 // Create ...
-func (f *VpnClient) Create(name, crn, subnetId, subnetName, resourceGrpId string) (*models.VPNGateway, error) {
+func (f *VpnClient) Create(name, subnetId, resourceGrpId string) (*models.VPNGateway, error) {
 	var body = models.VPNGatewayTemplate{}
 	body.Name = name
 	if resourceGrpId != "" {
@@ -279,14 +279,15 @@ func (f *VpnClient) Create(name, crn, subnetId, subnetName, resourceGrpId string
 		}
 		body.ResourceGroup = &rgref
 	}
-	if crn != "" && subnetId != "" && subnetName != "" {
+
+	if subnetId != "" {
+
 		subnetref := models.VPNGatewayTemplateSubnet{
-			ID:   strfmt.UUID(subnetId),
-			Name: subnetName,
-			Crn:  crn,
+			ID: strfmt.UUID(subnetId),
 		}
 		body.Subnet = &subnetref
 	}
+
 	params := v_p_naa_s.NewPostVpnGatewaysParams().WithBody(&body)
 	params.Version = "2019-01-01"
 	resp, err := f.session.Riaas.VPNaaS.PostVpnGateways(params, session.Auth(f.session))
