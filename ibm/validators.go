@@ -60,6 +60,26 @@ func validateAllowedStringValue(validValues []string) schema.SchemaValidateFunc 
 	}
 }
 
+func validateAllowedIntValue(is []int) schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		value := v.(int)
+		existed := false
+		for _, i := range is {
+			if i == value {
+				existed = true
+				break
+			}
+		}
+		if !existed {
+			errors = append(errors, fmt.Errorf(
+				"%q must contain a valid int value should in array %#v, got %q",
+				k, is, value))
+		}
+		return
+
+	}
+}
+
 func validateRoutePath(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	//Somehow API allows this
