@@ -20,6 +20,7 @@ const (
 	isVPNGatewayDeleted          = "done"
 	isVPNGatewayProvisioning     = "provisioning"
 	isVPNGatewayProvisioningDone = "done"
+	isVPNGatewayPublicIPAddress  = "public_ip_address"
 )
 
 func resourceIBMISVPNGateway() *schema.Resource {
@@ -67,6 +68,11 @@ func resourceIBMISVPNGateway() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			isVPNGatewayPublicIPAddress: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -110,6 +116,7 @@ func resourceIBMISVPNGatewayRead(d *schema.ResourceData, meta interface{}) error
 	d.Set(isVPNGatewaySubnet, VPNGateway.Subnet.ID)
 	d.Set(isVPNGatewayResourceGroup, VPNGateway.ResourceGroup.ID)
 	d.Set(isVPNGatewayStatus, VPNGateway.Status)
+	d.Set(isVPNGatewayPublicIPAddress, VPNGateway.PublicIP.Address)
 	return nil
 }
 

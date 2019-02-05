@@ -822,3 +822,25 @@ func validateGeneration(v interface{}, k string) (ws []string, errors []error) {
 	}
 	return
 }
+
+func validateDeadPeerDetectionInterval(v interface{}, k string) (ws []string, errors []error) {
+	secs := v.(int)
+	if secs < 15 || secs > 86399 {
+		errors = append(errors, fmt.Errorf(
+			"%q must be between 15 and 86399",
+			k))
+		return
+	}
+	return
+}
+
+func validateDeadPeerDetectionTimeout(v interface{}, k string) (ws []string, errors []error) {
+	secs := v.(int)
+	if secs < 15 || secs > 86399 {
+		errors = append(errors, fmt.Errorf(
+			"%q must be between 15 and 86399",
+			k))
+		return
+	}
+	return
+}

@@ -195,6 +195,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_is_subnet":                             resourceIBMISSubnet(),
 			"ibm_is_ssh_key":                            resourceIBMISSSHKey(),
 			"ibm_is_vpn_gateway":                        resourceIBMISVPNGateway(),
+			"ibm_is_vpn_gateway_connection":             resourceIBMISVPNGatewayConnection(),
 			"ibm_is_vpc":                                resourceIBMISVPC(),
 			"ibm_lb":                                    resourceIBMLb(),
 			"ibm_lbaas":                                 resourceIBMLbaas(),
