@@ -36,7 +36,7 @@ func (f *VPCClient) ListWithFilter(tag, start string) ([]*models.Vpc, string, er
 	if start != "" {
 		params = params.WithStart(&start)
 	}
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 
 	resp, err := f.session.Riaas.Network.GetVpcs(params, session.Auth(f.session))
 
@@ -50,7 +50,7 @@ func (f *VPCClient) ListWithFilter(tag, start string) ([]*models.Vpc, string, er
 // Get ...
 func (f *VPCClient) Get(id string) (*models.Vpc, error) {
 	params := network.NewGetVpcsIDParams().WithID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.GetVpcsID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -74,7 +74,7 @@ func (f *VPCClient) Create(name string, isDefault bool, defaultacl, rg string) (
 	}
 
 	params := network.NewPostVpcsParams().WithBody(&body)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.PostVpcs(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -86,7 +86,7 @@ func (f *VPCClient) Create(name string, isDefault bool, defaultacl, rg string) (
 // Delete ...
 func (f *VPCClient) Delete(id string) error {
 	params := network.NewDeleteVpcsIDParams().WithID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	_, err := f.session.Riaas.Network.DeleteVpcsID(params, session.Auth(f.session))
 	return errors.ToError(err)
 }
@@ -97,7 +97,7 @@ func (f *VPCClient) Update(id, name string) (*models.Vpc, error) {
 		Name: name,
 	}
 	params := network.NewPatchVpcsIDParams().WithID(id).WithBody(&body)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.PatchVpcsID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -112,7 +112,7 @@ func (f *VPCClient) UpdateDefaultNWACL(id, aclid string) (*models.NetworkACL, er
 		ID: strfmt.UUID(aclid),
 	}
 	params := network.NewPutVpcsVpcIDDefaultNetworkACLParams().WithVpcID(id).WithBody(&body)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.PutVpcsVpcIDDefaultNetworkACL(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -124,7 +124,7 @@ func (f *VPCClient) UpdateDefaultNWACL(id, aclid string) (*models.NetworkACL, er
 // ListPrefixes ...
 func (f *VPCClient) ListPrefixes(id string) ([]*models.AddressPoolPrefix, error) {
 	params := network.NewGetVpcsVpcIDAddressPrefixesParams().WithVpcID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.GetVpcsVpcIDAddressPrefixes(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -136,7 +136,7 @@ func (f *VPCClient) ListPrefixes(id string) ([]*models.AddressPoolPrefix, error)
 // GetSecurityGroups ...
 func (f *VPCClient) GetSecurityGroup(id string) (*models.DefaultSecurityGroup, error) {
 	params := network.NewGetVpcsVpcIDDefaultSecurityGroupParams().WithVpcID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.GetVpcsVpcIDDefaultSecurityGroup(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)

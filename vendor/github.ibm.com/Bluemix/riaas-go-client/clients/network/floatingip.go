@@ -42,7 +42,7 @@ func (f *FloatingIPClient) ListWithFilter(tag, zoneName, resourcegroupID, start 
 	if start != "" {
 		params = params.WithStart(&start)
 	}
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.GetFloatingIps(params, session.Auth(f.session))
 
 	if err != nil {
@@ -55,7 +55,7 @@ func (f *FloatingIPClient) ListWithFilter(tag, zoneName, resourcegroupID, start 
 // Get ...
 func (f *FloatingIPClient) Get(id string) (*models.FloatingIP, error) {
 	params := network.NewGetFloatingIpsIDParams().WithID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.GetFloatingIpsID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -96,7 +96,7 @@ func (f *FloatingIPClient) Create(name, zoneName, resourcegroupID, targetID stri
 	}
 
 	params := network.NewPostFloatingIpsParams().WithBody(&body)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.PostFloatingIps(params, session.Auth(f.session))
 	if err != nil {
 		return nil, riaaserrors.ToError(err)
@@ -108,7 +108,7 @@ func (f *FloatingIPClient) Create(name, zoneName, resourcegroupID, targetID stri
 // Delete ...
 func (f *FloatingIPClient) Delete(id string) error {
 	params := network.NewDeleteFloatingIpsIDParams().WithID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	_, err := f.session.Riaas.Network.DeleteFloatingIpsID(params, session.Auth(f.session))
 	return riaaserrors.ToError(err)
 }
@@ -130,7 +130,7 @@ func (f *FloatingIPClient) Update(id, name, targetID string) (*models.FloatingIP
 	}
 
 	params := network.NewPatchFloatingIpsIDParams().WithID(id).WithBody(&body)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.PatchFloatingIpsID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, riaaserrors.ToError(err)

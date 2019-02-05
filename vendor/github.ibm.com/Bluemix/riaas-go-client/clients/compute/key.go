@@ -38,7 +38,7 @@ func (f *KeyClient) ListWithFilter(tag, resourceGroupID, start string) ([]*model
 	if start != "" {
 		params.WithStart(&start)
 	}
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 
 	resp, err := f.session.Riaas.Compute.GetKeys(params, session.Auth(f.session))
 
@@ -52,7 +52,7 @@ func (f *KeyClient) ListWithFilter(tag, resourceGroupID, start string) ([]*model
 // Get ...
 func (f *KeyClient) Get(id string) (*models.Key, error) {
 	params := compute.NewGetKeysIDParams().WithID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Compute.GetKeysID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -71,7 +71,7 @@ func (f *KeyClient) Create(name, keystring string) (*models.Key, error) {
 		Type:      &keytype,
 	}
 	params := compute.NewPostKeysParams().WithBody(&body)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Compute.PostKeys(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -83,7 +83,7 @@ func (f *KeyClient) Create(name, keystring string) (*models.Key, error) {
 // Delete ...
 func (f *KeyClient) Delete(id string) error {
 	params := compute.NewDeleteKeysIDParams().WithID(id)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	_, err := f.session.Riaas.Compute.DeleteKeysID(params, session.Auth(f.session))
 	return err
 }
@@ -94,7 +94,7 @@ func (f *KeyClient) Update(id, name string) (*models.Key, error) {
 		Name: name,
 	}
 	params := compute.NewPatchKeysIDParams().WithID(id).WithBody(&body)
-	params.Version = "2019-01-01"
+	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Compute.PatchKeysID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
