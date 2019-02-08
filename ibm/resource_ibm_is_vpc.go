@@ -11,14 +11,15 @@ import (
 )
 
 const (
-	isVPCDefaultNetworkACL = "default_network_acl"
-	isVPCIsDefault         = "is_default"
-	isVPCName              = "name"
-	isVPCResourceGroup     = "resource_group"
-	isVPCStatus            = "status"
-	isVPCTags              = "tags"
-	isVPCDeleting          = "deleting"
-	isVPCDeleted           = "done"
+	isVPCDefaultNetworkACL     = "default_network_acl"
+	isVPCIsDefault             = "is_default"
+	isVPCIDefaultSecurityGroup = "default_security_group"
+	isVPCName                  = "name"
+	isVPCResourceGroup         = "resource_group"
+	isVPCStatus                = "status"
+	isVPCTags                  = "tags"
+	isVPCDeleting              = "deleting"
+	isVPCDeleted               = "done"
 )
 
 func resourceIBMISVPC() *schema.Resource {
@@ -63,6 +64,11 @@ func resourceIBMISVPC() *schema.Resource {
 			},
 
 			isVPCStatus: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			isVPCIDefaultSecurityGroup: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -118,6 +124,11 @@ func resourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		log.Printf("[DEBUG] vpc default network acl is  null")
 		d.Set(isVPCDefaultNetworkACL, nil)
+	}
+	if vpc.DefaultSecurityGroup != nil {
+		d.Set(isVPCIDefaultSecurityGroup, vpc.DefaultSecurityGroup.ID)
+	} else {
+		d.Set(isVPCIDefaultSecurityGroup, nil)
 	}
 	return nil
 }
