@@ -37,4 +37,5 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The unique identifier of the VPC.
+* `default_security_group` - The unique identifier of the VPC default security group.
 * `status` - The status of VPC.
