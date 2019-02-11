@@ -23,26 +23,26 @@ func TestAccIBMISIPSecPolicy_basic(t *testing.T) {
 				Config: testAccCheckIBMISIPSecPolicyConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "name", name),
+						"ibm_is_ipsec_policy.example", "name", name),
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "authentication_algorithm", "md5"),
+						"ibm_is_ipsec_policy.example", "authentication_algorithm", "md5"),
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "encryption_algorithm", "3des"),
+						"ibm_is_ipsec_policy.example", "encryption_algorithm", "3des"),
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "pfs", "disabled"),
+						"ibm_is_ipsec_policy.example", "pfs", "disabled"),
 				),
 			},
 			{
 				Config: testAccCheckIBMISIPSecPolicyConfigUpdate(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "name", name),
+						"ibm_is_ipsec_policy.example", "name", name),
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "authentication_algorithm", "sha1"),
+						"ibm_is_ipsec_policy.example", "authentication_algorithm", "sha1"),
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "encryption_algorithm", "aes128"),
+						"ibm_is_ipsec_policy.example", "encryption_algorithm", "aes128"),
 					resource.TestCheckResourceAttr(
-						"ibm_is_ip_sec_policy.example", "pfs", "group_2"),
+						"ibm_is_ipsec_policy.example", "pfs", "group_2"),
 				),
 			},
 		},
@@ -55,7 +55,7 @@ func checkPolicyDestroy(s *terraform.State) error {
 	vpnC := vpn.NewVpnClient(sess)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ibm_is_ip_sec_policy" {
+		if rs.Type != "ibm_is_ipsec_policy" {
 			continue
 		}
 
@@ -97,7 +97,7 @@ func testAccCheckIBMISIpSecPolicyExists(n string, policy **models.IpsecPolicy) r
 
 func testAccCheckIBMISIPSecPolicyConfig(name string) string {
 	return fmt.Sprintf(`
-		resource "ibm_is_ip_sec_policy" "example" {
+		resource "ibm_is_ipsec_policy" "example" {
 			name = "%s"
 			authentication_algorithm = "md5"
 			encryption_algorithm = "3des"
@@ -108,7 +108,7 @@ func testAccCheckIBMISIPSecPolicyConfig(name string) string {
 
 func testAccCheckIBMISIPSecPolicyConfigUpdate(name string) string {
 	return fmt.Sprintf(`
-		resource "ibm_is_ip_sec_policy" "example" {
+		resource "ibm_is_ipsec_policy" "example" {
 			name = "%s"
 			authentication_algorithm = "sha1"
 			encryption_algorithm = "aes128"
