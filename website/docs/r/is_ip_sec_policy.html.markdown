@@ -1,14 +1,14 @@
 ---
 layout: "ibm"
-page_title: "IBM : ip_sec_policy"
-sidebar_current: "docs-ibm-resource-is-ip-sec-policy"
+page_title: "IBM : ipsec_policy"
+sidebar_current: "docs-ibm-resource-is-ipsec-policy"
 description: |-
-  Manages IBM ip sec policy.
+  Manages IBM ipsec policy.
 ---
 
-# ibm\_is_ip_sec_policy
+# ibm\_is_ipsec_policy
 
-Provides a ip sec policy resource. This allows ip sec policy to be created, updated, and cancelled.
+Provides a ipsec policy resource. This allows ipsec policy to be created, updated, and cancelled.
 
 
 ## Example Usage
@@ -16,7 +16,7 @@ Provides a ip sec policy resource. This allows ip sec policy to be created, upda
 In the following example, you can create a ip sec policy:
 
 ```hcl
-resource "ibm_is_ip_sec_policy" "example" {
+resource "ibm_is_ipsec_policy" "example" {
 	name = "test"
 	authentication_algorithm = "md5"
 	encryption_algorithm = "3des"
