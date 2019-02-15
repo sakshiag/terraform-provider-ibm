@@ -18,15 +18,13 @@ import (
 	"github.com/IBM-Cloud/bluemix-go/api/container/containerv1"
 	"github.com/IBM-Cloud/bluemix-go/api/iampap/iampapv1"
 	"github.com/IBM-Cloud/bluemix-go/api/iamuum/iamuumv1"
-<<<<<<< HEAD
-=======
 	"github.com/IBM-Cloud/bluemix-go/api/icd/icdv4"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	"github.com/IBM-Cloud/bluemix-go/api/mccp/mccpv2"
 	"github.com/apache/incubator-openwhisk-client-go/whisk"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/softlayer/softlayer-go/datatypes"
 	"github.com/softlayer/softlayer-go/sl"
+	vpc "github.ibm.com/riaas/rias-api/riaas/models"
 )
 
 //HashInt ...
@@ -328,23 +326,6 @@ func flattenWorkerPools(list []containerv1.WorkerPoolResponse) []map[string]inte
 	return workerPools
 }
 
-<<<<<<< HEAD
-func flattenAlbs(list []containerv1.ALBConfig) []map[string]interface{} {
-	albs := make([]map[string]interface{}, len(list))
-	for i, alb := range list {
-		l := map[string]interface{}{
-			"id":                 alb.ALBID,
-			"name":               alb.Name,
-			"alb_type":           alb.ALBType,
-			"enable":             alb.Enable,
-			"state":              alb.State,
-			"num_of_instances":   alb.NumOfInstances,
-			"alb_ip":             alb.ALBIP,
-			"resize":             alb.Resize,
-			"disable_deployment": alb.DisableDeployment,
-		}
-		albs[i] = l
-=======
 func flattenAlbs(list []containerv1.ALBConfig, filterType string) []map[string]interface{} {
 	albs := make([]map[string]interface{}, 0)
 	for _, alb := range list {
@@ -362,7 +343,6 @@ func flattenAlbs(list []containerv1.ALBConfig, filterType string) []map[string]i
 			}
 			albs = append(albs, l)
 		}
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	}
 	return albs
 }
@@ -843,10 +823,7 @@ func flattenPolicyResource(list []iampapv1.Resource) []map[string]interface{} {
 	return result
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func flattenHealthMonitors(list []datatypes.Network_LBaaS_Listener) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, len(list))
 	ports := make([]int, 0, 0)
@@ -938,10 +915,7 @@ func flattenServiceIds(services []string, meta interface{}) ([]string, error) {
 	return serviceids, nil
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func expandOrigins(originsList *schema.Set) (origins []cisv1.Origin) {
 	for _, iface := range originsList.List() {
 		orig := iface.(map[string]interface{})
@@ -956,8 +930,6 @@ func expandOrigins(originsList *schema.Set) (origins []cisv1.Origin) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 func expandUsers(userList *schema.Set) (users []icdv4.User) {
 	for _, iface := range userList.List() {
 		userEl := iface.(map[string]interface{})
@@ -1043,7 +1015,6 @@ func flattenWhitelist(whitelist icdv4.Whitelist) []map[string]interface{} {
 }
 
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func flattenOrigins(list []cisv1.Origin) []map[string]interface{} {
 	origins := make([]map[string]interface{}, len(list), len(list))
 	for i, origin := range list {
@@ -1070,10 +1041,7 @@ func expandStringMap(inVal interface{}) map[string]string {
 	return outVal
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func convertTfToCisThreeVar(glbTfId string) (glbId string, zoneId string, cisId string, err error) {
 	g := strings.SplitN(glbTfId, ":", 3)
 	glbId = g[0]
@@ -1081,20 +1049,13 @@ func convertTfToCisThreeVar(glbTfId string) (glbId string, zoneId string, cisId 
 		zoneId = g[1]
 		cisId = g[2]
 	} else {
-<<<<<<< HEAD
-		err = errors.New("resourceCISGlbRead - cis_id or zone_id not passed")
-=======
 		err = errors.New("cis_id or zone_id not passed")
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return
 	}
 	return
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func convertCisToTfThreeVar(Id string, Id2 string, cisId string) (buildId string) {
 	if Id != "" {
 		buildId = Id + ":" + Id2 + ":" + cisId
@@ -1104,10 +1065,7 @@ func convertCisToTfThreeVar(Id string, Id2 string, cisId string) (buildId string
 	return
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func convertTfToCisTwoVarSlice(tfIds []string) (Ids []string, cisId string, err error) {
 	for _, item := range tfIds {
 		Id := strings.SplitN(item, ":", 2)
@@ -1121,10 +1079,7 @@ func convertTfToCisTwoVarSlice(tfIds []string) (Ids []string, cisId string, err 
 	return
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func convertCisToTfTwoVarSlice(Ids []string, cisId string) (buildIds []string) {
 	for _, Id := range Ids {
 		buildIds = append(buildIds, Id+":"+cisId)
@@ -1132,10 +1087,7 @@ func convertCisToTfTwoVarSlice(Ids []string, cisId string) (buildIds []string) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func convertCisToTfTwoVar(Id string, cisId string) (buildId string) {
 	if Id != "" {
 		buildId = Id + ":" + cisId
@@ -1145,10 +1097,7 @@ func convertCisToTfTwoVar(Id string, cisId string) (buildId string) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func convertTftoCisTwoVar(tfId string) (Id string, cisId string, err error) {
 	g := strings.SplitN(tfId, ":", 2)
 	if len(g) > 1 {
@@ -1161,10 +1110,7 @@ func convertTftoCisTwoVar(tfId string) (Id string, cisId string, err error) {
 	return
 }
 
-<<<<<<< HEAD
-=======
 // Cloud Internet Services
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func transformToIBMCISDnsData(recordType string, id string, value interface{}) (newValue interface{}, err error) {
 	switch {
 	case id == "flags":
@@ -1325,4 +1271,19 @@ func UpdateTags(d *schema.ResourceData, meta interface{}) error {
 	}
 	return nil
 }
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+
+func flattenISLBIPs(ips []*vpc.LoadBalancerIP) interface{} {
+	out := make([]interface{}, len(ips))
+	for i, ip := range ips {
+		out[i] = ip.Address
+	}
+	return out
+}
+
+func flattenISLBSubnets(subnets []*vpc.LoadBalancerSubnetsItems) interface{} {
+	out := make([]interface{}, len(subnets))
+	for s, subnet := range subnets {
+		out[s] = subnet.ID
+	}
+	return out
+}
