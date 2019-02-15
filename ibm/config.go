@@ -414,6 +414,7 @@ func (c *Config) ClientSession() (interface{}, error) {
 	if err != nil {
 		session.bmxUserFetchErr = fmt.Errorf("Error occured while fetching account user details: %q", err)
 		session.functionConfigErr = fmt.Errorf("Error occured while fetching auth key for function: %q", err)
+		session.isConfigErr = fmt.Errorf("Error occured while fetching auth key for vpc: %q", err)
 	} else {
 		userConfig, err := fetchUserDetails(sess.BluemixSession)
 		if err != nil {
