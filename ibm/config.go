@@ -406,6 +406,7 @@ func (c *Config) ClientSession() (interface{}, error) {
 		session.resourceCatalogConfigErr = errEmptyBluemixCredentials
 		session.resourceManagementConfigErr = errEmptyBluemixCredentials
 		session.resourceCatalogConfigErr = errEmptyBluemixCredentials
+		session.isConfigErr = errEmptyBluemixCredentials
 
 		return session, nil
 	}

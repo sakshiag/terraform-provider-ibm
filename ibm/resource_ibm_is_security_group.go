@@ -76,7 +76,10 @@ func resourceIBMISSecurityGroupCreate(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 
 	sgdef, err := makeIBMISSecurityGroupCreateParams(parsed)
@@ -93,7 +96,10 @@ func resourceIBMISSecurityGroupCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIBMISSecurityGroupRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 
 	group, err := sgC.Get(d.Id())
@@ -144,7 +150,10 @@ func resourceIBMISSecurityGroupRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMISSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 	if !d.HasChange(isSecurityGroupName) {
 		return resourceIBMISSecurityGroupRead(d, meta)
@@ -152,7 +161,7 @@ func resourceIBMISSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 
 	name := d.Get(isSecurityGroupName).(string)
 
-	_, err := sgC.Update(d.Id(), name)
+	_, err = sgC.Update(d.Id(), name)
 	if err != nil {
 		return err
 	}
@@ -161,10 +170,13 @@ func resourceIBMISSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIBMISSecurityGroupDelete(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 
-	err := sgC.Delete(d.Id())
+	err = sgC.Delete(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {
@@ -179,10 +191,13 @@ func resourceIBMISSecurityGroupDelete(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIBMISSecurityGroupExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 
-	_, err := sgC.Get(d.Id())
+	_, err = sgC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

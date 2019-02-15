@@ -36,7 +36,10 @@ func dataSourceIBMISRegion() *schema.Resource {
 }
 
 func dataSourceIBMISRegionRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	regionC := geography.NewRegionClient(sess)
 	region, err := regionC.Get(d.Get("name").(string))
 	if err != nil {

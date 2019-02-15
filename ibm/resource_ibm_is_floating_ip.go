@@ -91,7 +91,10 @@ func resourceIBMISFloatingIP() *schema.Resource {
 
 func resourceIBMISFloatingIPCreate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	name := d.Get(isFloatingIPName).(string)
 	resgrp := d.Get(isFloatingIPResourceGroup).(string)
@@ -123,7 +126,10 @@ func resourceIBMISFloatingIPCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMISFloatingIPRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	floatingipC := network.NewFloatingIPClient(sess)
 
 	floatingip, err := floatingipC.Get(d.Id())
@@ -147,7 +153,10 @@ func resourceIBMISFloatingIPRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceIBMISFloatingIPUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	floatingipC := network.NewFloatingIPClient(sess)
 
 	name := ""
@@ -177,10 +186,13 @@ func resourceIBMISFloatingIPUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMISFloatingIPDelete(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	floatingipC := network.NewFloatingIPClient(sess)
 
-	err := floatingipC.Delete(d.Id())
+	err = floatingipC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -232,10 +244,13 @@ func isFloatingIPDeleteRefreshFunc(fip *network.FloatingIPClient, id string) res
 }
 
 func resourceIBMISFloatingIPExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	floatingipC := network.NewFloatingIPClient(sess)
 
-	_, err := floatingipC.Get(d.Id())
+	_, err = floatingipC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

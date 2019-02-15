@@ -84,7 +84,10 @@ func resourceIBMISVPC() *schema.Resource {
 }
 
 func resourceIBMISVPCCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[DEBUG] VPC create")
 	name := d.Get(isVPCName).(string)
@@ -105,7 +108,10 @@ func resourceIBMISVPCCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpcC := network.NewVPCClient(sess)
 
 	vpc, err := vpcC.Get(d.Id())
@@ -135,7 +141,10 @@ func resourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMISVPCUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpcC := network.NewVPCClient(sess)
 
 	if d.HasChange(isVPCName) {
@@ -151,9 +160,12 @@ func resourceIBMISVPCUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMISVPCDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpcC := network.NewVPCClient(sess)
-	err := vpcC.Delete(d.Id())
+	err = vpcC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -205,10 +217,13 @@ func isVPCDeleteRefreshFunc(vpc *network.VPCClient, id string) resource.StateRef
 }
 
 func resourceIBMISVPCExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	vpcC := network.NewVPCClient(sess)
 
-	_, err := vpcC.Get(d.Id())
+	_, err = vpcC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

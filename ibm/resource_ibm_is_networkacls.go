@@ -165,7 +165,10 @@ func resourceIBMISNetworkACL() *schema.Resource {
 }
 
 func resourceIBMISNetworkACLCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	nwaclC := network.NewNetworkAclClient(sess)
 
 	var nwaclbody models.PostNetworkAclsParamsBody
@@ -192,7 +195,7 @@ func resourceIBMISNetworkACLCreate(d *schema.ResourceData, meta interface{}) err
 
 	//validate each rule before attempting to create the ACL
 	rules := d.Get(isNetworkACLRules).([]interface{})
-	err := validateInlineRules(rules)
+	err = validateInlineRules(rules)
 	if err != nil {
 		return err
 	}
@@ -228,7 +231,10 @@ func resourceIBMISNetworkACLCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMISNetworkACLRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	nwaclC := network.NewNetworkAclClient(sess)
 	log.Printf("[DEBUG] Looking up details for network ACL with id %s", d.Id())
 	nwacl, err := nwaclC.Get(d.Id())
@@ -298,7 +304,10 @@ func resourceIBMISNetworkACLRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceIBMISNetworkACLUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	nwaclC := network.NewNetworkAclClient(sess)
 	nwaclid := d.Id()
 	rules := d.Get(isNetworkACLRules).([]interface{})
@@ -332,10 +341,13 @@ func resourceIBMISNetworkACLUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMISNetworkACLDelete(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	nwaclC := network.NewNetworkAclClient(sess)
 	log.Printf("Deleting the network ACL with id %s", d.Id())
-	err := nwaclC.Delete(d.Id())
+	err = nwaclC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -344,10 +356,13 @@ func resourceIBMISNetworkACLDelete(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMISNetworkACLExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	nwaclC := network.NewNetworkAclClient(sess)
 
-	_, err := nwaclC.Get(d.Id())
+	_, err = nwaclC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

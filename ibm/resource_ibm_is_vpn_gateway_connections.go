@@ -137,7 +137,10 @@ func resourceIBMISVPNGatewayConnection() *schema.Resource {
 }
 
 func resourceIBMISVPNGatewayConnectionCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[DEBUG] VPNGatewayConnection create")
 	name := d.Get(isVPNGatewayConnectionName).(string)
@@ -191,7 +194,10 @@ func resourceIBMISVPNGatewayConnectionCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceIBMISVPNGatewayConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	parts, err := idParts(d.Id())
 	if err != nil {
@@ -229,7 +235,10 @@ func resourceIBMISVPNGatewayConnectionRead(d *schema.ResourceData, meta interfac
 
 func resourceIBMISVPNGatewayConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	VPNGatewayConnectionC := vpn.NewVpnClient(sess)
 
 	var name, peerAddress, psk string
@@ -313,7 +322,10 @@ func resourceIBMISVPNGatewayConnectionUpdate(d *schema.ResourceData, meta interf
 
 func resourceIBMISVPNGatewayConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	parts, err := idParts(d.Id())
 	if err != nil {
@@ -380,7 +392,10 @@ func isVPNGatewayConnectionDeleteRefreshFunc(VPNGatewayConnection *vpn.VpnClient
 }
 
 func resourceIBMISVPNGatewayConnectionExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	parts, err := idParts(d.Id())
 	if err != nil {
 		return false, err

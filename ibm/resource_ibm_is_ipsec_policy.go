@@ -105,7 +105,10 @@ func resourceIBMISIPSecPolicy() *schema.Resource {
 }
 
 func resourceIBMISIPSecPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[DEBUG] Ip Sec create")
 	name := d.Get(isIpSecName).(string)
@@ -128,7 +131,10 @@ func resourceIBMISIPSecPolicyCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMISIPSecPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpnC := vpn.NewVpnClient(sess)
 
 	ipSec, err := vpnC.GetIpsecPolicy(d.Id())
@@ -167,7 +173,10 @@ func resourceIBMISIPSecPolicyRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceIBMISIPSecPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpnC := vpn.NewVpnClient(sess)
 
 	if d.HasChange(isIpSecName) || d.HasChange(isIpSecAuthenticationAlg) || d.HasChange(isIpSecEncryptionAlg) || d.HasChange(isIpSecPFS) || d.HasChange(isIpSecKeyLifeTime) {
@@ -187,9 +196,12 @@ func resourceIBMISIPSecPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceIBMISIPSecPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpnC := vpn.NewVpnClient(sess)
-	err := vpnC.DeleteIpsecPolicy(d.Id())
+	err = vpnC.DeleteIpsecPolicy(d.Id())
 	if err != nil {
 		return err
 	}
@@ -199,10 +211,13 @@ func resourceIBMISIPSecPolicyDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMISIPSecPolicyExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	vpnC := vpn.NewVpnClient(sess)
 
-	_, err := vpnC.GetIpsecPolicy(d.Id())
+	_, err = vpnC.GetIpsecPolicy(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

@@ -113,7 +113,10 @@ func resourceIBMISIKEPolicy() *schema.Resource {
 }
 
 func resourceIBMISIKEPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[DEBUG] IKE Policy create")
 	name := d.Get(isIKEName).(string)
@@ -139,7 +142,10 @@ func resourceIBMISIKEPolicyCreate(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMISIKEPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpnC := vpn.NewVpnClient(sess)
 
 	ike, err := vpnC.GetIkePolicy(d.Id())
@@ -179,7 +185,10 @@ func resourceIBMISIKEPolicyRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceIBMISIKEPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpnC := vpn.NewVpnClient(sess)
 
 	if d.HasChange(isIKEName) || d.HasChange(isIKEAuthenticationAlg) || d.HasChange(isIKEEncryptionAlg) || d.HasChange(isIKEDhGroup) || d.HasChange(isIKEVERSION) || d.HasChange(isIKEKeyLifeTime) {
@@ -200,9 +209,12 @@ func resourceIBMISIKEPolicyUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceIBMISIKEPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpnC := vpn.NewVpnClient(sess)
-	err := vpnC.DeleteIkePolicy(d.Id())
+	err = vpnC.DeleteIkePolicy(d.Id())
 	if err != nil {
 		return err
 	}
@@ -212,10 +224,13 @@ func resourceIBMISIKEPolicyDelete(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMISIKEPolicyExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	vpnC := vpn.NewVpnClient(sess)
 
-	_, err := vpnC.GetIkePolicy(d.Id())
+	_, err = vpnC.GetIkePolicy(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

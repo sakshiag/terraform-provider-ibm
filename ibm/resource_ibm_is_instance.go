@@ -275,7 +275,10 @@ func resourceIBMISInstance() *schema.Resource {
 }
 
 func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	profile := d.Get(isInstanceProfile).(string)
 	var body = &models.PostInstancesParamsBody{
@@ -434,7 +437,10 @@ func isInstanceRefreshFunc(instanceC *compute.InstanceClient, id string) resourc
 }
 
 func resourceIBMisInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
 	instance, err := instanceC.Get(d.Id())
@@ -509,7 +515,10 @@ func resourceIBMisInstanceRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMisInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
 	name := ""
@@ -521,7 +530,7 @@ func resourceIBMisInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 		profile = d.Get(isInstanceProfile).(string)
 	}
 
-	_, err := instanceC.Update(d.Id(), name, profile)
+	_, err = instanceC.Update(d.Id(), name, profile)
 	if err != nil {
 		return err
 	}
@@ -531,9 +540,12 @@ func resourceIBMisInstanceUpdate(d *schema.ResourceData, meta interface{}) error
 
 func resourceIBMisInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
-	err := instanceC.Delete(d.Id())
+	err = instanceC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -548,10 +560,13 @@ func resourceIBMisInstanceDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceIBMisInstanceExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
-	_, err := instanceC.Get(d.Id())
+	_, err = instanceC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

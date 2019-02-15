@@ -101,7 +101,10 @@ func resourceIBMISPublicGateway() *schema.Resource {
 }
 
 func resourceIBMISPublicGatewayCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	name := d.Get(isPublicGatewayName).(string)
 	vpc := d.Get(isPublicGatewayVPC).(string)
@@ -167,7 +170,10 @@ func isPublicGatewayRefreshFunc(publicgwC *network.PublicGatewayClient, id strin
 }
 
 func resourceIBMISPublicGatewayRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	publicgwC := network.NewPublicGatewayClient(sess)
 
 	publicgw, err := publicgwC.Get(d.Id())
@@ -202,7 +208,10 @@ func resourceIBMISPublicGatewayRead(d *schema.ResourceData, meta interface{}) er
 
 func resourceIBMISPublicGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	publicgwC := network.NewPublicGatewayClient(sess)
 
 	name := ""
@@ -210,7 +219,7 @@ func resourceIBMISPublicGatewayUpdate(d *schema.ResourceData, meta interface{}) 
 		name = d.Get(isPublicGatewayName).(string)
 	}
 
-	_, err := publicgwC.Update(d.Id(), name)
+	_, err = publicgwC.Update(d.Id(), name)
 	if err != nil {
 		return err
 	}
@@ -220,9 +229,12 @@ func resourceIBMISPublicGatewayUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceIBMISPublicGatewayDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	publicgwC := network.NewPublicGatewayClient(sess)
-	err := publicgwC.Delete(d.Id())
+	err = publicgwC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -273,10 +285,13 @@ func isPublicGatewayDeleteRefreshFunc(pg *network.PublicGatewayClient, id string
 }
 
 func resourceIBMISPublicGatewayExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	publicgwC := network.NewPublicGatewayClient(sess)
 
-	_, err := publicgwC.Get(d.Id())
+	_, err = publicgwC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

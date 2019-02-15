@@ -78,7 +78,10 @@ func resourceIBMISVPNGateway() *schema.Resource {
 }
 
 func resourceIBMISVPNGatewayCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[DEBUG] VPNGateway create")
 	name := d.Get(isVPNGatewayName).(string)
@@ -104,7 +107,10 @@ func resourceIBMISVPNGatewayCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceIBMISVPNGatewayRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	VPNGatewayC := vpn.NewVpnClient(sess)
 
 	VPNGateway, err := VPNGatewayC.Get(d.Id())
@@ -122,7 +128,10 @@ func resourceIBMISVPNGatewayRead(d *schema.ResourceData, meta interface{}) error
 
 func resourceIBMISVPNGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	VPNGatewayC := vpn.NewVpnClient(sess)
 
 	if d.HasChange(isVPNGatewayName) {
@@ -138,9 +147,12 @@ func resourceIBMISVPNGatewayUpdate(d *schema.ResourceData, meta interface{}) err
 
 func resourceIBMISVPNGatewayDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	VPNGatewayC := vpn.NewVpnClient(sess)
-	err := VPNGatewayC.Delete(d.Id())
+	err = VPNGatewayC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -219,10 +231,13 @@ func isVPNGatewayDeleteRefreshFunc(VPNGateway *vpn.VpnClient, id string) resourc
 }
 
 func resourceIBMISVPNGatewayExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	VPNGatewayC := vpn.NewVpnClient(sess)
 
-	_, err := VPNGatewayC.Get(d.Id())
+	_, err = VPNGatewayC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

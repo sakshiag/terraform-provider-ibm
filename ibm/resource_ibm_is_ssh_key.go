@@ -71,7 +71,10 @@ func resourceIBMISSSHKey() *schema.Resource {
 }
 
 func resourceIBMISSSHKeyCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[DEBUG] Key create")
 	name := d.Get(isKeyName).(string)
@@ -91,7 +94,10 @@ func resourceIBMISSSHKeyCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMISSSHKeyRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	keyC := compute.NewKeyClient(sess)
 
 	key, err := keyC.Get(d.Id())
@@ -115,7 +121,10 @@ func resourceIBMISSSHKeyRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMISSSHKeyUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	keyC := compute.NewKeyClient(sess)
 
 	if d.HasChange(isKeyName) {
@@ -131,9 +140,12 @@ func resourceIBMISSSHKeyUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMISSSHKeyDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	keyC := compute.NewKeyClient(sess)
-	err := keyC.Delete(d.Id())
+	err = keyC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -143,10 +155,13 @@ func resourceIBMISSSHKeyDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIBMISSSHKeyExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	keyC := compute.NewKeyClient(sess)
 
-	_, err := keyC.Get(d.Id())
+	_, err = keyC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

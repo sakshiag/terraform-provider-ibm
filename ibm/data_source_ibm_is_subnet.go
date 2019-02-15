@@ -87,7 +87,10 @@ func dataSourceIBMISSubnet() *schema.Resource {
 }
 
 func dataSourceIBMISSubnetRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	subnetC := network.NewSubnetClient(sess)
 
 	subnet, err := subnetC.Get(d.Get("identifier").(string))

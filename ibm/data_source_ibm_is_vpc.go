@@ -48,7 +48,10 @@ func dataSourceIBMISVPC() *schema.Resource {
 }
 
 func dataSourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	vpcC := network.NewVPCClient(sess)
 
 	name := d.Get(isVPCName).(string)

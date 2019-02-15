@@ -97,7 +97,10 @@ func resourceIBMISInstanceNIC() *schema.Resource {
 }
 
 func resourceIBMISInstanceNICRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
 	instanceid, interfaceid, err := parseISTerraformID(d.Id())
@@ -136,7 +139,10 @@ func resourceIBMISInstanceNICRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIBMISInstanceNICDelete(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
 	instanceid, interfaceid, err := parseISTerraformID(d.Id())
@@ -153,7 +159,10 @@ func resourceIBMISInstanceNICDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMISInstanceNICCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
 	instanceid := d.Get(isInstanceNICInstanceID).(string)
@@ -181,7 +190,10 @@ func resourceIBMISInstanceNICCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMISInstanceNICUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
 	instanceid, interfaceid, err := parseISTerraformID(d.Id())
@@ -210,7 +222,10 @@ func resourceIBMISInstanceNICUpdate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIBMISInstanceNICExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 
 	instanceid, interfaceid, err := parseISTerraformID(d.Id())

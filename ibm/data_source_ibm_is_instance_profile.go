@@ -36,7 +36,10 @@ func dataSourceIBMISInstanceProfile() *schema.Resource {
 }
 
 func dataSourceIBMISInstanceProfileRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	instanceC := compute.NewInstanceClient(sess)
 	profile, err := instanceC.GetProfile(d.Get(isInstanceProfileName).(string))
 	if err != nil {

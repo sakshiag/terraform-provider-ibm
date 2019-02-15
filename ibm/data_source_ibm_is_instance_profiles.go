@@ -43,7 +43,10 @@ func dataSourceIBMISInstanceProfiles() *schema.Resource {
 }
 
 func dataSourceIBMISInstanceProfilesRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	clientC := compute.NewInstanceClient(sess)
 	availableProfiles, _, err := clientC.ListProfiles("")
 	if err != nil {

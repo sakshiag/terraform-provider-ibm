@@ -133,7 +133,10 @@ func resourceIBMISSubnet() *schema.Resource {
 }
 
 func resourceIBMISSubnetCreate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 
 	name := d.Get(isSubnetName).(string)
 	vpc := d.Get(isSubnetVPC).(string)
@@ -201,7 +204,10 @@ func isSubnetRefreshFunc(subnetC *network.SubnetClient, id string) resource.Stat
 }
 
 func resourceIBMISSubnetRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	subnetC := network.NewSubnetClient(sess)
 
 	subnet, err := subnetC.Get(d.Id())
@@ -239,7 +245,10 @@ func resourceIBMISSubnetRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMISSubnetUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	subnetC := network.NewSubnetClient(sess)
 
 	name := ""
@@ -255,7 +264,7 @@ func resourceIBMISSubnetUpdate(d *schema.ResourceData, meta interface{}) error {
 		gw = d.Get(isSubnetPublicGateway).(string)
 	}
 
-	_, err := subnetC.Update(d.Id(), name, acl, gw)
+	_, err = subnetC.Update(d.Id(), name, acl, gw)
 	if err != nil {
 		return err
 	}
@@ -265,9 +274,12 @@ func resourceIBMISSubnetUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIBMISSubnetDelete(d *schema.ResourceData, meta interface{}) error {
 
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	subnetC := network.NewSubnetClient(sess)
-	err := subnetC.Delete(d.Id())
+	err = subnetC.Delete(d.Id())
 	if err != nil {
 		return err
 	}
@@ -319,10 +331,13 @@ func isSubnetDeleteRefreshFunc(subnetC *network.SubnetClient, id string) resourc
 }
 
 func resourceIBMISSubnetExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	subnetC := network.NewSubnetClient(sess)
 
-	_, err := subnetC.Get(d.Id())
+	_, err = subnetC.Get(d.Id())
 	if err != nil {
 		iserror, ok := err.(iserrors.RiaasError)
 		if ok {

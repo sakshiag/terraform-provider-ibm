@@ -38,7 +38,10 @@ func dataSourceIBMISZone() *schema.Resource {
 }
 
 func dataSourceIBMISZoneRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	zoneC := geography.NewZoneClient(sess)
 	zone, err := zoneC.Get(d.Get(isZoneRegion).(string), d.Get(isZoneName).(string))
 	if err != nil {

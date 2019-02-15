@@ -152,7 +152,10 @@ func resourceIBMISSecurityGroupRuleCreate(d *schema.ResourceData, meta interface
 	if err != nil {
 		return err
 	}
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 
 	rule, err := sgC.AddRule(parsed.secgrpID, parsed.direction, parsed.ipversion, parsed.protocol,
@@ -169,7 +172,10 @@ func resourceIBMISSecurityGroupRuleCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceIBMISSecurityGroupRuleRead(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 	secgrpID, ruleID, err := parseISTerraformID(d.Id())
 	if err != nil {
@@ -238,7 +244,10 @@ func resourceIBMISSecurityGroupRuleRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceIBMISSecurityGroupRuleUpdate(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 	parsed, err := parseIBMISSecurityGroupRuleDictionary(d, "update")
 	if err != nil {
@@ -256,7 +265,10 @@ func resourceIBMISSecurityGroupRuleUpdate(d *schema.ResourceData, meta interface
 }
 
 func resourceIBMISSecurityGroupRuleDelete(d *schema.ResourceData, meta interface{}) error {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 
 	secgrpID, ruleID, err := parseISTerraformID(d.Id())
@@ -278,7 +290,10 @@ func resourceIBMISSecurityGroupRuleDelete(d *schema.ResourceData, meta interface
 }
 
 func resourceIBMISSecurityGroupRuleExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	sess, _ := meta.(ClientSession).ISSession()
+	sess, err := meta.(ClientSession).ISSession()
+	if err != nil {
+		return false, err
+	}
 	sgC := network.NewSecurityGroupClient(sess)
 
 	secgrpID, ruleID, err := parseISTerraformID(d.Id())
