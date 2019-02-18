@@ -24,6 +24,8 @@ data "ibm_is_instance_profiles" "ds_instance_profiles" {
 
 The following attributes are exported:
 
-* `name` - The name for this virtual server instance profile.
-* `family` - The family of the virtual server instance profile.
-* `generation` - The platform generation of the virtual server instance profile.
+* `profiles` - List of all server instance profiles in the region.
+  * `name` - The name for this virtual server instance profile.
+  * `family` - The family of the virtual server instance profile.
+  * `generation` - The platform generation of the virtual server instance profile.
+
