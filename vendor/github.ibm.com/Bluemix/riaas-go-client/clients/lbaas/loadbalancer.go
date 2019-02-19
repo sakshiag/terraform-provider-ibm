@@ -90,7 +90,9 @@ func (f *LoadBalancerClient) Get(id string) (*models.LoadBalancer, error) {
 func (f *LoadBalancerClient) Update(id, name string) (*models.LoadBalancer, error) {
 	var body = l_baas.PatchLoadBalancersIDParams{}
 	if name != "" {
-		body.Body.Name = name
+		body.Body = &models.LoadBalancerTemplatePatch{
+			Name: name,
+		}
 	}
 
 	params := l_baas.NewPatchLoadBalancersIDParams().WithID(id).WithBody(body.Body)
