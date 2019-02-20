@@ -147,7 +147,7 @@ func (f *LoadBalancerClient) GetPools(id string) (*models.PoolCollection, error)
 // CreatePool ...
 func (f *LoadBalancerClient) CreatePool(lbaasPool *l_baas.PostLoadBalancersIDPoolsParams) (*models.Pool, error) {
 
-	params := l_baas.NewPostLoadBalancersIDPoolsParams().WithBody(lbaasPool.Body)
+	params := l_baas.NewPostLoadBalancersIDPoolsParams().WithBody(lbaasPool.Body).WithID(lbaasPool.ID)
 	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.LBaas.PostLoadBalancersIDPools(params, session.Auth(f.session))
 	if err != nil {
@@ -248,11 +248,13 @@ func (f *LoadBalancerClient) GetPool(lbaasId, poolId string) (*models.Pool, erro
 func (f *LoadBalancerClient) UpdatePool(lbaasId, poolId, algorithm, name, protocol string, hmTemplate models.HealthMonitorTemplate, sessionTemplate models.SessionPersistenceTemplate) (*models.Pool, error) {
 
 	var body = models.PoolTemplatePatch{
-		Algorithm:          algorithm,
-		HealthMonitor:      &hmTemplate,
-		Name:               name,
-		Protocol:           protocol,
-		SessionPersistence: &sessionTemplate,
+		Algorithm:     algorithm,
+		HealthMonitor: &hmTemplate,
+		Name:          name,
+		Protocol:      protocol,
+	}
+	if sessionTemplate.Type != "" {
+		body.SessionPersistence = &sessionTemplate
 	}
 	params := l_baas.NewPatchLoadBalancersIDPoolsPoolIDParams().WithID(lbaasId).WithPoolID(poolId).WithBody(&body)
 	params.Version = "2019-01-15"
