@@ -18,7 +18,7 @@ In the following example, you can create a load balancer pool:
 ```hcl
 resource "ibm_is_lb_pool" "testacc_pool" {
   name           = "test_pool"
-  lb_id          = "addfd-gg4r4-12345"
+  lb             = "addfd-gg4r4-12345"
   algorithm      = "round_robin"
   protocol       = "http"
   health_delay   = 60
@@ -34,7 +34,7 @@ resource "ibm_is_lb_pool" "testacc_pool" {
 The following arguments are supported:
 
 * `name` - (Required, string) The name of the pool
-* `lb_id` - (Required, string)  The load balancer unique identifier.
+* `lb` - (Required, string)  The load balancer unique identifier.
 * `algorithm` - (Required, string) The load balancing algorithm. Enumeration type: round_robin, weighted_round_robin, least_connections
 * `protocol` - (Required, string) The pool protocol. Enumeration type: http, tcp
 * `health_delay` - (Required, int) The health check interval in seconds. Interval must be greater than timeout value
