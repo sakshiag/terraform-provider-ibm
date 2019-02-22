@@ -162,7 +162,7 @@ func testAccCheckIBMISLBPoolConfig(vpcname, subnetname, zone, cidr, name, poolNa
 	}
 	resource "ibm_is_lb_pool" "testacc_lb_pool" {
 		name = "%s"
-		lb_id = "${ibm_is_lb.testacc_LB.id}"
+		lb = "${ibm_is_lb.testacc_LB.id}"
 		algorithm = "%s"
 		protocol = "%s"
 		health_delay= %s

@@ -13,7 +13,7 @@ import (
 
 const (
 	isLBPoolName                      = "name"
-	isLBID                            = "lb_id"
+	isLBID                            = "lb"
 	isLBPoolAlgorithm                 = "algorithm"
 	isLBPoolProtocol                  = "protocol"
 	isLBPoolHealthDelay               = "health_delay"
