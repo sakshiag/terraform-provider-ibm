@@ -24,17 +24,20 @@ func NewVPCClient(sess *session.Session) *VPCClient {
 
 // List ...
 func (f *VPCClient) List(start string) ([]*models.Vpc, string, error) {
-	return f.ListWithFilter("", start)
+	return f.ListWithFilter("", start, "")
 }
 
 // ListWithFilter ...
-func (f *VPCClient) ListWithFilter(tag, start string) ([]*models.Vpc, string, error) {
+func (f *VPCClient) ListWithFilter(tag, start, resourcegroupID string) ([]*models.Vpc, string, error) {
 	params := network.NewGetVpcsParams()
 	if tag != "" {
 		params = params.WithTag(&tag)
 	}
 	if start != "" {
 		params = params.WithStart(&start)
+	}
+	if resourcegroupID != "" {
+		params = params.WithResourceGroupID(&resourcegroupID)
 	}
 	params.Version = "2019-01-15"
 
@@ -61,15 +64,20 @@ func (f *VPCClient) Get(id string) (*models.Vpc, error) {
 }
 
 // Create ...
-func (f *VPCClient) Create(name string, isDefault bool, defaultacl, rg string) (*models.Vpc, error) {
+func (f *VPCClient) Create(name string, classicAccess bool, defaultacl, rg string) (*models.Vpc, error) {
 
 	var body = models.PostVpcsParamsBody{
-		Name:      name,
-		IsDefault: isDefault,
+		Name:          name,
+		ClassicAccess: classicAccess,
 	}
 	if defaultacl != "" {
 		body.DefaultNetworkACL = &models.PostVpcsParamsBodyDefaultNetworkACL{
 			ID: strfmt.UUID(defaultacl),
+		}
+	}
+	if rg != "" {
+		body.ResourceGroup = &models.PostVpcsParamsBodyResourceGroup{
+			ID: strfmt.UUID(rg),
 		}
 	}
 
@@ -119,6 +127,38 @@ func (f *VPCClient) UpdateDefaultNWACL(id, aclid string) (*models.NetworkACL, er
 	}
 
 	return resp.Payload, nil
+}
+
+// CreateAddressPrefix ...
+func (f *VPCClient) CreateAddressPrefix(addressPrefixes *models.PostVpcsVpcIDAddressPrefixesParamsBody) (*models.AddressPoolPrefix, error) {
+	params := network.NewPostVpcsVpcIDAddressPrefixesParams().WithBody(addressPrefixes)
+	params.Version = "2019-01-15"
+	resp, err := f.session.Riaas.Network.PostVpcsVpcIDAddressPrefixes(params, session.Auth(f.session))
+	if err != nil {
+		return nil, errors.ToError(err)
+	}
+
+	return resp.Payload, nil
+}
+
+// GetAddressPrefix ...
+func (f *VPCClient) GetAddressPrefix(vpcID, addressPrefixesID string) (*models.AddressPoolPrefix, error) {
+	params := network.NewGetVpcsVpcIDAddressPrefixesIDParams().WithVpcID(vpcID)
+	params.Version = "2019-01-15"
+	resp, err := f.session.Riaas.Network.GetVpcsVpcIDAddressPrefixesID(params, session.Auth(f.session))
+	if err != nil {
+		return nil, errors.ToError(err)
+	}
+
+	return resp.Payload, nil
+}
+
+// DeleteAddressPrefix ...
+func (f *VPCClient) DeleteAddressPrefix(vpcID, addressPrefixesID string) error {
+	params := network.NewDeleteVpcsVpcIDAddressPrefixesIDParams().WithVpcID(vpcID)
+	params.Version = "2019-01-15"
+	_, err := f.session.Riaas.Network.DeleteVpcsVpcIDAddressPrefixesID(params, session.Auth(f.session))
+	return errors.ToError(err)
 }
 
 // ListPrefixes ...

@@ -121,7 +121,7 @@ func (f *LoadBalancerClient) GetListeners(id string) (*models.ListenerCollection
 // CreateListeners ...
 func (f *LoadBalancerClient) CreateListeners(lbaasListners *l_baas.PostLoadBalancersIDListenersParams) (*models.Listener, error) {
 
-	params := l_baas.NewPostLoadBalancersIDListenersParams().WithBody(lbaasListners.Body)
+	params := l_baas.NewPostLoadBalancersIDListenersParams().WithBody(lbaasListners.Body).WithID(lbaasListners.ID)
 	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.LBaas.PostLoadBalancersIDListeners(params, session.Auth(f.session))
 	if err != nil {
@@ -195,21 +195,31 @@ func (f *LoadBalancerClient) GetListener(lbaasId, listenerId string) (*models.Li
 }
 
 // UpdateListener ...
-func (f *LoadBalancerClient) UpdateListener(lbaasId, listenerId, crn, href, protocol string, port, connectionLimit int, poolId strfmt.UUID) (*models.Listener, error) {
-	var cert = models.ListenerTemplatePatchCertificateInstance{
-		Crn: crn,
+func (f *LoadBalancerClient) UpdateListener(lbaasId, listenerId, crn, protocol, poolId string, port, connectionLimit int) (*models.Listener, error) {
+	body := models.ListenerTemplatePatch{}
+	if crn != "" {
+		body.CertificateInstance = &models.ListenerTemplatePatchCertificateInstance{
+			Crn: crn,
+		}
 	}
-	var defaultPool = models.ListenerTemplatePatchDefaultPool{
-		Href: href,
-		ID:   poolId,
+	if poolId != "" {
+		body.DefaultPool = &models.ListenerTemplatePatchDefaultPool{
+			ID: strfmt.UUID(poolId),
+		}
 	}
-	var body = models.ListenerTemplatePatch{
-		CertificateInstance: &cert,
-		ConnectionLimit:     int64(connectionLimit),
-		DefaultPool:         &defaultPool,
-		Port:                int64(port),
-		Protocol:            protocol,
+
+	if connectionLimit > 0 {
+		body.ConnectionLimit = int64(connectionLimit)
 	}
+
+	if port > 0 {
+		body.Port = int64(port)
+	}
+
+	if protocol != "" {
+		body.Protocol = protocol
+	}
+
 	params := l_baas.NewPatchLoadBalancersIDListenersListenerIDParams().WithID(lbaasId).WithListenerID(listenerId).WithBody(&body)
 	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.LBaas.PatchLoadBalancersIDListenersListenerID(params, session.Auth(f.session))

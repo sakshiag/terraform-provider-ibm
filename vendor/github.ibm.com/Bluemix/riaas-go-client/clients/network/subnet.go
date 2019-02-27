@@ -139,6 +139,14 @@ func (f *SubnetClient) Create(name, zoneName, vpcID, networkaclID, publicgwID, g
 	return resp.Payload, nil
 }
 
+// DetachPublicGateway ...
+func (f *SubnetClient) DetachPublicGateway(id string) error {
+	params := network.NewDeleteSubnetsSubnetIDPublicGatewayParams().WithSubnetID(id)
+	params.Version = "2019-01-15"
+	_, err := f.session.Riaas.Network.DeleteSubnetsSubnetIDPublicGateway(params, session.Auth(f.session))
+	return riaaserrors.ToError(err)
+}
+
 // Delete ...
 func (f *SubnetClient) Delete(id string) error {
 	params := network.NewDeleteSubnetsIDParams().WithID(id)

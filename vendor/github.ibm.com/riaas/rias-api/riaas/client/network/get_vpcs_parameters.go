@@ -75,11 +75,24 @@ for the get vpcs operation typically these are written to a http.Request
 */
 type GetVpcsParams struct {
 
+	/*ClassicAccess
+	  The `classic_access` parameter filters the returned collection by the supplied field.
+	If the supplied field is `true`, only Classic Access VPCs will be returned.
+	If the supplied field is `false`, only VPCs without Classic Access will be returned.
+
+
+	*/
+	ClassicAccess *bool
 	/*Limit
 	  The number of resources to return on a page
 
 	*/
 	Limit *int32
+	/*ResourceGroupID
+	  Filters the collection to resources within one of the resource groups identified in a comma-separated list of resource group identifiers
+
+	*/
+	ResourceGroupID *string
 	/*Start
 	  A server-supplied token determining what resource to start the page on
 
@@ -134,6 +147,17 @@ func (o *GetVpcsParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithClassicAccess adds the classicAccess to the get vpcs params
+func (o *GetVpcsParams) WithClassicAccess(classicAccess *bool) *GetVpcsParams {
+	o.SetClassicAccess(classicAccess)
+	return o
+}
+
+// SetClassicAccess adds the classicAccess to the get vpcs params
+func (o *GetVpcsParams) SetClassicAccess(classicAccess *bool) {
+	o.ClassicAccess = classicAccess
+}
+
 // WithLimit adds the limit to the get vpcs params
 func (o *GetVpcsParams) WithLimit(limit *int32) *GetVpcsParams {
 	o.SetLimit(limit)
@@ -143,6 +167,17 @@ func (o *GetVpcsParams) WithLimit(limit *int32) *GetVpcsParams {
 // SetLimit adds the limit to the get vpcs params
 func (o *GetVpcsParams) SetLimit(limit *int32) {
 	o.Limit = limit
+}
+
+// WithResourceGroupID adds the resourceGroupID to the get vpcs params
+func (o *GetVpcsParams) WithResourceGroupID(resourceGroupID *string) *GetVpcsParams {
+	o.SetResourceGroupID(resourceGroupID)
+	return o
+}
+
+// SetResourceGroupID adds the resourceGroupId to the get vpcs params
+func (o *GetVpcsParams) SetResourceGroupID(resourceGroupID *string) {
+	o.ResourceGroupID = resourceGroupID
 }
 
 // WithStart adds the start to the get vpcs params
@@ -186,6 +221,22 @@ func (o *GetVpcsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 	}
 	var res []error
 
+	if o.ClassicAccess != nil {
+
+		// query param classic_access
+		var qrClassicAccess bool
+		if o.ClassicAccess != nil {
+			qrClassicAccess = *o.ClassicAccess
+		}
+		qClassicAccess := swag.FormatBool(qrClassicAccess)
+		if qClassicAccess != "" {
+			if err := r.SetQueryParam("classic_access", qClassicAccess); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	if o.Limit != nil {
 
 		// query param limit
@@ -196,6 +247,22 @@ func (o *GetVpcsParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 		qLimit := swag.FormatInt32(qrLimit)
 		if qLimit != "" {
 			if err := r.SetQueryParam("limit", qLimit); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	if o.ResourceGroupID != nil {
+
+		// query param resource_group.id
+		var qrResourceGroupID string
+		if o.ResourceGroupID != nil {
+			qrResourceGroupID = *o.ResourceGroupID
+		}
+		qResourceGroupID := qrResourceGroupID
+		if qResourceGroupID != "" {
+			if err := r.SetQueryParam("resource_group.id", qResourceGroupID); err != nil {
 				return err
 			}
 		}

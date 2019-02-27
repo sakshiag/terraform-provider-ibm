@@ -19,6 +19,13 @@ import (
 // swagger:model vpc
 type Vpc struct {
 
+	// Indicates whether this VPC is connected to Classic Infrastructure. If true, this VPC's
+	// resources have private network connectivity to the account's Classic Infrastructure
+	// resources. Only one VPC on an account may be connected in this way. This value is set at
+	// creation and subsequently immutable.
+	//
+	ClassicAccess bool `json:"classic_access,omitempty"`
+
 	// The date and time that the VPC was created
 	// Format: date-time
 	CreatedAt strfmt.DateTime `json:"created_at,omitempty"`

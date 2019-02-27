@@ -2580,6 +2580,9 @@ definitions:
     type: object
   vpc:
     properties:
+      classic_access: {
+        description: "Indicates whether this VPC is connected to Classic Infrastructure. If true, this VPC's\nresources have private network connectivity to the account's Classic Infrastructure\nresources. Only one VPC on an account may be connected in this way. This value is set at\ncreation and subsequently immutable.\n",
+        type: boolean}
       created_at: {description: The date and time that the VPC was created, format: date-time,
         type: string}
       crn: {description: The CRN for this VPC, example: 'crn:v1:bluemix:public:gt::a/123456::vpc:4727d842-f94f-4a2d-824a-9bc9b02c523b',
@@ -6550,6 +6553,9 @@ paths:
         in: query, maximum: 100, minimum: 1, name: limit, required: false, type: integer}
       - {description: Filters the collection to resources containing the specified
           tag, in: query, name: tag, required: false, type: string}
+      - {description: Filters the collection to resources within one of the resource groups identified in a comma-separated list of resource group identifiers, in: query, name: resource_group.id, required: false,
+        type: string}
+      - {description:  "The `classic_access` parameter filters the returned collection by the supplied field.\nIf the supplied field is `true`, only Classic Access VPCs will be returned.\nIf the supplied field is `false`, only VPCs without Classic Access will be returned.\n",in: query, name: classic_access, required: false, type: boolean}
       produces: [application/json]
       responses:
         200:
@@ -6592,6 +6598,8 @@ paths:
         required: false
         schema:
           properties:
+            classic_access: {description: "Indicates whether this VPC is connected to Classic Infrastructure. If true, this VPC's\nresources have private network connectivity to the account's Classic Infrastructure\nresources. Only one VPC on an account may be connected in this way. This value is set at\ncreation and subsequently immutable.\n",
+              type: boolean}
             default_network_acl:
               description: The default network ACL to use for subnets created in this
                 VPC; if no default network ACL is provided a new one which allows
@@ -6608,7 +6616,7 @@ paths:
               title: NetworkACLIdentityByName
               type: object
             is_default: {description: Indicates whether this is the default VPC for
-                the account, type: boolean}
+                the account, type: boolean, x-omitempty: true}
             name: {description: The user-defined name for this VPC, example: my-vpc,
               format: name, pattern: '^[A-Za-z][-A-Za-z0-9_]*$', type: string}
             tags:
@@ -6617,6 +6625,13 @@ paths:
               items: {description: A tag for the resource, type: string}
               type: array
               x-omitempty: true
+            resource_group:
+              properties:
+                id: {description: The unique identifier for this resource, example: 349a61d8-7ab1-420f-a690-5fed76ef9d4f,
+                  format: uuid, pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+                  type: string}
+              title: idreference
+              type: object
           title: VPCTemplate
       responses:
         201:

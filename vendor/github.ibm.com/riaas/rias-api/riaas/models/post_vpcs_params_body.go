@@ -17,6 +17,13 @@ import (
 // swagger:model postVpcsParamsBody
 type PostVpcsParamsBody struct {
 
+	// Indicates whether this VPC is connected to Classic Infrastructure. If true, this VPC's
+	// resources have private network connectivity to the account's Classic Infrastructure
+	// resources. Only one VPC on an account may be connected in this way. This value is set at
+	// creation and subsequently immutable.
+	//
+	ClassicAccess bool `json:"classic_access,omitempty"`
+
 	// default network acl
 	DefaultNetworkACL *PostVpcsParamsBodyDefaultNetworkACL `json:"default_network_acl,omitempty"`
 
@@ -26,6 +33,9 @@ type PostVpcsParamsBody struct {
 	// The user-defined name for this VPC
 	// Pattern: ^[A-Za-z][-A-Za-z0-9_]*$
 	Name string `json:"name,omitempty"`
+
+	// resource group
+	ResourceGroup *PostVpcsParamsBodyResourceGroup `json:"resource_group,omitempty"`
 
 	// A collection of tags for this resource
 	Tags []string `json:"tags,omitempty"`
@@ -40,6 +50,10 @@ func (m *PostVpcsParamsBody) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateResourceGroup(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -75,6 +89,24 @@ func (m *PostVpcsParamsBody) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(m.Name), `^[A-Za-z][-A-Za-z0-9_]*$`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *PostVpcsParamsBody) validateResourceGroup(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ResourceGroup) { // not required
+		return nil
+	}
+
+	if m.ResourceGroup != nil {
+		if err := m.ResourceGroup.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("resource_group")
+			}
+			return err
+		}
 	}
 
 	return nil

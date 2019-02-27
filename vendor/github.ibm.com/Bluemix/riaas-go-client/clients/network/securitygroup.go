@@ -265,7 +265,7 @@ func (f *SecurityGroupClient) GetRule(secgrpID, ruleID string) (*models.Security
 func (f *SecurityGroupClient) UpdateRule(secgrpID, ruleID, direction, ipversion, protocol, remoteAddress, remoteCIDR, remoteSecGrpID string,
 	icmpType, icmpCode, portMin, portMax int64) (*models.SecurityGroupRule, error) {
 
-	remote := models.SecurityGroupRuleRemote{}
+	remote := models.SecurityGroupRuleTemplateRemote{}
 
 	if remoteAddress != "" {
 		if remoteCIDR != "" || remoteSecGrpID != "" {
@@ -307,6 +307,10 @@ func (f *SecurityGroupClient) UpdateRule(secgrpID, ruleID, direction, ipversion,
 	}
 	if portMin >= 0 {
 		rule.PortMin = &portMin
+	}
+
+	if remoteAddress != "" || remoteCIDR != "" || remoteSecGrpID != "" {
+		rule.Remote = &remote
 	}
 
 	params := network.NewPatchSecurityGroupsSecurityGroupIDRulesIDParams()
