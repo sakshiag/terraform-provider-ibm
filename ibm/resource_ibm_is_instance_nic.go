@@ -13,7 +13,6 @@ const (
 	isInstanceNICName               = "name"
 	isInstanceNICResourceGroup      = "resource_group"
 	isInstanceNICStatus             = "status"
-	isInstanceNICTags               = "tags"
 	isInstanceNICPortSpeed          = "port_speed"
 	isInstanceNICPrimaryIPV4Address = "primary_ipv4_address"
 	isInstanceNICPrimaryIPV6Address = "primary_ipv6_address"
@@ -57,13 +56,6 @@ func resourceIBMISInstanceNIC() *schema.Resource {
 			isInstanceNICStatus: {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-
-			isInstanceNICTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 
 			isInstanceNICPrimaryIPV4Address: {
@@ -133,8 +125,6 @@ func resourceIBMISInstanceNICRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	d.Set(isInstanceNICSecurityGroups, secGroups)
 
-	d.Set(isInstanceNICTags, nic.Tags)
-
 	return nil
 }
 
@@ -173,7 +163,7 @@ func resourceIBMISInstanceNICCreate(d *schema.ResourceData, meta interface{}) er
 	v6address := d.Get(isInstanceNICPrimaryIPV6Address).(string)
 	secaddrs := expandStringList((d.Get(isInstanceNICSecondaryAddresses).(*schema.Set)).List())
 	secgrps := expandStringList((d.Get(isInstanceNICSecurityGroups).(*schema.Set)).List())
-	tags := expandStringList((d.Get(isInstanceNICTags).(*schema.Set)).List())
+	tags := []string{}
 
 	nic, err := instanceC.AddInterface(instanceid, name, subnetid, portspeed,
 		v4address, v6address, secaddrs, secgrps, tags)

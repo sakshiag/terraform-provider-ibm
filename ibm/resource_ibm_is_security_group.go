@@ -15,7 +15,6 @@ const (
 	isSecurityGroupResourceGroup = "resource_group"
 	isSecurityGroupVPC           = "vpc"
 	isSecurityGroupRules         = "rules"
-	isSecurityGroupTags          = "tags"
 )
 
 func resourceIBMISSecurityGroup() *schema.Resource {
@@ -59,13 +58,6 @@ func resourceIBMISSecurityGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: makeIBMISSecurityRuleSchema(),
 				},
-			},
-
-			isSecurityGroupTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 		},
 	}
@@ -111,13 +103,6 @@ func resourceIBMISSecurityGroupRead(d *schema.ResourceData, meta interface{}) er
 	d.Set(isSecurityGroupVPC, group.Vpc.ID.String())
 	if group.ResourceGroup != nil {
 		d.Set(isSecurityGroupResourceGroup, group.ResourceGroup.ID.String())
-	}
-	if len(group.Tags) > 0 {
-		tags := make([]string, 0)
-		for _, t := range tags {
-			tags = append(tags, t)
-		}
-		d.Set(isSecurityGroupTags, tags)
 	}
 	rules := make([]map[string]interface{}, 0)
 	if len(group.Rules) > 0 {
@@ -244,26 +229,11 @@ type parsedIBMISSecurityGroupDictionary struct {
 	name          string
 	resourceGroup string
 	vpc           string
-	tags          []string
 }
 
 func newParsedIBMISSecurityGroupDictionary() *parsedIBMISSecurityGroupDictionary {
 	p := &parsedIBMISSecurityGroupDictionary{}
-	p.tags = make([]string, 0)
 	return p
-}
-
-func parseSecurityGroupTags(d *schema.ResourceData, p *parsedIBMISSecurityGroupDictionary) {
-	tagSet := d.Get(isSecurityGroupTags).(*schema.Set)
-
-	if tagSet.Len() == 0 {
-		return
-	}
-
-	for _, elem := range tagSet.List() {
-		p.tags = append(p.tags, elem.(string))
-	}
-	return
 }
 
 func parseIBMISSecurityGroupDictionary(d *schema.ResourceData, tag string) (*parsedIBMISSecurityGroupDictionary, error) {
@@ -271,7 +241,6 @@ func parseIBMISSecurityGroupDictionary(d *schema.ResourceData, tag string) (*par
 	parsed.name = d.Get(isSecurityGroupName).(string)
 	parsed.resourceGroup = d.Get(isSecurityGroupResourceGroup).(string)
 	parsed.vpc = d.Get(isSecurityGroupVPC).(string)
-	parseSecurityGroupTags(d, parsed)
 	return parsed, nil
 }
 
@@ -298,7 +267,6 @@ func makeIBMISSecurityGroupCreateParams(parsed *parsedIBMISSecurityGroupDictiona
 		return nil, err
 	}
 	params.Vpc = &models.PostSecurityGroupsParamsBodyVpc{ID: uuid}
-	params.Tags = parsed.tags
 
 	return params, nil
 }

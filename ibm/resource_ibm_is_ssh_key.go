@@ -13,7 +13,6 @@ const (
 	isKeyPublicKey     = "public_key"
 	isKeyResourceGroup = "resource_group"
 	isKeyType          = "type"
-	isKeyTags          = "tags"
 	isKeyFingerprint   = "fingerprint"
 	isKeyLength        = "length"
 )
@@ -48,13 +47,6 @@ func resourceIBMISSSHKey() *schema.Resource {
 			isKeyType: {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-
-			isKeyTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 
 			isKeyFingerprint: {
@@ -113,7 +105,6 @@ func resourceIBMISSSHKeyRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set(isKeyResourceGroup, nil)
 	}
 	d.Set(isKeyType, key.Type)
-	d.Set(isKeyTags, key.Tags)
 	d.Set(isKeyFingerprint, key.Fingerprint)
 	d.Set(isKeyLength, key.Length)
 	return nil

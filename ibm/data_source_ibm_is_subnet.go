@@ -66,13 +66,6 @@ func dataSourceIBMISSubnet() *schema.Resource {
 				Computed: true,
 			},
 
-			isSubnetTags: {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
-			},
-
 			isSubnetVPC: {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -123,7 +116,6 @@ func dataSourceIBMISSubnetRead(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		d.Set(isSubnetResourceGroup, nil)
 	}
-	d.Set(isSubnetTags, subnet.Tags)
 
 	return nil
 }

@@ -21,7 +21,6 @@ const (
 	isSubnetPublicGateway             = "public_gateway"
 	isSubnetResourceGroup             = "resource_group"
 	isSubnetStatus                    = "status"
-	isSubnetTags                      = "tags"
 	isSubnetVPC                       = "vpc"
 	isSubnetZone                      = "zone"
 	isSubnetAvailableIpv4AddressCount = "available_ipv4_address_count"
@@ -108,13 +107,6 @@ func resourceIBMISSubnet() *schema.Resource {
 			isSubnetStatus: {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-
-			isSubnetTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 
 			isSubnetVPC: {
@@ -238,7 +230,6 @@ func resourceIBMISSubnetRead(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		d.Set(isSubnetResourceGroup, nil)
 	}
-	d.Set(isSubnetTags, subnet.Tags)
 
 	return nil
 }

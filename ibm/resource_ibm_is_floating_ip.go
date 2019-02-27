@@ -17,7 +17,6 @@ const (
 	isFloatingIPName          = "name"
 	isFloatingIPResourceGroup = "resource_group"
 	isFloatingIPStatus        = "status"
-	isFloatingIPTags          = "tags"
 	isFloatingIPZone          = "zone"
 	isFloatingIPTarget        = "target"
 
@@ -61,13 +60,6 @@ func resourceIBMISFloatingIP() *schema.Resource {
 			isFloatingIPStatus: {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-
-			isFloatingIPTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 
 			isFloatingIPZone: {
@@ -147,7 +139,6 @@ func resourceIBMISFloatingIPRead(d *schema.ResourceData, meta interface{}) error
 	} else {
 		d.Set(isFloatingIPResourceGroup, nil)
 	}
-	d.Set(isFloatingIPTags, floatingip.Tags)
 
 	return nil
 }

@@ -17,7 +17,6 @@ const (
 	isVPCName                  = "name"
 	isVPCResourceGroup         = "resource_group"
 	isVPCStatus                = "status"
-	isVPCTags                  = "tags"
 	isVPCDeleting              = "deleting"
 	isVPCDeleted               = "done"
 )
@@ -72,13 +71,6 @@ func resourceIBMISVPC() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
-			isVPCTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
-			},
 		},
 	}
 }
@@ -123,7 +115,6 @@ func resourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set(isVPCName, vpc.Name)
 	d.Set(isVPCIsDefault, vpc.IsDefault)
 	d.Set(isVPCStatus, vpc.Status)
-	d.Set(isVPCTags, vpc.Tags)
 	if vpc.DefaultNetworkACL != nil {
 		log.Printf("[DEBUG] vpc default network acl is not null :%s", vpc.DefaultNetworkACL.ID)
 		d.Set(isVPCDefaultNetworkACL, vpc.DefaultNetworkACL.ID)

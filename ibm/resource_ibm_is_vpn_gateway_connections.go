@@ -26,7 +26,6 @@ const (
 	isVPNGatewayConnectionDeadPeerDetectionAction   = "action"
 	isVPNGatewayConnectionDeadPeerDetectionInterval = "interval"
 	isVPNGatewayConnectionDeadPeerDetectionTimeout  = "timeout"
-	isVPNGatewayConnectionTags                      = "tags"
 	isVPNGatewayConnectionStatus                    = "status"
 	isVPNGatewayConnectionDeleting                  = "deleting"
 	isVPNGatewayConnectionDeleted                   = "done"
@@ -88,13 +87,6 @@ func resourceIBMISVPNGatewayConnection() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
-			},
-
-			isVPNGatewayConnectionTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},

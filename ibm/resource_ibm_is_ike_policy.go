@@ -15,7 +15,6 @@ const (
 	isIKEDhGroup           = "dh_group"
 	isIKEVERSION           = "ike_version"
 	isIKEKeyLifeTime       = "key_lifetime"
-	isIKETags              = "tags"
 	isIKEResourceGroup     = "resource_group"
 	isIKENegotiationMode   = "negotiation_mode"
 	isIKEVPNConnections    = "vpn_connections"
@@ -167,7 +166,6 @@ func resourceIBMISIKEPolicyRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set(isIKEHref, ike.Href)
 	d.Set(isIKENegotiationMode, ike.NegotiationMode)
 	d.Set(isIKEVERSION, ike.IkeVersion)
-	//d.Set(isIKETags, ike.)
 	d.Set(isIKEDhGroup, ike.DhGroup)
 	connList := make([]map[string]interface{}, 0)
 	if ike.Connections != nil && len(ike.Connections) > 0 {

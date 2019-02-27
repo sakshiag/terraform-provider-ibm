@@ -15,7 +15,6 @@ import (
 
 const (
 	isInstanceName                    = "name"
-	isInstanceTags                    = "tags"
 	isInstanceKeys                    = "keys"
 	isInstanceNetworkInterfaces       = "network_interfaces"
 	isInstancePrimaryNetworkInterface = "primary_network_interface"
@@ -27,7 +26,6 @@ const (
 	isInstanceNicSecondaryAddress     = "secondary_addresses"
 	isInstanceNicSecurityGroups       = "security_groups"
 	isInstanceNicSubnet               = "subnet"
-	isInstanceNicTags                 = "tags"
 	isInstanceNicFloatingIPs          = "floating_ips"
 	isInstanceProfile                 = "profile"
 	isInstanceResourceGroup           = "resource_group"
@@ -38,7 +36,6 @@ const (
 	isInstanceBootVolume              = "boot_volume"
 	isInstanceVolAttName              = "name"
 	isInstanceVolAttResourcceGroup    = "resource_group"
-	isInstanceVolAttTags              = "tags"
 	isInstanceVolAttVolume            = "volume"
 	isInstanceVolAttVolAutoDelete     = "auto_delete"
 	isInstanceVolAttVolCapacity       = "capacity"
@@ -47,7 +44,6 @@ const (
 	isInstanceVolAttVolBillingTerm    = "billing_term"
 	isInstanceVolAttVolEncryptionKey  = "encryption_key"
 	isInstanceVolAttVolResourceGroup  = "resource_group"
-	isInstanceVolAttVolTags           = "tags"
 	isInstanceVolAttVolType           = "type"
 	isInstanceVolAttVolProfile        = "profile"
 	isInstanceImage                   = "image"
@@ -110,13 +106,6 @@ func resourceIBMISInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				ForceNew: false,
 				Required: true,
-			},
-
-			isInstanceTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 
 			isInstanceKeys: {

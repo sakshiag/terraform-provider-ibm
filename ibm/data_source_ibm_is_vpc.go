@@ -36,13 +36,6 @@ func dataSourceIBMISVPC() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
-			isVPCTags: {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
-			},
 		},
 	}
 }
@@ -68,7 +61,6 @@ func dataSourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 			d.Set(isVPCName, vpc.Name)
 			d.Set(isVPCIsDefault, vpc.IsDefault)
 			d.Set(isVPCStatus, vpc.Status)
-			d.Set(isVPCTags, vpc.Tags)
 			if vpc.DefaultNetworkACL != nil {
 				d.Set(isVPCDefaultNetworkACL, vpc.DefaultNetworkACL.ID)
 			} else {

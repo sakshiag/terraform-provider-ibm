@@ -14,7 +14,6 @@ const (
 	isVPNGatewayName             = "name"
 	isVPNGatewayResourceGroup    = "resource_group"
 	isVPNGatewaySubnet           = "subnet"
-	isVPNGatewayTags             = "tags"
 	isVPNGatewayStatus           = "status"
 	isVPNGatewayDeleting         = "deleting"
 	isVPNGatewayDeleted          = "done"
@@ -55,13 +54,6 @@ func resourceIBMISVPNGateway() *schema.Resource {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
-			},
-
-			isVPNGatewayTags: {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 
 			isVPNGatewayStatus: {
