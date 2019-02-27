@@ -189,6 +189,7 @@ func Provider() terraform.ResourceProvider {
 			"ibm_is_ike_policy":                         resourceIBMISIKEPolicy(),
 			"ibm_is_ipsec_policy":                       resourceIBMISIPSecPolicy(),
 			"ibm_is_lb":                                 resourceIBMISLB(),
+			"ibm_is_lb_listener":                        resourceIBMISLBListener(),
 			"ibm_is_lb_pool":                            resourceIBMISLBPool(),
 			"ibm_is_lb_pool_member":                     resourceIBMISLBPoolMember(),
 			"ibm_is_network_acl":                        resourceIBMISNetworkACL(),

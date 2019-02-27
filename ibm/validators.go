@@ -844,3 +844,18 @@ func validateDeadPeerDetectionTimeout(v interface{}, k string) (ws []string, err
 	}
 	return
 }
+
+func validateLBListenerPort(v interface{}, k string) (ws []string, errors []error) {
+	return validatePortRange(1, 65535)(v, k)
+}
+
+func validateLBListenerConnectionLimit(v interface{}, k string) (ws []string, errors []error) {
+	conns := v.(int)
+	if conns < 1 || conns > 15000 {
+		errors = append(errors, fmt.Errorf(
+			"%q must be between 1 and 15000",
+			k))
+		return
+	}
+	return
+}
