@@ -38,4 +38,3 @@ The following attributes are exported:
 * `default_network_acl` - ID of the default network ACL.
 * `is_default` - Is this VPC default for the account.
 * `resource_group` - The resource group where the VPC created.
-* `tags` - Tags associated with the VPC. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.

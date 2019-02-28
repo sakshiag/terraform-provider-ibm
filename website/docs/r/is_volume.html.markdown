@@ -42,7 +42,6 @@ The following arguments are supported:
 * `auto_delete` - (Optional, bool) If set to true, this volume will be automatically deleted if the only instance it is attached to is deleted. The default is `false`.
 * `billing_term` - (Optional, string) The billing term.
 * `resource_group` - (Optional, string) The resource group for this volume.
-* `tags` - (Optional, array of strings) Tags associated with the volume. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 

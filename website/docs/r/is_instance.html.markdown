@@ -84,7 +84,6 @@ Nested `primary_network_interface` block have the following structure:
 * `volumes` - (Optional, list) Comma separated IDs of volumes. 
 * `user-data` - (Optional, string) User data to transfer to the server instance. 
 * `resource_group` - (Optional, string) The resource group to which the instance belongs.
-* `tags` - (Optional, array of strings) Tags associated with the instance. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 

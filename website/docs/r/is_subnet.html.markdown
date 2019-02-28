@@ -51,7 +51,6 @@ The following arguments are supported:
 * `network_acl` - (Optional, string) The ID of the network ACL for the subnet.
 * `public_gateway` - (Optional, string) The ID of the public-gateway for the subnet.
 * `resource_group` - (Optional, string) The resource group to which the subnet belongs.
-* `tags` - (Optional, array of strings) Tags associated with the subnet. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 * `vpc` - (Required, string) The vpc id.
 * `zone` - (Required, string) The subnet zone name.
 
@@ -62,5 +61,4 @@ The following attributes are exported:
 * `id` - The id of the subnet.
 * `ipv6_cidr_block` - The IPv6 range of the subnet.
 * `status` - The status of the subnet.
-* `tags` - Tags associated with the subnet.
 * `available_ipv4_address_count` - The total number of available IPv4 addresses.

@@ -69,7 +69,6 @@ The following arguments are supported:
 * `subnet` -  (Required, string) ID of the subnet.
 * `instance_id` - (Required, string) The instance identifier.
 * `resource_group` - (Optional, string) The resource group to which the instance nic belongs.
-* `tags` - (Optional, array of strings) Tags associated with the instance nic. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 * `primary_ipv4_address` -(Optional, string) The primary IPv4 address.
 * `primary_ipv6_address` - (Optional, string) The primary IPv6 address in any valid notation as specified by RFC 4291.
 * `secondary_addresses` - (Optional, array of strings) A secondary IP address.

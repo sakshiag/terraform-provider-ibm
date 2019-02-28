@@ -30,7 +30,6 @@ The following arguments are supported:
 * `is_default` - (Optional, string)  Make this VPC default for the account. The default is false.
 * `name` - (Required, string) The name of the VPC.
 * `resource_group` - (Optional, string) The resource group where the VPC to be created
-* `tags` - (Optional, array of strings) Tags associated with the VPC. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 

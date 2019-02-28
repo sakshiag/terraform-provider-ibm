@@ -26,7 +26,6 @@ The following arguments are supported:
 
 * `name` - (Required, string) The user-defined name for this key.
 * `public_key` - (Required, string) The public SSH key.
-* `tags` - (Optional, array of strings) Tags associated with the ssh key. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 

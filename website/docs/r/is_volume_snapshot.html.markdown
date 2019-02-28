@@ -38,7 +38,6 @@ The following arguments are supported:
 * `name` - (Required, string) The user-defined name for this volume.
 * `volume_id` - (Required, string) The volume id.
 * `resource_group` - (Optional, string) The resource group for this volume snapshot.
-* `tags` - (Optional, array of strings) Tags associated with the volume snapshot. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 

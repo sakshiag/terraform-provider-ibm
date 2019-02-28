@@ -49,7 +49,6 @@ Nested `floating_ip` blocks have the following structure:
   * `id` - (Optional, string) ID of the floating ip bound to the public gateway.
   * `address` - (Optional, string) IP address of the floating ip bound to the public gateway. 
 * `resource_group` - (Optional, string) The resource group to which the gateway belongs.
-* `tags` - (Optional, array of strings) Tags associated with the gateway. Permitted characters include: A-Z, 0-9, whitespace, _ (underscore), - (hyphen), . (period), and : (colon). All other characters are removed.
 
 ## Attribute Reference
 
