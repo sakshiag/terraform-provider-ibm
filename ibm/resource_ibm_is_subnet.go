@@ -39,8 +39,9 @@ func resourceIBMISSubnet() *schema.Resource {
 		Exists:   resourceIBMISSubnetExists,
 		Importer: &schema.ResourceImporter{},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(60 * time.Minute),
-			Delete: schema.DefaultTimeout(60 * time.Minute),
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -240,9 +241,25 @@ func resourceIBMISSubnetUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	if d.HasChange(isSubnetPublicGateway) {
 		gw = d.Get(isSubnetPublicGateway).(string)
+		if gw == "" {
+			err = subnetC.DetachPublicGateway(d.Id())
+			if err != nil {
+				return err
+			}
+			_, err = isWaitForSubnetAvailable(subnetC, d.Id(), d.Timeout(schema.TimeoutDelete))
+			if err != nil {
+				return err
+			}
+
+		}
 	}
 
 	_, err = subnetC.Update(d.Id(), name, acl, gw)
+	if err != nil {
+		return err
+	}
+
+	_, err = isWaitForSubnetAvailable(subnetC, d.Id(), d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -257,6 +274,24 @@ func resourceIBMISSubnetDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	subnetC := network.NewSubnetClient(sess)
+
+	subnet, err := subnetC.Get(d.Id())
+	if err != nil {
+		return err
+	}
+
+	if subnet.PublicGateway != nil {
+		err = subnetC.DetachPublicGateway(d.Id())
+		if err != nil {
+			return err
+		}
+		_, err = isWaitForSubnetAvailable(subnetC, d.Id(), d.Timeout(schema.TimeoutDelete))
+		if err != nil {
+			return err
+		}
+
+	}
+
 	err = subnetC.Delete(d.Id())
 	if err != nil {
 		return err
