@@ -161,10 +161,9 @@ func resourceIBMISInstance() *schema.Resource {
 			},
 
 			isInstanceUserData: {
-				Type:             schema.TypeString,
-				ForceNew:         true,
-				Optional:         true,
-				DiffSuppressFunc: applyOnce,
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
 			},
 
 			isInstanceImage: {
