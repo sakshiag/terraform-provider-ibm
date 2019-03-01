@@ -19,23 +19,20 @@ const (
 	isInstanceNetworkInterfaces       = "network_interfaces"
 	isInstancePrimaryNetworkInterface = "primary_network_interface"
 	isInstanceNicName                 = "name"
+	isInstanceProfile                 = "profile"
 	isInstanceNicPortSpeed            = "port_speed"
 	isInstanceNicPrimaryIpv4Address   = "primary_ipv4_address"
 	isInstanceNicPrimaryIpv6Address   = "primary_ipv6_address"
-	isInstanceNicResourceGroup        = "resource_group"
 	isInstanceNicSecondaryAddress     = "secondary_addresses"
 	isInstanceNicSecurityGroups       = "security_groups"
 	isInstanceNicSubnet               = "subnet"
 	isInstanceNicFloatingIPs          = "floating_ips"
-	isInstanceProfile                 = "profile"
-	isInstanceResourceGroup           = "resource_group"
 	isInstanceUserData                = "user_data"
 	isInstanceVolumes                 = "volumes"
 	isInstanceVPC                     = "vpc"
 	isInstanceZone                    = "zone"
 	isInstanceBootVolume              = "boot_volume"
 	isInstanceVolAttName              = "name"
-	isInstanceVolAttResourcceGroup    = "resource_group"
 	isInstanceVolAttVolume            = "volume"
 	isInstanceVolAttVolAutoDelete     = "auto_delete"
 	isInstanceVolAttVolCapacity       = "capacity"
@@ -43,7 +40,6 @@ const (
 	isInstanceVolAttVolName           = "name"
 	isInstanceVolAttVolBillingTerm    = "billing_term"
 	isInstanceVolAttVolEncryptionKey  = "encryption_key"
-	isInstanceVolAttVolResourceGroup  = "resource_group"
 	isInstanceVolAttVolType           = "type"
 	isInstanceVolAttVolProfile        = "profile"
 	isInstanceImage                   = "image"
@@ -162,12 +158,6 @@ func resourceIBMISInstance() *schema.Resource {
 				Default:          "gc",
 				DiffSuppressFunc: applyOnce,
 				ValidateFunc:     validateGeneration,
-			},
-
-			isInstanceResourceGroup: {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 			},
 
 			isInstanceUserData: {
@@ -369,12 +359,6 @@ func resourceIBMisInstanceCreate(d *schema.ResourceData, meta interface{}) error
 
 	if userdata, ok := d.GetOk(isInstanceUserData); ok {
 		body.UserData = userdata.(string)
-	}
-
-	if rg, ok := d.GetOk(isInstanceResourceGroup); ok {
-		body.ResourceGroup = &models.PostInstancesParamsBodyResourceGroup{
-			ID: strfmt.UUID(rg.(string)),
-		}
 	}
 
 	instanceC := compute.NewInstanceClient(sess)

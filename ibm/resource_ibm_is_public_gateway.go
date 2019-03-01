@@ -13,7 +13,6 @@ import (
 const (
 	isPublicGatewayName              = "name"
 	isPublicGatewayFloatingIP        = "floating_ip"
-	isPublicGatewayResourceGroup     = "resource_group"
 	isPublicGatewayStatus            = "status"
 	isPublicGatewayVPC               = "vpc"
 	isPublicGatewayZone              = "zone"
@@ -64,12 +63,6 @@ func resourceIBMISPublicGateway() *schema.Resource {
 						},
 					},
 				},
-			},
-
-			isPublicGatewayResourceGroup: {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 			},
 
 			isPublicGatewayStatus: {
@@ -188,11 +181,6 @@ func resourceIBMISPublicGatewayRead(d *schema.ResourceData, meta interface{}) er
 	d.Set(isPublicGatewayStatus, publicgw.Status)
 	d.Set(isPublicGatewayZone, publicgw.Zone.Name)
 	d.Set(isPublicGatewayVPC, publicgw.Vpc.ID.String())
-	if publicgw.ResourceGroup != nil {
-		d.Set(isPublicGatewayResourceGroup, publicgw.ResourceGroup)
-	} else {
-		d.Set(isPublicGatewayResourceGroup, nil)
-	}
 
 	return nil
 }

@@ -7,8 +7,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/IBM-Cloud/bluemix-go/api/resource/resourcev1/management"
-	"github.com/go-openapi/strfmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.ibm.com/Bluemix/riaas-go-client/clients/network"
 	iserrors "github.ibm.com/Bluemix/riaas-go-client/errors"
@@ -17,7 +15,6 @@ import (
 
 const (
 	isNetworkACLName            = "name"
-	isNetworkACLResourceGroup   = "resource_group"
 	isNetworkACLRules           = "rules"
 	isNetworkACLSubnets         = "subnets"
 	isNetworkACLRuleID          = "id"
@@ -51,12 +48,6 @@ func resourceIBMISNetworkACL() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
-			},
-			isNetworkACLResourceGroup: {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
-				Computed: true,
 			},
 			isNetworkACLRules: {
 				Type:     schema.TypeList,
@@ -174,25 +165,6 @@ func resourceIBMISNetworkACLCreate(d *schema.ResourceData, meta interface{}) err
 	var nwaclbody models.PostNetworkAclsParamsBody
 	nwaclbody.Name = d.Get(isNetworkACLName).(string)
 
-	rg := d.Get(isNetworkACLResourceGroup).(string)
-	if rg != "" {
-		nwaclbody.ResourceGroup = &models.PostNetworkAclsParamsBodyResourceGroup{
-			ID: strfmt.UUID(rg),
-		}
-	} else {
-		log.Printf("[DEBUG] Looking up default resource group")
-		rmapi, _ := meta.(ClientSession).ResourceManagementAPI()
-		rgquery := &management.ResourceGroupQuery{
-			Default: true,
-		}
-		rgs, _ := rmapi.ResourceGroup().List(rgquery)
-		log.Printf("[DEBUG] Using default esource group : %s", rgs[0].ID)
-		rg = rgs[0].ID
-		nwaclbody.ResourceGroup = &models.PostNetworkAclsParamsBodyResourceGroup{
-			ID: strfmt.UUID(rgs[0].ID),
-		}
-	}
-
 	//validate each rule before attempting to create the ACL
 	rules := d.Get(isNetworkACLRules).([]interface{})
 	err = validateInlineRules(rules)
@@ -212,7 +184,6 @@ func resourceIBMISNetworkACLCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	d.SetId(nwacl.ID.String())
-	d.Set(isNetworkACLResourceGroup, rg)
 	nwaclid := nwacl.ID.String()
 
 	//Remove default rules
@@ -244,9 +215,6 @@ func resourceIBMISNetworkACLRead(d *schema.ResourceData, meta interface{}) error
 
 	d.Set(isNetworkACLName, nwacl.Name)
 	d.Set(isNetworkACLSubnets, len(nwacl.Subnets))
-	if nwacl.ResourceGroup != nil {
-		d.Set(isNetworkACLResourceGroup, nwacl.ResourceGroup)
-	}
 
 	log.Printf("[DEBUG] Looking up rules for network ACL with id %s", d.Id())
 	rawrules, _, err := nwaclC.ListRules(d.Id(), "")

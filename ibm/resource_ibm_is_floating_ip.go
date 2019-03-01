@@ -13,12 +13,11 @@ import (
 )
 
 const (
-	isFloatingIPAddress       = "address"
-	isFloatingIPName          = "name"
-	isFloatingIPResourceGroup = "resource_group"
-	isFloatingIPStatus        = "status"
-	isFloatingIPZone          = "zone"
-	isFloatingIPTarget        = "target"
+	isFloatingIPAddress = "address"
+	isFloatingIPName    = "name"
+	isFloatingIPStatus  = "status"
+	isFloatingIPZone    = "zone"
+	isFloatingIPTarget  = "target"
 
 	isFloatingIPProvisioning     = "provisioning"
 	isFloatingIPProvisioningDone = "done"
@@ -49,12 +48,6 @@ func resourceIBMISFloatingIP() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
-			},
-
-			isFloatingIPResourceGroup: {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 			},
 
 			isFloatingIPStatus: {
@@ -89,7 +82,6 @@ func resourceIBMISFloatingIPCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	name := d.Get(isFloatingIPName).(string)
-	resgrp := d.Get(isFloatingIPResourceGroup).(string)
 	var zone, target string
 
 	if zn, ok := d.GetOk(isFloatingIPZone); ok {
@@ -105,7 +97,7 @@ func resourceIBMISFloatingIPCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	floatingipC := network.NewFloatingIPClient(sess)
-	floatingip, err := floatingipC.Create(name, zone, resgrp, target)
+	floatingip, err := floatingipC.Create(name, zone, "", target)
 	if err != nil {
 		log.Printf("[DEBUG] floating ip err %s", isErrorToString(err))
 		return err
@@ -134,11 +126,6 @@ func resourceIBMISFloatingIPRead(d *schema.ResourceData, meta interface{}) error
 	d.Set(isFloatingIPStatus, floatingip.Status)
 	d.Set(isFloatingIPZone, floatingip.Zone.Name)
 	d.Set(isFloatingIPTarget, floatingip.Target.ID.String())
-	if floatingip.ResourceGroup != nil {
-		d.Set(isFloatingIPResourceGroup, floatingip.ResourceGroup)
-	} else {
-		d.Set(isFloatingIPResourceGroup, nil)
-	}
 
 	return nil
 }

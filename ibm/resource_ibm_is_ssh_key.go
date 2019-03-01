@@ -9,12 +9,11 @@ import (
 )
 
 const (
-	isKeyName          = "name"
-	isKeyPublicKey     = "public_key"
-	isKeyResourceGroup = "resource_group"
-	isKeyType          = "type"
-	isKeyFingerprint   = "fingerprint"
-	isKeyLength        = "length"
+	isKeyName        = "name"
+	isKeyPublicKey   = "public_key"
+	isKeyType        = "type"
+	isKeyFingerprint = "fingerprint"
+	isKeyLength      = "length"
 )
 
 func resourceIBMISSSHKey() *schema.Resource {
@@ -37,11 +36,6 @@ func resourceIBMISSSHKey() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-
-			isKeyResourceGroup: {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			isKeyType: {
@@ -71,7 +65,6 @@ func resourceIBMISSSHKeyCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Key create")
 	name := d.Get(isKeyName).(string)
 	publickey := d.Get(isKeyPublicKey).(string)
-	//rg := d.Get(isKeyResourceGroup).(string)
 
 	keyC := compute.NewKeyClient(sess)
 	key, err := keyC.Create(name, publickey)
@@ -99,11 +92,6 @@ func resourceIBMISSSHKeyRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set(isKeyName, key.Name)
 	d.Set(isKeyPublicKey, key.PublicKey)
-	if key.ResourceGroup != nil {
-		d.Set(isKeyResourceGroup, key.ResourceGroup.ID)
-	} else {
-		d.Set(isKeyResourceGroup, nil)
-	}
 	d.Set(isKeyType, key.Type)
 	d.Set(isKeyFingerprint, key.Fingerprint)
 	d.Set(isKeyLength, key.Length)

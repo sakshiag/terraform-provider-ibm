@@ -11,7 +11,6 @@ import (
 const (
 	isInstanceNICInstanceID         = "instance_id"
 	isInstanceNICName               = "name"
-	isInstanceNICResourceGroup      = "resource_group"
 	isInstanceNICStatus             = "status"
 	isInstanceNICPortSpeed          = "port_speed"
 	isInstanceNICPrimaryIPV4Address = "primary_ipv4_address"

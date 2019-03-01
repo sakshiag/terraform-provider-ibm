@@ -11,10 +11,9 @@ import (
 )
 
 const (
-	isSecurityGroupName          = "name"
-	isSecurityGroupResourceGroup = "resource_group"
-	isSecurityGroupVPC           = "vpc"
-	isSecurityGroupRules         = "rules"
+	isSecurityGroupName  = "name"
+	isSecurityGroupVPC   = "vpc"
+	isSecurityGroupRules = "rules"
 )
 
 func resourceIBMISSecurityGroup() *schema.Resource {
@@ -35,13 +34,6 @@ func resourceIBMISSecurityGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Security group name",
 				//ValidateFunc: validateSecurityGroupId,
-			},
-			isSecurityGroupResourceGroup: {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "Security group's resource group id",
-				ValidateFunc: validateResourceGroupId,
-				ForceNew:     true,
 			},
 			isSecurityGroupVPC: {
 				Type:         schema.TypeString,
@@ -101,9 +93,6 @@ func resourceIBMISSecurityGroupRead(d *schema.ResourceData, meta interface{}) er
 
 	d.Set(isSecurityGroupName, group.Name)
 	d.Set(isSecurityGroupVPC, group.Vpc.ID.String())
-	if group.ResourceGroup != nil {
-		d.Set(isSecurityGroupResourceGroup, group.ResourceGroup.ID.String())
-	}
 	rules := make([]map[string]interface{}, 0)
 	if len(group.Rules) > 0 {
 		for _, rule := range group.Rules {
@@ -239,7 +228,6 @@ func newParsedIBMISSecurityGroupDictionary() *parsedIBMISSecurityGroupDictionary
 func parseIBMISSecurityGroupDictionary(d *schema.ResourceData, tag string) (*parsedIBMISSecurityGroupDictionary, error) {
 	parsed := newParsedIBMISSecurityGroupDictionary()
 	parsed.name = d.Get(isSecurityGroupName).(string)
-	parsed.resourceGroup = d.Get(isSecurityGroupResourceGroup).(string)
 	parsed.vpc = d.Get(isSecurityGroupVPC).(string)
 	return parsed, nil
 }

@@ -56,11 +56,6 @@ func dataSourceIBMISSubnet() *schema.Resource {
 				Computed: true,
 			},
 
-			isSubnetResourceGroup: {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			isSubnetStatus: {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -111,11 +106,6 @@ func dataSourceIBMISSubnetRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set(isSubnetStatus, subnet.Status)
 	d.Set(isSubnetZone, subnet.Zone.Name)
 	d.Set(isSubnetVPC, subnet.Vpc.ID.String())
-	if subnet.ResourceGroup != nil {
-		d.Set(isSubnetResourceGroup, subnet.ResourceGroup)
-	} else {
-		d.Set(isSubnetResourceGroup, nil)
-	}
 
 	return nil
 }

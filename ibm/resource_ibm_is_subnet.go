@@ -19,7 +19,6 @@ const (
 	isSubnetName                      = "name"
 	isSubnetNetworkACL                = "network_acl"
 	isSubnetPublicGateway             = "public_gateway"
-	isSubnetResourceGroup             = "resource_group"
 	isSubnetStatus                    = "status"
 	isSubnetVPC                       = "vpc"
 	isSubnetZone                      = "zone"
@@ -98,12 +97,6 @@ func resourceIBMISSubnet() *schema.Resource {
 				ForceNew: false,
 			},
 
-			isSubnetResourceGroup: {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
-			},
-
 			isSubnetStatus: {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -146,10 +139,9 @@ func resourceIBMISSubnetCreate(d *schema.ResourceData, meta interface{}) error {
 
 	acl := d.Get(isSubnetNetworkACL).(string)
 	gw := d.Get(isSubnetPublicGateway).(string)
-	resgrp := d.Get(isSubnetResourceGroup).(string)
 
 	subnetC := network.NewSubnetClient(sess)
-	subnet, err := subnetC.Create(name, zone, vpc, acl, gw, "", resgrp, ipv4cidr, ipv4addrcount)
+	subnet, err := subnetC.Create(name, zone, vpc, acl, gw, "", "", ipv4cidr, ipv4addrcount)
 	if err != nil {
 		return err
 	}
@@ -225,11 +217,6 @@ func resourceIBMISSubnetRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set(isSubnetStatus, subnet.Status)
 	d.Set(isSubnetZone, subnet.Zone.Name)
 	d.Set(isSubnetVPC, subnet.Vpc.ID.String())
-	if subnet.ResourceGroup != nil {
-		d.Set(isSubnetResourceGroup, subnet.ResourceGroup)
-	} else {
-		d.Set(isSubnetResourceGroup, nil)
-	}
 
 	return nil
 }
