@@ -30,7 +30,6 @@ The following arguments are supported:
 
 * `name` - (Optional, string) The security group name.
 * `vpc` - (Required, string) The vpc id. 
-* `resource_group` - (Optional, string) The resource group to which the security group belongs.
 
 ## Attribute Reference
 

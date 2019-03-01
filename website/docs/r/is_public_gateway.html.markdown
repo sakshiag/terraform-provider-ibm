@@ -48,7 +48,6 @@ The following arguments are supported:
 Nested `floating_ip` blocks have the following structure:
   * `id` - (Optional, string) ID of the floating ip bound to the public gateway.
   * `address` - (Optional, string) IP address of the floating ip bound to the public gateway. 
-* `resource_group` - (Optional, string) The resource group to which the gateway belongs.
 
 ## Attribute Reference
 

@@ -52,7 +52,6 @@ The following arguments are supported:
     **NOTE**: Conflicts with `zone`.
 * `zone` - (Optional, string) Name of the target zone. 
     **NOTE**: Conflicts with `target`.
-* `resource_group` - (Optional, string) The resource group to which the floating ip belongs.
 
 ## Attribute Reference
 

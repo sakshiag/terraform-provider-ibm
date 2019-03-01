@@ -34,5 +34,4 @@ The following attributes are exported:
 * `id` - The id of the ssh key.
 * `fingerprint` -  The SHA256 fingerprint of the public key.
 * `length` - The length of this key.
-* `resource_group` - The resource group for this key
 * `type` - The cryptosystem used by this key.

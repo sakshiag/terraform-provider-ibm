@@ -50,7 +50,6 @@ The following arguments are supported:
 * `name` - (Required, string) The name of the subnet.
 * `network_acl` - (Optional, string) The ID of the network ACL for the subnet.
 * `public_gateway` - (Optional, string) The ID of the public-gateway for the subnet.
-* `resource_group` - (Optional, string) The resource group to which the subnet belongs.
 * `vpc` - (Required, string) The vpc id.
 * `zone` - (Required, string) The subnet zone name.
 

@@ -68,7 +68,6 @@ The following arguments are supported:
 * `port_speed` - (Required, int) Speed of the network interface.
 * `subnet` -  (Required, string) ID of the subnet.
 * `instance_id` - (Required, string) The instance identifier.
-* `resource_group` - (Optional, string) The resource group to which the instance nic belongs.
 * `primary_ipv4_address` -(Optional, string) The primary IPv4 address.
 * `primary_ipv6_address` - (Optional, string) The primary IPv6 address in any valid notation as specified by RFC 4291.
 * `secondary_addresses` - (Optional, array of strings) A secondary IP address.

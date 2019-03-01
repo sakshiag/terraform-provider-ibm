@@ -47,7 +47,6 @@ The following attributes are exported:
 * `name` - The name of the subnet.
 * `network_acl` - The ID of the network ACL for the subnet.
 * `public_gateway` - The ID of the public-gateway for the subnet.
-* `resource_group` - The resource group to which the subnet belongs.
 * `status` - The status of the subnet.
 * `vpc` - The vpc id.
 * `zone` - The subnet zone name.

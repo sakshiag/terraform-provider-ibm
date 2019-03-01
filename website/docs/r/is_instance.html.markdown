@@ -83,7 +83,6 @@ Nested `primary_network_interface` block have the following structure:
 
 * `volumes` - (Optional, list) Comma separated IDs of volumes. 
 * `user-data` - (Optional, string) User data to transfer to the server instance. 
-* `resource_group` - (Optional, string) The resource group to which the instance belongs.
 
 ## Attribute Reference
 
