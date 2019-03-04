@@ -116,14 +116,6 @@ func TestAccIBMIAMUserPolicy_With_Resource_Type(t *testing.T) {
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIBMIAMUserPolicyDestroy,
-<<<<<<< HEAD
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccCheckIBMIAMUserPolicy_resource_type(),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckIBMIAMUserPolicyExists("ibm_iam_user_policy.policy", conf),
-					resource.TestCheckResourceAttr("ibm_iam_user_policy.policy", "roles.#", "1"),
-=======
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccCheckIBMIAMUserPolicy_resource_type(),
@@ -178,42 +170,12 @@ func TestAccIBMIAMUserPolicy_account_management(t *testing.T) {
 					testAccCheckIBMIAMUserPolicyExists(resourceName, conf),
 					resource.TestCheckResourceAttr("ibm_iam_user_policy.policy", "roles.#", "1"),
 					resource.TestCheckResourceAttr("ibm_iam_user_policy.policy", "account_management", "true"),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				),
 			},
 		},
 	})
 }
 
-<<<<<<< HEAD
-func TestAccIBMIAMUserPolicy_import(t *testing.T) {
-	var conf iampapv1.Policy
-	name := fmt.Sprintf("terraform_%d", acctest.RandInt())
-	resourceName := "ibm_iam_user_policy.policy"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIBMIAMUserPolicyDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccCheckIBMIAMUserPolicy_import(name),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckIBMIAMUserPolicyExists(resourceName, conf),
-					resource.TestCheckResourceAttr("ibm_iam_user_policy.policy", "roles.#", "1"),
-				),
-			},
-			resource.TestStep{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func TestAccIBMIAMUserPolicy_Invalid_User(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
@@ -430,8 +392,6 @@ func testAccCheckIBMIAMUserPolicy_invalid_user() string {
 		  }
 
 	`)
-<<<<<<< HEAD
-=======
 }
 
 func testAccCheckIBMIAMUserPolicy_account_management(name string) string {
@@ -444,5 +404,4 @@ func testAccCheckIBMIAMUserPolicy_account_management(name string) string {
 		  }
 
 	`, IAMUser)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 }

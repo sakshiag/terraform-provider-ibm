@@ -35,18 +35,11 @@ func resourceIBMIAMServicePolicy() *schema.Resource {
 			},
 
 			"resources": {
-<<<<<<< HEAD
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				MaxItems: 1,
-=======
 				Type:          schema.TypeList,
 				Optional:      true,
 				Computed:      true,
 				MaxItems:      1,
 				ConflictsWith: []string{"account_management"},
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"service": {
@@ -88,8 +81,6 @@ func resourceIBMIAMServicePolicy() *schema.Resource {
 				},
 			},
 
-<<<<<<< HEAD
-=======
 			"account_management": {
 				Type:          schema.TypeBool,
 				Default:       false,
@@ -98,7 +89,6 @@ func resourceIBMIAMServicePolicy() *schema.Resource {
 				ConflictsWith: []string{"resources"},
 			},
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -196,8 +186,6 @@ func resourceIBMIAMServicePolicyRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("roles", roles)
 	d.Set("version", servicePolicy.Version)
 	d.Set("resources", flattenPolicyResource(servicePolicy.Resources))
-<<<<<<< HEAD
-=======
 	if len(servicePolicy.Resources) > 0 {
 		if servicePolicy.Resources[0].GetAttribute("serviceType") == "service" {
 			d.Set("account_management", false)
@@ -206,7 +194,6 @@ func resourceIBMIAMServicePolicyRead(d *schema.ResourceData, meta interface{}) e
 			d.Set("account_management", true)
 		}
 	}
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	return nil
 }

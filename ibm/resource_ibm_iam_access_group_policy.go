@@ -35,18 +35,11 @@ func resourceIBMIAMAccessGroupPolicy() *schema.Resource {
 			},
 
 			"resources": {
-<<<<<<< HEAD
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				MaxItems: 1,
-=======
 				Type:          schema.TypeList,
 				Optional:      true,
 				Computed:      true,
 				MaxItems:      1,
 				ConflictsWith: []string{"account_management"},
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"service": {
@@ -88,8 +81,6 @@ func resourceIBMIAMAccessGroupPolicy() *schema.Resource {
 				},
 			},
 
-<<<<<<< HEAD
-=======
 			"account_management": {
 				Type:          schema.TypeBool,
 				Default:       false,
@@ -98,7 +89,6 @@ func resourceIBMIAMAccessGroupPolicy() *schema.Resource {
 				ConflictsWith: []string{"resources"},
 			},
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -191,8 +181,6 @@ func resourceIBMIAMAccessGroupPolicyRead(d *schema.ResourceData, meta interface{
 	d.Set("roles", roles)
 	d.Set("version", accgrpPolicy.Version)
 	d.Set("resources", flattenPolicyResource(accgrpPolicy.Resources))
-<<<<<<< HEAD
-=======
 	if len(accgrpPolicy.Resources) > 0 {
 		if accgrpPolicy.Resources[0].GetAttribute("serviceType") == "service" {
 			d.Set("account_management", false)
@@ -201,7 +189,6 @@ func resourceIBMIAMAccessGroupPolicyRead(d *schema.ResourceData, meta interface{
 			d.Set("account_management", true)
 		}
 	}
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	return nil
 }
@@ -360,13 +347,10 @@ func generateAccountPolicy(d *schema.ResourceData, meta interface{}) (iampapv1.P
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	if d.Get("account_management").(bool) {
 		policyResource.SetServiceType("platform_service")
 	}
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	if len(policyResource.Attributes) == 0 {
 		policyResource.SetServiceType("service")
 	}

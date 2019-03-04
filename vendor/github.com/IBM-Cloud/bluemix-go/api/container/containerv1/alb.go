@@ -65,11 +65,7 @@ type ALBSecretsPerCRN struct {
 type Albs interface {
 	ListClusterALBs(clusterNameOrID string, target ClusterTargetHeader) ([]ALBConfig, error)
 	GetALB(albID string, target ClusterTargetHeader) (ALBConfig, error)
-<<<<<<< HEAD
-	ConfigureALB(albID string, config ALBConfig, target ClusterTargetHeader) error
-=======
 	ConfigureALB(albID string, config ALBConfig, disableDeployment bool, target ClusterTargetHeader) error
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	RemoveALB(albID string, target ClusterTargetHeader) error
 	DeployALBCert(config ALBSecretConfig, target ClusterTargetHeader) error
 	UpdateALBCert(config ALBSecretConfig, target ClusterTargetHeader) error
@@ -107,21 +103,13 @@ func (r *alb) GetALB(albID string, target ClusterTargetHeader) (ALBConfig, error
 }
 
 // ConfigureALB enables or disables alb for cluster
-<<<<<<< HEAD
-func (r *alb) ConfigureALB(albID string, config ALBConfig, target ClusterTargetHeader) error {
-=======
 func (r *alb) ConfigureALB(albID string, config ALBConfig, disableDeployment bool, target ClusterTargetHeader) error {
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	var successV interface{}
 	if config.Enable {
 		_, err := r.client.Post("/v1/alb/albs", config, &successV, target.ToMap())
 		return err
 	}
-<<<<<<< HEAD
-	_, err := r.client.Delete(fmt.Sprintf("/v1/alb/albs/%s", albID), target.ToMap())
-=======
 	_, err := r.client.Delete(fmt.Sprintf("/v1/alb/albs/%s?disableDeployment=%t", albID, disableDeployment), target.ToMap())
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	return err
 }
 

@@ -392,8 +392,6 @@ data "ibm_resource_group" "testacc_ds_resource_group" {
 	is_default = "true"
 }
 
-<<<<<<< HEAD
-=======
 resource "ibm_container_cluster" "testacc_cluster" {
   name       = "%s"
   datacenter = "%s"
@@ -445,131 +443,6 @@ resource "ibm_container_cluster" "testacc_cluster" {
 
   kube_version    = "%s"
   machine_type    = "%s"
-  hardware       = "dedicated"
-  public_vlan_id  = "%s"
-  private_vlan_id = "%s"
-  no_subnet		  = true
-  is_trusted  = true
-  wait_time_minutes = 1440
-}	`, cfOrganization, cfOrganization, cfSpace, clusterName, datacenter, kubeVersion, trustedMachineType, publicVlanID, privateVlanID)
-}
-
-func testAccCheckIBMContainerCluster_nosubnet_false(clusterName string) string {
-	return fmt.Sprintf(`
-
-data "ibm_org" "org" {
-    org = "%s"
-}
-
-data "ibm_space" "space" {
-  org    = "%s"
-  space  = "%s"
-}
-
-data "ibm_account" "acc" {
-   org_guid = "${data.ibm_org.org.id}"
-}
-
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
-resource "ibm_container_cluster" "testacc_cluster" {
-  name       = "%s"
-  datacenter = "%s"
-
-  org_guid = "${data.ibm_org.org.id}"
-	space_guid = "${data.ibm_space.space.id}"
-	account_guid = "${data.ibm_account.acc.id}"
-
-<<<<<<< HEAD
-  worker_num = 1
-  resource_group_id = "${data.ibm_resource_group.testacc_ds_resource_group.id}"
-  
-  default_pool_size = 1
-  
-  hardware = "shared"
-  kube_version    = "%s"
-  machine_type    = "%s"
-  public_vlan_id  = "%s"
-  private_vlan_id = "%s"
-  no_subnet		  = true
-  region = "%s"
-}	`, cfOrganization, cfOrganization, cfSpace, clusterName, datacenter, kubeVersion, machineType, publicVlanID, privateVlanID, csRegion)
-}
-
-func testAccCheckIBMContainerCluster_trusted(clusterName string) string {
-	return fmt.Sprintf(`
-=======
-  machine_type    = "%s"
-  hardware       = "dedicated"
-  public_vlan_id  = "%s"
-  private_vlan_id = "%s"
-  no_subnet		  = false
-}	`, cfOrganization, cfOrganization, cfSpace, clusterName, datacenter, machineType, publicVlanID, privateVlanID)
-}
-
-func testAccCheckIBMContainerCluster_with_worker_num_zero(clusterName string) string {
-	return fmt.Sprintf(`
-
-data "ibm_org" "org" {
-    org = "%s"
-}
-
-data "ibm_space" "space" {
-  org    = "%s"
-  space  = "%s"
-}
-
-data "ibm_account" "acc" {
-   org_guid = "${data.ibm_org.org.id}"
-}
-
-resource "ibm_container_cluster" "testacc_cluster" {
-  name       = "%s"
-  datacenter = "%s"
-
-  account_guid = "${data.ibm_account.acc.id}"
-  default_pool_size = 0
-  machine_type    = "%s"
-  hardware       = "shared"
-  public_vlan_id  = "%s"
-  private_vlan_id = "%s"
-  no_subnet		  = true
-}	`, cfOrganization, cfOrganization, cfSpace, clusterName, datacenter, machineType, publicVlanID, privateVlanID)
-}
-
-func testAccCheckIBMContainerClusterOptionalOrgSpace_basic(clusterName string) string {
-	return fmt.Sprintf(`
-
-resource "ibm_container_cluster" "testacc_cluster" {
-  name       = "%s"
-  datacenter = "%s"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
-
-data "ibm_org" "org" {
-    org = "%s"
-}
-
-data "ibm_space" "space" {
-  org    = "%s"
-  space  = "%s"
-}
-
-data "ibm_account" "acc" {
-   org_guid = "${data.ibm_org.org.id}"
-}
-
-resource "ibm_container_cluster" "testacc_cluster" {
-  name       = "%s"
-  datacenter = "%s"
-
-  org_guid = "${data.ibm_org.org.id}"
-	space_guid = "${data.ibm_space.space.id}"
-	account_guid = "${data.ibm_account.acc.id}"
-
-  default_pool_size = 1
-
-  kube_version    = "%s"
-  machine_type    = "%s"
-<<<<<<< HEAD
   hardware       = "dedicated"
   public_vlan_id  = "%s"
   private_vlan_id = "%s"
@@ -648,16 +521,31 @@ resource "ibm_container_cluster" "testacc_cluster" {
   name       = "%s"
   datacenter = "%s"
 
-  machine_type    = "%s"
-  hardware       = "shared"
-  public_vlan_id  = "%s"
-  private_vlan_id = "%s"
-  disk_encryption = true
-}	`, clusterName, datacenter, machineType, publicVlanID, privateVlanID)
+data "ibm_org" "org" {
+    org = "%s"
 }
 
-func testAccCheckIBMContainerCluster_diskEnc(clusterName string) string {
-=======
+data "ibm_space" "space" {
+  org    = "%s"
+  space  = "%s"
+}
+
+data "ibm_account" "acc" {
+   org_guid = "${data.ibm_org.org.id}"
+}
+
+resource "ibm_container_cluster" "testacc_cluster" {
+  name       = "%s"
+  datacenter = "%s"
+
+  org_guid = "${data.ibm_org.org.id}"
+	space_guid = "${data.ibm_space.space.id}"
+	account_guid = "${data.ibm_account.acc.id}"
+
+  default_pool_size = 1
+
+  kube_version    = "%s"
+  machine_type    = "%s"
   hardware       = "shared"
   public_vlan_id  = "%s"
   private_vlan_id = "%s"
@@ -699,7 +587,6 @@ resource "ibm_container_cluster" "testacc_cluster" {
 }
 
 func testAccCheckIBMContainerCluster_update(clusterName string) string {
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	return fmt.Sprintf(`
 
 data "ibm_org" "org" {
@@ -727,46 +614,6 @@ resource "ibm_container_cluster" "testacc_cluster" {
 	space_guid = "${data.ibm_space.space.id}"
 	account_guid = "${data.ibm_account.acc.id}"
 
-<<<<<<< HEAD
-  machine_type    = "%s"
-  hardware       = "shared"
-  public_vlan_id  = "%s"
-  private_vlan_id = "%s"
-  no_subnet		  = true
-   disk_encryption = false
-}	`, cfOrganization, cfOrganization, cfSpace, clusterName, datacenter, machineType, publicVlanID, privateVlanID)
-}
-
-func testAccCheckIBMContainerCluster_update(clusterName string) string {
-	return fmt.Sprintf(`
-
-data "ibm_org" "org" {
-    org = "%s"
-}
-
-data "ibm_space" "space" {
-  org    = "%s"
-  space  = "%s"
-}
-
-data "ibm_account" "acc" {
-   org_guid = "${data.ibm_org.org.id}"
-}
-
-data "ibm_resource_group" "testacc_ds_resource_group" {
-	is_default = "true"
-}
-
-resource "ibm_container_cluster" "testacc_cluster" {
-  name       = "%s"
-  datacenter = "%s"
-
-  org_guid = "${data.ibm_org.org.id}"
-	space_guid = "${data.ibm_space.space.id}"
-	account_guid = "${data.ibm_account.acc.id}"
-
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
   worker_num = 2
   
   default_pool_size = 2
@@ -775,43 +622,6 @@ resource "ibm_container_cluster" "testacc_cluster" {
   resource_group_id = "${data.ibm_resource_group.testacc_ds_resource_group.id}"
   kube_version    = "%s"
   machine_type    = "%s"
-<<<<<<< HEAD
-  public_vlan_id  = "%s"
-  private_vlan_id = "%s"
-  no_subnet		  = true
-  update_all_workers = true
-  region = "%s"
-}	`, cfOrganization, cfOrganization, cfSpace, clusterName, datacenter, kubeUpdateVersion, machineType, publicVlanID, privateVlanID, csRegion)
-}
-
-func testAccCheckIBMContainerCluster_private_and_public_subnet(clusterName string) string {
-	return fmt.Sprintf(`
-
-data "ibm_org" "org" {
-    org = "%s"
-}
-
-data "ibm_space" "space" {
-  org    = "%s"
-  space  = "%s"
-}
-
-data "ibm_account" "acc" {
-   org_guid = "${data.ibm_org.org.id}"
-}
-
-resource "ibm_container_cluster" "testacc_cluster" {
-  name       = "%s"
-  datacenter = "%s"
-
-  org_guid = "${data.ibm_org.org.id}"
-	space_guid = "${data.ibm_space.space.id}"
-	account_guid = "${data.ibm_account.acc.id}"
-
-  machine_type    = "%s"
-  hardware       = "shared"
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
   public_vlan_id  = "%s"
   private_vlan_id = "%s"
   no_subnet		  = true

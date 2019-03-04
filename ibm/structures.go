@@ -1132,8 +1132,6 @@ func transformToIBMCISDnsData(recordType string, id string, value interface{}) (
 
 	return
 }
-<<<<<<< HEAD
-=======
 
 func indexOf(element string, data []string) int {
 	for k, v := range data {

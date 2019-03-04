@@ -4,10 +4,7 @@ import (
 	v1 "github.com/IBM-Cloud/bluemix-go/api/cis/cisv1"
 	"github.com/hashicorp/terraform/helper/schema"
 	"log"
-<<<<<<< HEAD
-=======
 	"strings"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 )
 
 func resourceIBMCISSettings() *schema.Resource {
@@ -84,10 +81,6 @@ var settingsList = [...]string{"waf", "ssl", "min_tls_version", "automatic_https
 
 func resourceCISSettingsUpdate(d *schema.ResourceData, meta interface{}) error {
 	cisClient, err := meta.(ClientSession).CisAPI()
-<<<<<<< HEAD
-	log.Printf("   client %v\n", cisClient)
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	if err != nil {
 		return err
 	}
@@ -124,17 +117,6 @@ func resourceCISSettingsRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	settingsId, cisId, _ := convertTftoCisTwoVar(d.Id())
-<<<<<<< HEAD
-	log.Printf("resourceCISSettingsRead - Getting Settings \n")
-
-	for _, item := range settingsList {
-		settingsResult, err := cisClient.Settings().GetSetting(cisId, settingsId, item)
-		if err != nil {
-			log.Printf("resourceCISettingsRead - GetSetting for %s Failed\n", item)
-			return err
-		} else {
-
-=======
 	for _, item := range settingsList {
 		settingsResult, err := cisClient.Settings().GetSetting(cisId, settingsId, item)
 		if err != nil {
@@ -145,7 +127,6 @@ func resourceCISSettingsRead(d *schema.ResourceData, meta interface{}) error {
 			log.Printf("[WARN] Error getting zone during DomainRead %v\n", err)
 			return err
 		} else {
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			settingsObj := *settingsResult
 			d.Set(item, settingsObj.Value)
 		}
@@ -158,8 +139,6 @@ func resourceCISSettingsDelete(d *schema.ResourceData, meta interface{}) error {
 	d.SetId("")
 	return nil
 }
-<<<<<<< HEAD
-=======
 
 func checkCisSettingsDeleted(d *schema.ResourceData, meta interface{}, errCheck error, cisId string) bool {
 	// Check if error is due to removal of Cis resource and hence all subresources
@@ -180,4 +159,3 @@ func checkCisSettingsDeleted(d *schema.ResourceData, meta interface{}, errCheck 
 	}
 	return false
 }
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

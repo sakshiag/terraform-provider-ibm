@@ -165,8 +165,6 @@ func TestAccIBMIAMServicePolicy_import(t *testing.T) {
 	})
 }
 
-<<<<<<< HEAD
-=======
 func TestAccIBMIAMServicePolicy_account_management(t *testing.T) {
 	var conf iampapv1.Policy
 	name := fmt.Sprintf("terraform_%d", acctest.RandInt())
@@ -190,7 +188,6 @@ func TestAccIBMIAMServicePolicy_account_management(t *testing.T) {
 	})
 }
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func testAccCheckIBMIAMServicePolicyDestroy(s *terraform.State) error {
 	rsContClient, err := testAccProvider.Meta().(ClientSession).IAMPAPAPI()
 	if err != nil {
@@ -406,8 +403,6 @@ func testAccCheckIBMIAMServicePolicy_import(name string) string {
 
 	`, name)
 }
-<<<<<<< HEAD
-=======
 
 func testAccCheckIBMIAMServicePolicy_account_management(name string) string {
 	return fmt.Sprintf(`
@@ -424,4 +419,3 @@ func testAccCheckIBMIAMServicePolicy_account_management(name string) string {
 
 	`, name)
 }
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

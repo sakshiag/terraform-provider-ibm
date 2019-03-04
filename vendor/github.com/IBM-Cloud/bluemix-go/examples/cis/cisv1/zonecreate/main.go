@@ -36,29 +36,14 @@ func main() {
         log.Fatal(err)
     }
     zonesAPI := cisClient.Zones()
-<<<<<<< HEAD
-
-   
-    log.Println(">>>>>>>>>  Zone create")
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
     params := cisv1.ZoneBody{Name: domain}
     myZonePtr, err := zonesAPI.CreateZone(cis_id, params)
        
     if err != nil {
         log.Fatal(err)
     }
-<<<<<<< HEAD
-
     myZone := *myZonePtr
     zoneId := myZone.Id
-    log.Println("Zone create :", myZone)
-
-    log.Println(">>>>>>>>>  Zone read")
-=======
-    myZone := *myZonePtr
-    zoneId := myZone.Id
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
     myZonePtr, err = zonesAPI.GetZone(cis_id, zoneId)
 
     if err != nil {

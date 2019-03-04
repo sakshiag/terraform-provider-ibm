@@ -4,16 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-<<<<<<< HEAD
-	"github.com/hashicorp/terraform/helper/resource"
-)
-
-func TestAccIBMCisDomain_basic(t *testing.T) {
-	name := "ibm_cis_domain.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-=======
 	// v1 "github.com/IBM-Cloud/bluemix-go/api/cis/cisv1"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -26,22 +16,15 @@ func TestAccIBMCisDomain_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckCis(t) },
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		Providers: testAccProviders,
 		// No requirement for CheckDestory of this resource as by reaching this test it must have already been deleted
 		// correctly during the resource destroy phase of test. The destroy of resource_ibm_cis used in testAccCheckCisPoolConfigBasic
 		// will fail if this resource is not correctly deleted.
 		Steps: []resource.TestStep{
 			{
-<<<<<<< HEAD
-				Config: testAccIBMCisDomainConfig_basic("test", cis_domain),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(name, "domain", cis_domain),
-=======
 				Config: testAccCheckCisDomainConfigCisRI_basic("test_acc", testDomain),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "domain", testDomain),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 					resource.TestCheckResourceAttr(name, "name_servers.#", "2"),
 				),
 			},
@@ -49,10 +32,6 @@ func TestAccIBMCisDomain_basic(t *testing.T) {
 	})
 }
 
-<<<<<<< HEAD
-func TestAccIBMCisDomain_import(t *testing.T) {
-	name := "ibm_cis_domain.test"
-=======
 func TestAccIBMCisDomain_CreateAfterManualDestroy(t *testing.T) {
 	// Manual destroy of Domain resource
 	//t.Parallel()
@@ -116,22 +95,15 @@ func TestAccIBMCisDomain_CreateAfterManualCisRIDestroy(t *testing.T) {
 
 func TestAccIBMCisDomain_import(t *testing.T) {
 	name := "ibm_cis_domain.test_acc"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-<<<<<<< HEAD
-				Config: testAccIBMCisDomainConfig_basic("test", cis_domain),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(name, "domain", cis_domain),
-=======
 				Config: testAccCheckCisDomainConfigCisRI_basic("test_acc", cisDomainTest),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "domain", cisDomainTest),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 					resource.TestCheckResourceAttr(name, "name_servers.#", "2"),
 				),
 			},
@@ -146,14 +118,6 @@ func TestAccIBMCisDomain_import(t *testing.T) {
 	})
 }
 
-<<<<<<< HEAD
-func testAccIBMCisDomainConfig_basic(resourceID string, cis_domain string) string {
-	return testAccCheckIBMCisInstance_basic("test") + fmt.Sprintf(`
-				resource "ibm_cis_domain" "%[1]s" {
-					cis_id = "${ibm_cis.instance.id}"
-                    domain = "%[2]s"
-				}`, resourceID, cis_domain)
-=======
 func testAccCisDomainManuallyDelete(tfZoneId *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		cisClient, err := testAccProvider.Meta().(ClientSession).CisAPI()
@@ -251,5 +215,4 @@ data "ibm_cis" "testacc_ds_cis" {
   name = "%[2]s"
 }`, cisResourceGroup, cisInstance)
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 }

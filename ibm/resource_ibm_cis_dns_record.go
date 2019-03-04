@@ -344,20 +344,11 @@ func resourceIBMCISDnsRecordRead(d *schema.ResourceData, meta interface{}) error
 	var recordPtr *v1.DnsRecord
 	recordPtr, err = cisClient.Dns().GetDns(cisId, zoneId, recordId)
 	if err != nil {
-<<<<<<< HEAD
-		if strings.Contains(err.Error(), "Invalid dns record identifier") ||
-			strings.Contains(err.Error(), "HTTP status 404") {
-			log.Printf("[WARN] Removing record from state because it's not found in API")
-			d.SetId("")
-			return nil
-		}
-=======
 		if checkCisRecordDeleted(d, meta, err, recordPtr) {
 			d.SetId("")
 			return nil
 		}
 		log.Printf("[WARN] Error getting zone during DNS Record Read %v\n", err)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 
@@ -388,8 +379,6 @@ func resourceIBMCISDnsRecordDelete(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	recordId, zoneId, cisId, _ := convertTfToCisThreeVar(d.Id())
-<<<<<<< HEAD
-=======
 	if err != nil {
 		return err
 	}
@@ -404,7 +393,6 @@ func resourceIBMCISDnsRecordDelete(d *schema.ResourceData, meta interface{}) err
 		log.Printf("[WARN] Error getting zone during DNS Record Read %v\n", err)
 		return err
 	}
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	err = cisClient.Dns().DeleteDns(cisId, zoneId, recordId)
 	if err != nil {
 		return fmt.Errorf("Error deleting IBMCISDNS Record: %s", err)
@@ -470,8 +458,6 @@ func suppressDataDiff(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return false
 }
-<<<<<<< HEAD
-=======
 
 func checkCisRecordDeleted(d *schema.ResourceData, meta interface{}, errCheck error, record *v1.DnsRecord) bool {
 	// Check if error is due to removal of Cis resource and hence all subresources
@@ -494,4 +480,3 @@ func checkCisRecordDeleted(d *schema.ResourceData, meta interface{}, errCheck er
 	}
 	return false
 }
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

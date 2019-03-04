@@ -87,8 +87,6 @@ func init() {
 		fmt.Println("[WARN] Set the environment variable IBM_MACHINE_TYPE for testing ibm_container_cluster resource else it is set to default value 'u1c.2x4'")
 	}
 
-<<<<<<< HEAD
-=======
 	certCRN = os.Getenv("IBM_CERT_CRN")
 	if certCRN == "" {
 		certCRN = "crn:v1:bluemix:public:cloudcerts:eu-de:a/e9021a4d06e9b108b4a221a3cec47e3d:77e527aa-65b2-4cb3-969b-7e8714174346:certificate:c79da56505597523567d56f76a0cd8a4"
@@ -101,19 +99,12 @@ func init() {
 		fmt.Println("[WARN] Set the environment variable IBM_UPDATE_CERT_CRN for testing ibm_container_alb_cert resource else it is set to default value")
 	}
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	csRegion = os.Getenv("IBM_CONTAINER_REGION")
 	if csRegion == "" {
 		csRegion = "eu-de"
 		fmt.Println("[WARN] Set the environment variable IBM_CONTAINER_REGION for testing ibm_container resources else it is set to default value 'eu-de'")
 	}
 
-<<<<<<< HEAD
-	cis_domain = os.Getenv("IBM_CIS_DOMAIN")
-	if cis_domain == "" {
-		cis_domain = "wcpexample.com"
-		fmt.Println("[WARN] Set the environment variable IBM_CIS_DOMAIN with a VALID Domain name for testing ibm_cis resources else it is set to default value 'wcpexample.com' which will cause the test to fail")
-=======
 	cisInstance = os.Getenv("IBM_CIS_INSTANCE")
 	if cisInstance == "" {
 		cisInstance = ""
@@ -135,7 +126,6 @@ func init() {
 	if cisResourceGroup == "" {
 		cisResourceGroup = ""
 		fmt.Println("[WARN] Set the environment variable IBM_CIS_RESOURCE_GROUP with the resource group for the CIS Instance ")
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	}
 
 	trustedMachineType = os.Getenv("IBM_TRUSTED_MACHINE_TYPE")

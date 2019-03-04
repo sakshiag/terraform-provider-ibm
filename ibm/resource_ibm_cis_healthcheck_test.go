@@ -2,43 +2,25 @@ package ibm
 
 import (
 	"fmt"
-<<<<<<< HEAD
-	"testing"
-
-	v1 "github.com/IBM-Cloud/bluemix-go/api/cis/cisv1"
-=======
 	"log"
 	"testing"
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccIBMCisHealthcheck_Basic(t *testing.T) {
 	//t.Parallel()
-<<<<<<< HEAD
-	var monitor v1.Monitor
-	name := "ibm_cis_healthcheck.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-=======
 	var monitor string
 	name := "ibm_cis_healthcheck.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheckCis(t) },
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		Providers: testAccProviders,
 		// No requirement for CheckDestory of this resource as by reaching this point it must have already been deleted from CIS.
 		Steps: []resource.TestStep{
 			{
-<<<<<<< HEAD
-				Config: testAccCheckCisHealthcheckConfigBasic("test", cis_domain),
-=======
 				Config: testAccCheckCisHealthcheckConfigCisDS_Basic("test", cisDomainStatic),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCisHealthcheckExists(name, &monitor),
 					resource.TestCheckResourceAttr(name, "expected_body", "alive"),
@@ -55,20 +37,12 @@ func TestAccIBMCisHealthcheck_import(t *testing.T) {
 	name := "ibm_cis_healthcheck.test"
 
 	resource.Test(t, resource.TestCase{
-<<<<<<< HEAD
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccCheckCisHealthcheckConfigBasic("test", cis_domain),
-=======
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCisMonitorDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccCheckCisHealthcheckConfigCisDS_Basic("test", cisDomainStatic),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "expected_body", "alive"),
 				),
@@ -86,18 +60,6 @@ func TestAccIBMCisHealthcheck_import(t *testing.T) {
 
 func TestAccIBMCisHealthcheck_FullySpecified(t *testing.T) {
 	//t.Parallel()
-<<<<<<< HEAD
-	var monitor v1.Monitor
-	name := "ibm_cis_healthcheck.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		//CheckDestroy: testAccCheckCisHealthcheckDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckCisHealthcheckConfigFullySpecified("test", cis_domain),
-=======
 	var monitor string
 	name := "ibm_cis_healthcheck.test"
 
@@ -108,7 +70,6 @@ func TestAccIBMCisHealthcheck_FullySpecified(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCisHealthcheckConfigFullySpecified("test", cisDomainStatic),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCisHealthcheckExists(name, &monitor),
 					resource.TestCheckResourceAttr(name, "path", "/custom"),
@@ -120,9 +81,6 @@ func TestAccIBMCisHealthcheck_FullySpecified(t *testing.T) {
 	})
 }
 
-<<<<<<< HEAD
-func testAccCheckCisHealthcheckExists(n string, load *v1.Monitor) resource.TestCheckFunc {
-=======
 func TestAccIBMCisHealthcheck_CreateAfterManualDestroy(t *testing.T) {
 	t.Parallel()
 	var monitorOne, monitorTwo string
@@ -247,57 +205,26 @@ func testAccCheckCisMonitorDestroy(s *terraform.State) error {
 }
 
 func testAccCheckCisHealthcheckExists(n string, tfMonitorId *string) resource.TestCheckFunc {
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
 		}
-<<<<<<< HEAD
-
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No Load Balancer Monitor ID is set")
 		}
 
 		cisClient, err := testAccProvider.Meta().(ClientSession).CisAPI()
-<<<<<<< HEAD
-		healthcheckId, _, _ := convertTftoCisTwoVar(rs.Primary.ID)
-		foundHealthcheck, err := cisClient.Monitors().GetMonitor(rs.Primary.Attributes["cis_id"], healthcheckId)
-		if err != nil {
-			return err
-		}
-
-		load = foundHealthcheck
-
-=======
 		healthcheckId, cisId, _ := convertTftoCisTwoVar(rs.Primary.ID)
 		foundHealthcheck, err := cisClient.Monitors().GetMonitor(cisId, healthcheckId)
 		if err != nil {
 			return err
 		}
 		*tfMonitorId = convertCisToTfTwoVar(foundHealthcheck.Id, cisId)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return nil
 	}
 }
 
-<<<<<<< HEAD
-func testAccCheckCisHealthcheckConfigBasic(resourceId string, cis_domain string) string {
-	return testAccIBMCisDomainConfig_basic(resourceId, cis_domain) + fmt.Sprintf(`
-resource "ibm_cis_healthcheck" "%[1]s" {
-  cis_id = "${ibm_cis.instance.id}"
-  expected_body = "alive"
-  expected_codes = "2xx"
-}`, resourceId)
-}
-
-func testAccCheckCisHealthcheckConfigFullySpecified(resourceId string, cis_domain string) string {
-	return testAccIBMCisDomainConfig_basic(resourceId, cis_domain) + fmt.Sprintf(`
-resource "ibm_cis_healthcheck" "%[1]s" {
-  cis_id = "${ibm_cis.instance.id}"
-=======
 func testAccCheckCisHealthcheckConfigCisDS_Basic(resourceId string, cisDomain string) string {
 	return testAccCheckIBMCisDomainDataSourceConfig_basic1(resourceId, cisDomain) + fmt.Sprintf(`
 resource "ibm_cis_healthcheck" "%[1]s" {
@@ -321,7 +248,6 @@ func testAccCheckCisHealthcheckConfigFullySpecified(resourceId string, cisDomain
 	return testAccCheckIBMCisDomainDataSourceConfig_basic1(resourceId, cisDomain) + fmt.Sprintf(`
 resource "ibm_cis_healthcheck" "%[1]s" {
   cis_id = "${data.ibm_cis.%[2]s.id}"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
   expected_body = "dead"
   expected_codes = "5xx"
   method = "HEAD"
@@ -330,9 +256,5 @@ resource "ibm_cis_healthcheck" "%[1]s" {
   interval = 60
   retries = 5
   description = "this is a very weird load balancer"
-<<<<<<< HEAD
-}`, resourceId)
-=======
 }`, resourceId, cisInstance)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 }

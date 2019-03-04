@@ -2,53 +2,27 @@ package ibm
 
 import (
 	"fmt"
-<<<<<<< HEAD
-	"testing"
-
-	"github.com/IBM-Cloud/bluemix-go/models"
-
-	"strings"
-
-=======
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/IBM-Cloud/bluemix-go/bmxerror"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccIBMCisInstance_Basic(t *testing.T) {
-<<<<<<< HEAD
-	var conf models.ServiceInstance
-	serviceName := fmt.Sprintf("terraform_%d", acctest.RandInt())
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-=======
 	var cisInstanceOne string
 	testName := "test_acc"
 	name := "ibm_cis." + testName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckCis(t) },
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIBMCisInstanceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-<<<<<<< HEAD
-				Config: testAccCheckIBMCisInstance_basic(serviceName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckIBMCisInstanceExists("ibm_cis.instance", conf),
-					resource.TestCheckResourceAttr("ibm_cis.instance", "name", serviceName),
-					resource.TestCheckResourceAttr("ibm_cis.instance", "service", "internet-svcs"),
-					resource.TestCheckResourceAttr("ibm_cis.instance", "plan", "standard"),
-					resource.TestCheckResourceAttr("ibm_cis.instance", "location", "global"),
-=======
 				Config: testAccCheckIBMCisInstance_basic(cisResourceGroup, testName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckIBMCisInstanceExists(name, &cisInstanceOne),
@@ -56,41 +30,12 @@ func TestAccIBMCisInstance_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "service", "internet-svcs"),
 					resource.TestCheckResourceAttr(name, "plan", "standard"),
 					resource.TestCheckResourceAttr(name, "location", "global"),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				),
 			},
 		},
 	})
 }
 
-<<<<<<< HEAD
-func TestAccIBMCisInstance_import(t *testing.T) {
-	var conf models.ServiceInstance
-	serviceName := fmt.Sprintf("terraform_%d", acctest.RandInt())
-	resourceName := "ibm_cis.instance"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIBMCisInstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccCheckIBMCisInstance_basic(serviceName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckIBMCisInstanceExists(resourceName, conf),
-					resource.TestCheckResourceAttr(resourceName, "name", serviceName),
-					resource.TestCheckResourceAttr(resourceName, "service", "internet-svcs"),
-					resource.TestCheckResourceAttr(resourceName, "plan", "standard"),
-					resource.TestCheckResourceAttr(resourceName, "location", "global"),
-				),
-			},
-			resource.TestStep{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"wait_time_minutes"},
-=======
 func TestAccIBMCisInstance_CreateAfterManualDestroy(t *testing.T) {
 	//t.Parallel()
 	var cisInstanceOne, cisInstanceTwo string
@@ -121,23 +66,15 @@ func TestAccIBMCisInstance_CreateAfterManualDestroy(t *testing.T) {
 						return nil
 					},
 				),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			},
 		},
 	})
 }
 
-<<<<<<< HEAD
-func TestAccIBMCisInstance_with_resource_group(t *testing.T) {
-	var conf models.ServiceInstance
-	serviceName := fmt.Sprintf("terraform_%d", acctest.RandInt())
-	resourceName := "ibm_cis.instance"
-=======
 func TestAccIBMCisInstance_import(t *testing.T) {
 	var cisInstanceOne string
 	serviceName := fmt.Sprintf("terraform_%d", acctest.RandInt())
 	resourceName := "ibm_cis." + serviceName
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -145,23 +82,15 @@ func TestAccIBMCisInstance_import(t *testing.T) {
 		CheckDestroy: testAccCheckIBMCisInstanceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-<<<<<<< HEAD
-				Config: testAccCheckIBMCisInstance_with_resource_group(serviceName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckIBMCisInstanceExists(resourceName, conf),
-=======
 				Config: testAccCheckIBMCisInstance_basic(cisResourceGroup, serviceName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckIBMCisInstanceExists(resourceName, &cisInstanceOne),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 					resource.TestCheckResourceAttr(resourceName, "name", serviceName),
 					resource.TestCheckResourceAttr(resourceName, "service", "internet-svcs"),
 					resource.TestCheckResourceAttr(resourceName, "plan", "standard"),
 					resource.TestCheckResourceAttr(resourceName, "location", "global"),
 				),
 			},
-<<<<<<< HEAD
-=======
 			resource.TestStep{
 				ResourceName:      resourceName,
 				ImportState:       true,
@@ -169,7 +98,6 @@ func TestAccIBMCisInstance_import(t *testing.T) {
 				ImportStateVerifyIgnore: []string{
 					"wait_time_minutes"},
 			},
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		},
 	})
 }
@@ -195,9 +123,6 @@ func testAccCheckIBMCisInstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
-<<<<<<< HEAD
-func testAccCheckIBMCisInstanceExists(n string, obj models.ServiceInstance) resource.TestCheckFunc {
-=======
 func testAccCisInstanceManuallyDelete(tfCisId *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_ = testAccCisInstanceManuallyDeleteUnwrapped(s, tfCisId)
@@ -251,7 +176,6 @@ func testAccCisInstanceManuallyDeleteUnwrapped(s *terraform.State, tfCisId *stri
 }
 
 func testAccCheckIBMCisInstanceExists(n string, tfCisId *string) resource.TestCheckFunc {
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -266,14 +190,6 @@ func testAccCheckIBMCisInstanceExists(n string, tfCisId *string) resource.TestCh
 		instanceID := rs.Primary.ID
 
 		instance, err := rsContClient.ResourceServiceInstance().GetInstance(instanceID)
-<<<<<<< HEAD
-
-		if err != nil {
-			return err
-		}
-
-		obj = instance
-=======
 		if err != nil {
 			if strings.Contains(err.Error(), "Object not found") ||
 				strings.Contains(err.Error(), "status code: 404") {
@@ -288,45 +204,10 @@ func testAccCheckIBMCisInstanceExists(n string, tfCisId *string) resource.TestCh
 		}
 
 		*tfCisId = instanceID
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return nil
 	}
 }
 
-<<<<<<< HEAD
-func testAccCheckIBMCisInstance_basic(serviceName string) string {
-	return fmt.Sprintf(`
-		
-		resource "ibm_cis" "instance" {
-			name              = "%s"		
-			plan              = "standard"
-			location          = "global"
-			
-			timeouts {
-				create = "15m"
-				update = "15m"
-				delete = "15m"
-			  }
-		}
-	`, serviceName)
-}
-
-func testAccCheckIBMCisInstance_with_resource_group(serviceName string) string {
-	return fmt.Sprintf(`
-
-		data "ibm_resource_group" "group" {
-			name = "default"
-		}
-		
-		resource "ibm_cis" "instance" {
-			name              = "%s"		
-			plan              = "standard"
-			location          = "global"
-			resource_group_id = "${data.ibm_resource_group.group.id}"
-			
-		}
-	`, serviceName)
-=======
 func testAccCheckIBMCisInstance_basic(cisResourceGroup string, name string) string {
 	return fmt.Sprintf(`
 				data "ibm_resource_group" "test_acc" {
@@ -339,5 +220,4 @@ func testAccCheckIBMCisInstance_basic(cisResourceGroup string, name string) stri
 				  plan              = "standard"
 				  location          = "global"
 				}`, cisResourceGroup, name)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 }

@@ -3,10 +3,7 @@ package ibm
 import (
 	"log"
 	"reflect"
-<<<<<<< HEAD
-=======
 	"strings"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	v1 "github.com/IBM-Cloud/bluemix-go/api/cis/cisv1"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -39,11 +36,7 @@ func resourceIBMCISPool() *schema.Resource {
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
-<<<<<<< HEAD
-				Optional: true,
-=======
 				Required: true,
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			},
 			"minimum_origins": {
 				Type:     schema.TypeInt,
@@ -106,10 +99,6 @@ func resourceIBMCISPool() *schema.Resource {
 
 func resourceCISpoolCreate(d *schema.ResourceData, meta interface{}) error {
 	cisClient, err := meta.(ClientSession).CisAPI()
-<<<<<<< HEAD
-	log.Printf("   client %v\n", cisClient)
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	if err != nil {
 		return err
 	}
@@ -146,11 +135,7 @@ func resourceCISpoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 	pool, err = cisClient.Pools().CreatePool(cisId, poolNew)
 	if err != nil {
-<<<<<<< HEAD
-		log.Printf("CreatePools Failed %s\n", err)
-=======
 		log.Printf("[WARN] CreatePools Failed %s\n", err)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 
@@ -172,14 +157,6 @@ func resourceCISpoolRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
-<<<<<<< HEAD
-	log.Printf("resourceCISpoolRead - Getting Pool %v\n", poolId)
-	var pool *v1.Pool
-
-	pool, err = cisClient.Pools().GetPool(cisId, poolId)
-	if err != nil {
-		log.Printf("resourceCIpoolRead - ListPools Failed %s\n", err)
-=======
 	var pool *v1.Pool
 	pool, err = cisClient.Pools().GetPool(cisId, poolId)
 	if err != nil {
@@ -188,7 +165,6 @@ func resourceCISpoolRead(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 		log.Printf("[WARN] Error getting zone during PoolRead %v\n", err)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 
@@ -218,13 +194,6 @@ func resourceCISpoolDelete(d *schema.ResourceData, meta interface{}) error {
 	poolId, cisId, err := convertTftoCisTwoVar(d.Id())
 	var pool *v1.Pool
 	emptyPool := new(v1.Pool)
-<<<<<<< HEAD
-
-	log.Println("Getting Pool to delete")
-	pool, err = cisClient.Pools().GetPool(cisId, poolId)
-	if err != nil {
-		log.Printf("GetPool Failed %s\n", err)
-=======
 	pool, err = cisClient.Pools().GetPool(cisId, poolId)
 	if err != nil {
 		if checkCisPoolDeleted(d, meta, err, pool) {
@@ -232,22 +201,14 @@ func resourceCISpoolDelete(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 		log.Printf("[WARN] Error getting zone during PoolRead %v\n", err)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 
 	poolObj := *pool
 	if !reflect.DeepEqual(emptyPool, poolObj) {
-<<<<<<< HEAD
-		log.Println("Deleting Pool")
-		err = cisClient.Pools().DeletePool(cisId, poolId)
-		if err != nil {
-			log.Printf("DeletePool Failed %s\n", err)
-=======
 		err = cisClient.Pools().DeletePool(cisId, poolId)
 		if err != nil {
 			log.Printf("[WARN] DeletePool Failed %s\n", err)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			return err
 		}
 	}
@@ -255,8 +216,6 @@ func resourceCISpoolDelete(d *schema.ResourceData, meta interface{}) error {
 	d.SetId("")
 	return nil
 }
-<<<<<<< HEAD
-=======
 
 func checkCisPoolDeleted(d *schema.ResourceData, meta interface{}, errCheck error, pool *v1.Pool) bool {
 	// Check if error is due to removal of Cis resource and hence all subresources
@@ -278,4 +237,3 @@ func checkCisPoolDeleted(d *schema.ResourceData, meta interface{}, errCheck erro
 	}
 	return false
 }
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

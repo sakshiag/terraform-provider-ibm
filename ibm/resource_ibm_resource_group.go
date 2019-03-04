@@ -27,14 +27,9 @@ func resourceIBMResourceGroup() *schema.Resource {
 
 			"quota_id": {
 				Type:        schema.TypeString,
-<<<<<<< HEAD
-				Required:    true,
-				Description: "The id of the quota",
-=======
 				Optional:    true,
 				Description: "The id of the quota",
 				Removed:     "This field is removed",
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			},
 
 			"default": {
@@ -65,13 +60,6 @@ func resourceIBMResourceGroupCreate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 	name := d.Get("name").(string)
-<<<<<<< HEAD
-	quotaID := d.Get("quota_id").(string)
-
-	resourceGroupCreate := models.ResourceGroup{
-		Name:    name,
-		QuotaID: quotaID,
-=======
 
 	userDetails, err := meta.(ClientSession).BluemixUserDetails()
 	if err != nil {
@@ -83,7 +71,6 @@ func resourceIBMResourceGroupCreate(d *schema.ResourceData, meta interface{}) er
 	resourceGroupCreate := models.ResourceGroup{
 		Name:      name,
 		AccountID: accountID,
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	}
 
 	resourceGroup, err := rMgtClient.ResourceGroup().Create(resourceGroupCreate)
@@ -107,11 +94,6 @@ func resourceIBMResourceGroupRead(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return fmt.Errorf("Error retrieving resource group: %s", err)
 	}
-<<<<<<< HEAD
-	d.Set("quota_id", resourceGroup.QuotaID)
-=======
-
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	d.Set("name", resourceGroup.Name)
 	d.Set("state", resourceGroup.State)
 	d.Set("default", resourceGroup.Default)
@@ -134,14 +116,6 @@ func resourceIBMResourceGroupUpdate(d *schema.ResourceData, meta interface{}) er
 		hasChange = true
 	}
 
-<<<<<<< HEAD
-	if d.HasChange("quota_id") {
-		updateReq.QuotaID = d.Get("quota_id").(string)
-		hasChange = true
-	}
-
-=======
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	if hasChange {
 		_, err := rMgtClient.ResourceGroup().Update(resourceGroupID, &updateReq)
 		if err != nil {

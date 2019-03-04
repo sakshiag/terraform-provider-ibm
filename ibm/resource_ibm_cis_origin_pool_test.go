@@ -2,43 +2,20 @@ package ibm
 
 import (
 	"fmt"
-<<<<<<< HEAD
-	v1 "github.com/IBM-Cloud/bluemix-go/api/cis/cisv1"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-=======
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"log"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	"testing"
 )
 
 func TestAccIBMCisPool_Basic(t *testing.T) {
 	//t.Parallel()
-<<<<<<< HEAD
-	var pool v1.Pool
-=======
 	var pool string
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	rnd := acctest.RandString(10)
 	name := "ibm_cis_origin_pool." + rnd
 
 	resource.Test(t, resource.TestCase{
-<<<<<<< HEAD
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		// No requirement for CheckDestory of this resource as by reaching this test it must have already been deleted
-		// correctly during the resource destroy phase of test. The destroy of resource_ibm_cis used in testAccCheckCisPoolConfigBasic
-		// will fail if this resource is not correctly deleted.
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckCisPoolConfigBasic(rnd, cis_domain),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCisPoolExists(name, &pool, cis_domain),
-=======
 		PreCheck:  func() { testAccPreCheckCis(t) },
 		Providers: testAccProviders,
 		// No requirement for CheckDestory of this resource as by reaching this test it must have already been deleted
@@ -49,7 +26,6 @@ func TestAccIBMCisPool_Basic(t *testing.T) {
 				Config: testAccCheckCisPoolConfigCisDS_Basic(rnd, cisDomainStatic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCisPoolExists(name, &pool),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 					resource.TestCheckResourceAttr(name, "check_regions.#", "1"),
 				),
 			},
@@ -65,11 +41,7 @@ func TestAccIBMCisPool_import(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-<<<<<<< HEAD
-				Config: testAccCheckCisPoolConfigBasic("test", cis_domain),
-=======
 				Config: testAccCheckCisPoolConfigCisDS_Basic("test", cisDomainStatic),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "check_regions.#", "1"),
 					resource.TestCheckResourceAttr(name, "origins.#", "1"),
@@ -88,11 +60,7 @@ func TestAccIBMCisPool_import(t *testing.T) {
 
 func TestAccIBMCisPool_FullySpecified(t *testing.T) {
 	//t.Parallel()
-<<<<<<< HEAD
-	var pool v1.Pool
-=======
 	var pool string
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	rnd := acctest.RandString(10)
 	name := "ibm_cis_origin_pool." + rnd
 
@@ -101,15 +69,9 @@ func TestAccIBMCisPool_FullySpecified(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-<<<<<<< HEAD
-				Config: testAccCheckCisPoolConfigFullySpecified(rnd, cis_domain),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCisPoolExists(name, &pool, cis_domain),
-=======
 				Config: testAccCheckCisPoolConfigFullySpecified(rnd, cisDomainStatic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCisPoolExists(name, &pool),
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 					resource.TestCheckResourceAttr(name, "enabled", "false"),
 					resource.TestCheckResourceAttr(name, "description", "tfacc-fully-specified"),
 					resource.TestCheckResourceAttr(name, "check_regions.#", "1"),
@@ -122,9 +84,6 @@ func TestAccIBMCisPool_FullySpecified(t *testing.T) {
 	})
 }
 
-<<<<<<< HEAD
-func testAccCheckCisPoolDestroy(s *terraform.State, cis_domain string) error {
-=======
 func TestAccIBMCisPool_CreateAfterManualDestroy(t *testing.T) {
 	//t.Parallel()
 	var poolOne, poolTwo string
@@ -216,7 +175,6 @@ func TestAccIBMCisPool_CreateAfterCisRIManualDestroy(t *testing.T) {
 }
 
 func testAccCheckCisPoolDestroy(s *terraform.State) error {
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	cisClient, err := testAccProvider.Meta().(ClientSession).CisAPI()
 	if err != nil {
 		return err
@@ -225,13 +183,8 @@ func testAccCheckCisPoolDestroy(s *terraform.State) error {
 		if rs.Type != "ibm_cis_origin_pool" {
 			continue
 		}
-<<<<<<< HEAD
-
-		_, err = cisClient.Pools().GetPool(rs.Primary.Attributes["cis_id"], rs.Primary.ID)
-=======
 		poolId, cisId, _ := convertTftoCisTwoVar(rs.Primary.ID)
 		_, err = cisClient.Pools().GetPool(cisId, poolId)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		if err == nil {
 			return fmt.Errorf("Load balancer pool still exists")
 		}
@@ -240,11 +193,7 @@ func testAccCheckCisPoolDestroy(s *terraform.State) error {
 	return nil
 }
 
-<<<<<<< HEAD
-func testAccCheckCisPoolExists(n string, pool *v1.Pool, cis_domain string) resource.TestCheckFunc {
-=======
 func testAccCheckCisPoolExists(n string, tfPoolId *string) resource.TestCheckFunc {
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -260,21 +209,12 @@ func testAccCheckCisPoolExists(n string, tfPoolId *string) resource.TestCheckFun
 			return err
 		}
 
-<<<<<<< HEAD
-		poolId, _, _ := convertTftoCisTwoVar(rs.Primary.ID)
-		foundPool, err := cisClient.Pools().GetPool(rs.Primary.Attributes["cis_id"], poolId)
-=======
 		poolId, cisId, _ := convertTftoCisTwoVar(rs.Primary.ID)
 		foundPoolPtr, err := cisClient.Pools().GetPool(rs.Primary.Attributes["cis_id"], poolId)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		if err != nil {
 			return err
 		}
 
-<<<<<<< HEAD
-		pool = foundPool
-
-=======
 		foundPool := *foundPoolPtr
 		if foundPool.Id != poolId {
 			return fmt.Errorf("Record not found")
@@ -299,17 +239,10 @@ func testAccCisPoolManuallyDelete(tfPoolId *string) resource.TestCheckFunc {
 		if err != nil {
 			return fmt.Errorf("Error deleting IBMCISPool Record: %s", err)
 		}
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return nil
 	}
 }
 
-<<<<<<< HEAD
-func testAccCheckCisPoolConfigBasic(resourceId string, cis_domain string) string {
-	return testAccCheckIBMCisInstance_basic(cis_domain) + fmt.Sprintf(`
-resource "ibm_cis_origin_pool" "%[1]s" {
-  cis_id = "${ibm_cis.instance.id}"
-=======
 func testAccCheckCisPoolConfigCisDS_Basic(resourceId string, cisDomainStatic string) string {
 	return testAccCheckIBMCisDomainDataSourceConfig_basic1(resourceId, cisDomainStatic) + fmt.Sprintf(`
 resource "ibm_cis_origin_pool" "%[1]s" {
@@ -331,7 +264,6 @@ func testAccCheckCisPoolConfigCisRI_Basic(resourceId string, cisDomain string) s
 	return testAccCheckCisDomainConfigCisRI_basic(resourceId, cisDomain) + fmt.Sprintf(`
 resource "ibm_cis_origin_pool" "%[1]s" {
   cis_id = "${ibm_cis.%[2]s.id}"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
   name = "my-tf-pool-basic-%[1]s"
   check_regions = ["WEU"]
   description = "tfacc-fully-specified"
@@ -342,15 +274,6 @@ resource "ibm_cis_origin_pool" "%[1]s" {
     weight = 1
   }
 }
-<<<<<<< HEAD
-`, resourceId)
-}
-
-func testAccCheckCisPoolConfigFullySpecified(resourceId string, cis_domain string) string {
-	return testAccCheckCisHealthcheckConfigBasic(resourceId, cis_domain) + fmt.Sprintf(`
-resource "ibm_cis_origin_pool" "%[1]s" {
-  cis_id = "${ibm_cis.instance.id}"
-=======
 `, resourceId, "testacc_ds_cis")
 }
 
@@ -358,7 +281,6 @@ func testAccCheckCisPoolConfigFullySpecified(resourceId string, cisDomainStatic 
 	return testAccCheckCisHealthcheckConfigCisDS_Basic(resourceId, cisDomainStatic) + fmt.Sprintf(`
 resource "ibm_cis_origin_pool" "%[1]s" {
   cis_id = "${data.ibm_cis.%[2]s.id}"
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
   name = "my-tf-pool-basic-%[1]s"
   notification_email = "admin@outlook.com"
   origins {
@@ -376,9 +298,5 @@ resource "ibm_cis_origin_pool" "%[1]s" {
   enabled = false
   minimum_origins = 2
   monitor = "${ibm_cis_healthcheck.%[1]s.id}"
-<<<<<<< HEAD
-}`, resourceId)
-=======
 }`, resourceId, cisInstance)
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 }

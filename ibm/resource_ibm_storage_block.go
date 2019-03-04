@@ -198,15 +198,12 @@ func resourceIBMStorageBlock() *schema.Resource {
 					},
 				},
 			},
-<<<<<<< HEAD
-=======
 
 			"target_address": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		},
 	}
 }

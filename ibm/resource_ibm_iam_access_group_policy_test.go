@@ -166,8 +166,6 @@ func TestAccIBMIAMAccessGroupPolicy_import(t *testing.T) {
 	})
 }
 
-<<<<<<< HEAD
-=======
 func TestAccIBMIAMAccessGroupPolicy_account_management(t *testing.T) {
 	var conf iampapv1.Policy
 	name := fmt.Sprintf("terraform_%d", acctest.RandInt())
@@ -191,7 +189,6 @@ func TestAccIBMIAMAccessGroupPolicy_account_management(t *testing.T) {
 	})
 }
 
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func testAccCheckIBMIAMAccessGroupPolicyDestroy(s *terraform.State) error {
 	iampapClient, err := testAccProvider.Meta().(ClientSession).IAMPAPAPI()
 	if err != nil {
@@ -407,8 +404,6 @@ func testAccCheckIBMIAMAccessGroupPolicy_import(name string) string {
 
 	`, name)
 }
-<<<<<<< HEAD
-=======
 
 func testAccCheckIBMIAMAccessGroupPolicy_account_management(name string) string {
 	return fmt.Sprintf(`
@@ -425,4 +420,3 @@ func testAccCheckIBMIAMAccessGroupPolicy_account_management(name string) string 
 
 	`, name)
 }
->>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
