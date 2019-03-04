@@ -114,6 +114,9 @@ The following arguments are supported:
 * `no_subnet` - (Optional, boolean) Set to `true` if you do not want to automatically create a portable subnet.
 * `is_trusted` - (Optional, boolean) Set to `true` to  enable trusted cluster feature. Default is false.
 * `disk_encryption` - (Optional, boolean) Set to `false` to disable encryption on a worker.
+* `public_service_endpoint_enabled` - (Optional, boolean) Set to `true` to enable public service endpoint.
+* `private_service_endpoint_enabled` - (Optional, boolean) Set to `true` to enable private service endpoint.
+**Note**: Updating `public_service_endpoint_enabled` and `private_service_endpoint_enabled` is not supported.
 * `webhook` - (Optional, string) The webhook that you want to add to the cluster.
 * `public_service_endpoint` - (Optional,bool) Enable the public service endpoint to make the master publicly accessible.
 * `private_service_endpoint` - (Optional,bool) Enable the private service endpoint to make the master privately accessible. Once enabled this feature cannot be disabled later.
