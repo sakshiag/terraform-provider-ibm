@@ -8,7 +8,7 @@ description: |-
 
 # ibm\_is_lb
 
-Provides a load balancer resource. This allows load balancet to be created, updated, and cancelled.
+Provides a load balancer resource. This allows load balancer to be created, updated, and cancelled.
 
 
 ## Example Usage
