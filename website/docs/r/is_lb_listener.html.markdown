@@ -11,16 +11,6 @@ description: |-
 Provides a load balancer listener resource. This allows load balancer listener to be created, updated, and cancelled.
 
 
-## Timeouts
-
-ibm_is_lb_listener provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
-
-* `create` - (Default 60 minutes) Used for creating Instance.
-* `update` - (Default 60 minutes) Used for updating Instance.
-* `delete` - (Default 60 minutes) Used for deleting Instance.
-
-
-
 ## Example Usage
 
 In the following example, you can create a load balancer listener:
@@ -32,6 +22,15 @@ resource "ibm_is_lb_listener" "testacc_lb_listener" {
   protocol = "http"
 }
 ```
+
+## Timeouts
+
+ibm_is_lb_listener provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
+
+* `create` - (Default 60 minutes) Used for creating Instance.
+* `update` - (Default 60 minutes) Used for updating Instance.
+* `delete` - (Default 60 minutes) Used for deleting Instance.
+
 
 ## Argument Reference
 
