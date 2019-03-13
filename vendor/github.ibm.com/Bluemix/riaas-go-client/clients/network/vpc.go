@@ -130,8 +130,8 @@ func (f *VPCClient) UpdateDefaultNWACL(id, aclid string) (*models.NetworkACL, er
 }
 
 // CreateAddressPrefix ...
-func (f *VPCClient) CreateAddressPrefix(addressPrefixes *models.PostVpcsVpcIDAddressPrefixesParamsBody) (*models.AddressPoolPrefix, error) {
-	params := network.NewPostVpcsVpcIDAddressPrefixesParams().WithBody(addressPrefixes)
+func (f *VPCClient) CreateAddressPrefix(addressPrefixes *models.PostVpcsVpcIDAddressPrefixesParamsBody, vpcId string) (*models.AddressPoolPrefix, error) {
+	params := network.NewPostVpcsVpcIDAddressPrefixesParams().WithBody(addressPrefixes).WithVpcID(vpcId)
 	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.PostVpcsVpcIDAddressPrefixes(params, session.Auth(f.session))
 	if err != nil {
@@ -141,9 +141,21 @@ func (f *VPCClient) CreateAddressPrefix(addressPrefixes *models.PostVpcsVpcIDAdd
 	return resp.Payload, nil
 }
 
+// UpdateAddressPrefix ...
+func (f *VPCClient) UpdateAddressPrefix(addressPrefixes *models.PatchVpcsVpcIDAddressPrefixesIDParamsBody, vpcID, addressPrefixID string) (*models.AddressPoolPrefix, error) {
+	params := network.NewPatchVpcsVpcIDAddressPrefixesIDParams().WithBody(addressPrefixes).WithID(addressPrefixID).WithVpcID(vpcID)
+	params.Version = "2019-01-15"
+	resp, err := f.session.Riaas.Network.PatchVpcsVpcIDAddressPrefixesID(params, session.Auth(f.session))
+	if err != nil {
+		return nil, errors.ToError(err)
+	}
+
+	return resp.Payload, nil
+}
+
 // GetAddressPrefix ...
 func (f *VPCClient) GetAddressPrefix(vpcID, addressPrefixesID string) (*models.AddressPoolPrefix, error) {
-	params := network.NewGetVpcsVpcIDAddressPrefixesIDParams().WithVpcID(vpcID)
+	params := network.NewGetVpcsVpcIDAddressPrefixesIDParams().WithVpcID(vpcID).WithID(addressPrefixesID)
 	params.Version = "2019-01-15"
 	resp, err := f.session.Riaas.Network.GetVpcsVpcIDAddressPrefixesID(params, session.Auth(f.session))
 	if err != nil {
@@ -155,7 +167,7 @@ func (f *VPCClient) GetAddressPrefix(vpcID, addressPrefixesID string) (*models.A
 
 // DeleteAddressPrefix ...
 func (f *VPCClient) DeleteAddressPrefix(vpcID, addressPrefixesID string) error {
-	params := network.NewDeleteVpcsVpcIDAddressPrefixesIDParams().WithVpcID(vpcID)
+	params := network.NewDeleteVpcsVpcIDAddressPrefixesIDParams().WithVpcID(vpcID).WithID(addressPrefixesID)
 	params.Version = "2019-01-15"
 	_, err := f.session.Riaas.Network.DeleteVpcsVpcIDAddressPrefixesID(params, session.Auth(f.session))
 	return errors.ToError(err)
