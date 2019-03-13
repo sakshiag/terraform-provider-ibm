@@ -47,6 +47,7 @@ var updatedCertCRN string
 var regionName string
 var ISZoneName string
 var ISCIDR string
+var ISAddressPrefixCIDR string
 var isImage string
 var instanceProfileName string
 
@@ -261,6 +262,11 @@ func init() {
 		fmt.Println("[INFO] Set the environment variable SL_CIDR for testing ibm_is_subnet else it is set to default value '10.240.0.0/24'")
 	}
 
+	ISAddressPrefixCIDR = os.Getenv("SL_ADDRESS_PREFIX_CIDR")
+	if ISAddressPrefixCIDR == "" {
+		ISAddressPrefixCIDR = "10.120.0.0/24"
+		fmt.Println("[INFO] Set the environment variable SL_ADDRESS_PREFIX_CIDR for testing ibm_is_vpc_address_prefix else it is set to default value '10.120.0.0/24'")
+	}
 	isImage = os.Getenv("SL_IMAGE")
 	if isImage == "" {
 		isImage = "7eb4e35b-4257-56f8-d7da-326d85452591"
