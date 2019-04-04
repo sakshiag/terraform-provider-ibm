@@ -233,7 +233,11 @@ func resourceIBMISNetworkACLRead(d *schema.ResourceData, meta interface{}) error
 		rule[isNetworkACLRuleIPVersion] = rulex.IPVersion
 		rule[isNetworkACLRuleSource] = rulex.Source
 		rule[isNetworkACLRuleDestination] = rulex.Destination
-		rule[isNetworkACLRuleDirection] = rulex.Direction
+		if rulex.Direction == "inbound" {
+			rule[isNetworkACLRuleDirection] = "ingress"
+		} else {
+			rule[isNetworkACLRuleDirection] = "egress"
+		}
 
 		if rulex.Protocol == "icmp" {
 			rule[isNetworkACLRuleTCP] = make([]map[string]int, 0, 0)
