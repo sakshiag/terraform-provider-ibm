@@ -49,6 +49,7 @@ func resourceIBMISSubnet() *schema.Resource {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{isSubnetTotalIpv4AddressCount},
 				ValidateFunc:  validateCIDR,
 			},
