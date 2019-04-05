@@ -2,6 +2,7 @@ package ibm
 
 import (
 	"fmt"
+
 	"github.com/IBM-Cloud/bluemix-go/api/icd/icdv4"
 	"github.com/IBM-Cloud/bluemix-go/api/resource/resourcev1/controller"
 	"github.com/IBM-Cloud/bluemix-go/api/resource/resourcev1/management"
@@ -406,11 +407,12 @@ func dataSourceIBMDatabaseInstanceRead(d *schema.ResourceData, meta interface{})
 
 	d.SetId(instance.ID)
 
-	err = GetTags(d, meta)
+	tags, err := GetTags(meta, instance.ID)
 	if err != nil {
 		return fmt.Errorf(
 			"Error on get of resource instance (%s) tags: %s", d.Id(), err)
 	}
+	d.Set("tags", tags)
 
 	d.Set("name", instance.Name)
 	d.Set("status", instance.State)

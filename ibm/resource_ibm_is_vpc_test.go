@@ -27,6 +27,18 @@ func TestAccIBMISVPC_basic(t *testing.T) {
 					testAccCheckIBMISVPCExists("ibm_is_vpc.testacc_vpc", &vpc),
 					resource.TestCheckResourceAttr(
 						"ibm_is_vpc.testacc_vpc", "name", name1),
+					resource.TestCheckResourceAttr(
+						"ibm_is_vpc.testacc_vpc", "tags.#", "2"),
+				),
+			},
+			{
+				Config: testAccCheckIBMISVPCConfigUpdate(name1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIBMISVPCExists("ibm_is_vpc.testacc_vpc", &vpc),
+					resource.TestCheckResourceAttr(
+						"ibm_is_vpc.testacc_vpc", "name", name1),
+					resource.TestCheckResourceAttr(
+						"ibm_is_vpc.testacc_vpc", "tags.#", "1"),
 				),
 			},
 		},
@@ -81,7 +93,17 @@ func testAccCheckIBMISVPCExists(n string, vpc **models.Vpc) resource.TestCheckFu
 func testAccCheckIBMISVPCConfig(name string) string {
 	return fmt.Sprintf(`
 resource "ibm_is_vpc" "testacc_vpc" {
-    name = "%s"
+	name = "%s"
+	tags = ["tag1", "tag2"]
+}`, name)
+
+}
+
+func testAccCheckIBMISVPCConfigUpdate(name string) string {
+	return fmt.Sprintf(`
+resource "ibm_is_vpc" "testacc_vpc" {
+	name = "%s"
+	tags = ["tag1"]
 }`, name)
 
 }

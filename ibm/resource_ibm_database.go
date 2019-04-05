@@ -608,11 +608,12 @@ func resourceIBMDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		return nil
 	}
 
-	err = GetTags(d, meta)
+	tags, err := GetTags(meta, instanceID)
 	if err != nil {
 		return fmt.Errorf(
 			"Error on get of resource instance (%s) tags: %s", d.Id(), err)
 	}
+	d.Set(isVPCTags, tags)
 	d.Set("name", instance.Name)
 	d.Set("status", instance.State)
 	d.Set("resource_group_id", instance.ResourceGroupID)
@@ -713,7 +714,8 @@ func resourceIBMDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	if d.HasChange("tags") {
-		err = UpdateTags(d, meta)
+		oldList, newList := d.GetChange("tags")
+		err = UpdateTags(oldList, newList, meta, instanceID)
 		if err != nil {
 			return fmt.Errorf(
 				"Error on update of resource instance (%s) tags: %s", d.Id(), err)

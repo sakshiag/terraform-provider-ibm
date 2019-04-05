@@ -36,6 +36,12 @@ func dataSourceIBMISVPC() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			isVPCTags: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -49,7 +55,7 @@ func dataSourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get(isVPCName).(string)
 
-	vpcs, _, err := vpcC.List(name)
+	vpcs, _, err := vpcC.List("")
 	if err != nil {
 		return err
 	}
@@ -66,6 +72,12 @@ func dataSourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 			} else {
 				d.Set(isVPCDefaultNetworkACL, nil)
 			}
+			tags, err := GetTags(meta, vpc.Crn)
+			if err != nil {
+				return fmt.Errorf(
+					"Error on get of resource vpc (%s) tags: %s", d.Id(), err)
+			}
+			d.Set(isVPCTags, tags)
 			return nil
 		}
 	}

@@ -24,6 +24,8 @@ func TestAccIBMISVPCDatasource_basic(t *testing.T) {
 					testAccCheckIBMISVPCExists("ibm_is_vpc.testacc_vpc", &vpc),
 					resource.TestCheckResourceAttr(
 						"data.ibm_is_vpc.ds_vpc", "name", name1),
+					resource.TestCheckResourceAttr(
+						"data.ibm_is_vpc.ds_vpc", "tags.#", "1"),
 				),
 			},
 		},
@@ -33,7 +35,8 @@ func TestAccIBMISVPCDatasource_basic(t *testing.T) {
 func testDSCheckIBMISVPCConfig(name string) string {
 	return fmt.Sprintf(`
 		resource "ibm_is_vpc" "testacc_vpc" {
-		    name = "%s"
+			name = "%s"
+			tags = ["tag1"]
 		}
 		data "ibm_is_vpc" "ds_vpc" {
 		    name = "${ibm_is_vpc.testacc_vpc.name}"

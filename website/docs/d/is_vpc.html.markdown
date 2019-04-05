@@ -38,3 +38,4 @@ The following attributes are exported:
 * `default_network_acl` - ID of the default network ACL.
 * `is_default` - Is this VPC default for the account.
 * `resource_group` - The resource group where the VPC created.
+* `tags` - Tags associated with the instance.

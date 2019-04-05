@@ -1,6 +1,7 @@
 package ibm
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -19,6 +20,7 @@ const (
 	isVPCStatus                = "status"
 	isVPCDeleting              = "deleting"
 	isVPCDeleted               = "done"
+	isVPCTags                  = "tags"
 )
 
 func resourceIBMISVPC() *schema.Resource {
@@ -71,6 +73,13 @@ func resourceIBMISVPC() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			isVPCTags: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -96,6 +105,15 @@ func resourceIBMISVPCCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(vpc.ID.String())
 	log.Printf("[INFO] VPC : %s", vpc.ID.String())
+
+	if _, ok := d.GetOk(isVPCTags); ok {
+		oldList, newList := d.GetChange(isVPCTags)
+		err = UpdateTags(oldList, newList, meta, vpc.Crn)
+		if err != nil {
+			return fmt.Errorf(
+				"Error on create of resource vpc (%s) tags: %s", d.Id(), err)
+		}
+	}
 	return resourceIBMISVPCRead(d, meta)
 }
 
@@ -127,6 +145,12 @@ func resourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		d.Set(isVPCIDefaultSecurityGroup, nil)
 	}
+	tags, err := GetTags(meta, vpc.Crn)
+	if err != nil {
+		return fmt.Errorf(
+			"Error on get of resource vpc (%s) tags: %s", d.Id(), err)
+	}
+	d.Set(isVPCTags, tags)
 	return nil
 }
 
@@ -138,12 +162,27 @@ func resourceIBMISVPCUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	vpcC := network.NewVPCClient(sess)
 
+	vpc, err := vpcC.Get(d.Id())
+	if err != nil {
+		return err
+	}
+
 	if d.HasChange(isVPCName) {
 		name := d.Get(isVPCName).(string)
 		_, err := vpcC.Update(d.Id(), name)
 		if err != nil {
 			return err
 		}
+	}
+
+	if d.HasChange(isVPCTags) {
+		oldList, newList := d.GetChange(isVPCTags)
+		err = UpdateTags(oldList, newList, meta, vpc.Crn)
+		if err != nil {
+			return fmt.Errorf(
+				"Error on create of resource vpc (%s) tags: %s", d.Id(), err)
+		}
+
 	}
 
 	return resourceIBMISVPCRead(d, meta)
