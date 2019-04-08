@@ -55,7 +55,7 @@ func resourceIBMISLB() *schema.Resource {
 				ForceNew:     true,
 				Optional:     true,
 				Default:      "public",
-				ValidateFunc: validateAllowedStringValue([]string{"public"}),
+				ValidateFunc: validateAllowedStringValue([]string{"public", "private"}),
 			},
 
 			isLBStatus: {
