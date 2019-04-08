@@ -26,6 +26,14 @@ resource "ibm_is_lb_pool_member" "testacc_lb_mem" {
 
 ```
 
+## Timeouts
+
+ibm_is_lb_listener provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
+
+* `create` - (Default 60 minutes) Used for creating Instance.
+* `update` - (Default 60 minutes) Used for updating Instance.
+* `delete` - (Default 60 minutes) Used for deleting Instance.
+
 ## Argument Reference
 
 The following arguments are supported:

@@ -95,7 +95,6 @@ func resourceIBMISVPCCreate(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get(isVPCName).(string)
 	isdefault := d.Get(isVPCIsDefault).(bool)
 	nwacl := d.Get(isVPCDefaultNetworkACL).(string)
-
 	var rg string
 
 	if grp, ok := d.GetOk(isVPCResourceGroup); ok {

@@ -3,6 +3,7 @@ package ibm
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.ibm.com/Bluemix/riaas-go-client/clients/lbaas"
@@ -34,6 +35,12 @@ func resourceIBMISLBPool() *schema.Resource {
 		Delete:   resourceIBMISLBPoolDelete,
 		Exists:   resourceIBMISLBPoolExists,
 		Importer: &schema.ResourceImporter{},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Update: schema.DefaultTimeout(60 * time.Minute),
+			Delete: schema.DefaultTimeout(60 * time.Minute),
+		},
 
 		Schema: map[string]*schema.Schema{
 			isLBPoolName: {
@@ -153,6 +160,12 @@ func resourceIBMISLBPoolCreate(d *schema.ResourceData, meta interface{}) error {
 			Type:       spType,
 		}
 	}
+	_, err := isWaitForLBAvailable(client, lbID, d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return fmt.Errorf(
+			"Error checking for load balancer (%s) is active: %s", lbID, err)
+	}
+
 	lbPool, err := client.CreatePool(&l_baas.PostLoadBalancersIDPoolsParams{
 		Body: body,
 		ID:   lbID,
@@ -163,6 +176,13 @@ func resourceIBMISLBPoolCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.SetId(fmt.Sprintf("%s/%s", lbID, lbPool.ID.String()))
 	log.Printf("[INFO] Ipsec : %s", lbPool.ID.String())
+
+	_, err = isWaitForLBAvailable(client, lbID, d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return fmt.Errorf(
+			"Error checking for load balancer (%s) is active: %s", lbID, err)
+	}
+
 	return resourceIBMISLBPoolRead(d, meta)
 }
 
@@ -240,9 +260,22 @@ func resourceIBMISLBPoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		name := d.Get(isLBPoolName).(string)
 		algorithm := d.Get(isLBPoolAlgorithm).(string)
 		protocol := d.Get(isLBPoolProtocol).(string)
-		_, err := client.UpdatePool(lbID, lbPoolID, algorithm, name, protocol, healthMonitorTemplate, sessionPersistence)
+
+		_, err := isWaitForLBAvailable(client, lbID, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return fmt.Errorf(
+				"Error checking for load balancer (%s) is active: %s", lbID, err)
+		}
+
+		_, err = client.UpdatePool(lbID, lbPoolID, algorithm, name, protocol, healthMonitorTemplate, sessionPersistence)
 		if err != nil {
 			return err
+		}
+
+		_, err = isWaitForLBAvailable(client, lbID, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return fmt.Errorf(
+				"Error checking for load balancer (%s) is active: %s", lbID, err)
 		}
 	}
 
@@ -260,9 +293,22 @@ func resourceIBMISLBPoolDelete(d *schema.ResourceData, meta interface{}) error {
 
 	lbID := parts[0]
 	lbPoolID := parts[1]
+
+	_, err = isWaitForLBAvailable(client, lbID, d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return fmt.Errorf(
+			"Error checking for load balancer (%s) is active: %s", lbID, err)
+	}
+
 	err = client.DeletePool(lbID, lbPoolID)
 	if err != nil {
 		return err
+	}
+
+	_, err = isWaitForLBAvailable(client, lbID, d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return fmt.Errorf(
+			"Error checking for load balancer (%s) is active: %s", lbID, err)
 	}
 
 	d.SetId("")
