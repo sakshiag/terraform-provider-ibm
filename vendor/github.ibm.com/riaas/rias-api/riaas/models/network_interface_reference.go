@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -32,6 +34,10 @@ type NetworkInterfaceReference struct {
 	// The primary IPv4 address
 	PrimaryIPV4Address string `json:"primary_ipv4_address,omitempty"`
 
+	// network interface
+	// Enum: [network-interface]
+	ResourceType string `json:"resource_type,omitempty"`
+
 	// subnet
 	Subnet *ResourceReference `json:"subnet,omitempty"`
 }
@@ -49,6 +55,10 @@ func (m *NetworkInterfaceReference) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateResourceType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -95,6 +105,46 @@ func (m *NetworkInterfaceReference) validateName(formats strfmt.Registry) error 
 	}
 
 	if err := validate.Pattern("name", "body", string(m.Name), `^[A-Za-z][-A-Za-z0-9_]*$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var networkInterfaceReferenceTypeResourceTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["network-interface"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		networkInterfaceReferenceTypeResourceTypePropEnum = append(networkInterfaceReferenceTypeResourceTypePropEnum, v)
+	}
+}
+
+const (
+
+	// NetworkInterfaceReferenceResourceTypeNetworkInterface captures enum value "network-interface"
+	NetworkInterfaceReferenceResourceTypeNetworkInterface string = "network-interface"
+)
+
+// prop value enum
+func (m *NetworkInterfaceReference) validateResourceTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, networkInterfaceReferenceTypeResourceTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *NetworkInterfaceReference) validateResourceType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ResourceType) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateResourceTypeEnum("resource_type", "body", m.ResourceType); err != nil {
 		return err
 	}
 

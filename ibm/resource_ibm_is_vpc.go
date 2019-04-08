@@ -62,6 +62,7 @@ func resourceIBMISVPC() *schema.Resource {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
+				Computed: true,
 			},
 
 			isVPCStatus: {
@@ -93,8 +94,13 @@ func resourceIBMISVPCCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] VPC create")
 	name := d.Get(isVPCName).(string)
 	isdefault := d.Get(isVPCIsDefault).(bool)
-	rg := d.Get(isVPCResourceGroup).(string)
 	nwacl := d.Get(isVPCDefaultNetworkACL).(string)
+
+	var rg string
+
+	if grp, ok := d.GetOk(isVPCResourceGroup); ok {
+		rg = grp.(string)
+	}
 
 	vpcC := network.NewVPCClient(sess)
 	vpc, err := vpcC.Create(name, isdefault, nwacl, rg)
@@ -151,6 +157,7 @@ func resourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 			"Error on get of resource vpc (%s) tags: %s", d.Id(), err)
 	}
 	d.Set(isVPCTags, tags)
+	d.Set(isVPCResourceGroup, vpc.ResourceGroup.ID)
 	return nil
 }
 

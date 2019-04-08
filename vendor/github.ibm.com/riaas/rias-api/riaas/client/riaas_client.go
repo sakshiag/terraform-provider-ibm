@@ -15,6 +15,7 @@ import (
 	"github.ibm.com/riaas/rias-api/riaas/client/geography"
 	"github.ibm.com/riaas/rias-api/riaas/client/l_baas"
 	"github.ibm.com/riaas/rias-api/riaas/client/network"
+	"github.ibm.com/riaas/rias-api/riaas/client/storage"
 	"github.ibm.com/riaas/rias-api/riaas/client/v_p_naa_s"
 )
 
@@ -68,6 +69,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Riaas {
 	cli.LBaas = l_baas.New(transport, formats)
 
 	cli.Network = network.New(transport, formats)
+
+	cli.Storage = storage.New(transport, formats)
 
 	cli.VPNaaS = v_p_naa_s.New(transport, formats)
 
@@ -123,6 +126,8 @@ type Riaas struct {
 
 	Network *network.Client
 
+	Storage *storage.Client
+
 	VPNaaS *v_p_naa_s.Client
 
 	Transport runtime.ClientTransport
@@ -139,6 +144,8 @@ func (c *Riaas) SetTransport(transport runtime.ClientTransport) {
 	c.LBaas.SetTransport(transport)
 
 	c.Network.SetTransport(transport)
+
+	c.Storage.SetTransport(transport)
 
 	c.VPNaaS.SetTransport(transport)
 

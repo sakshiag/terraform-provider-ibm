@@ -34,7 +34,7 @@ func (m *GetInstancesOKBody) UnmarshalJSON(raw []byte) error {
 
 	// now for regular properties
 	var propsGetInstancesOKBody struct {
-		Instances []*Instance `json:"instances,omitempty"`
+		Instances []*Instance `json:"instances"`
 	}
 	if err := swag.ReadJSON(raw, &propsGetInstancesOKBody); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (m GetInstancesOKBody) MarshalJSON() ([]byte, error) {
 
 	// now for regular properties
 	var propsGetInstancesOKBody struct {
-		Instances []*Instance `json:"instances,omitempty"`
+		Instances []*Instance `json:"instances"`
 	}
 	propsGetInstancesOKBody.Instances = m.Instances
 

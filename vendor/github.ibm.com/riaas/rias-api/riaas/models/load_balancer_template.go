@@ -33,6 +33,9 @@ type LoadBalancerTemplate struct {
 	// The pools of this load balancer
 	Pools []*PoolTemplate `json:"pools,omitempty"`
 
+	// resource group
+	ResourceGroup *LoadBalancerTemplateResourceGroup `json:"resource_group,omitempty"`
+
 	// The subnets to provision this load balancer
 	Subnets []*SubnetIdentity `json:"subnets"`
 }
@@ -54,6 +57,10 @@ func (m *LoadBalancerTemplate) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePools(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateResourceGroup(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -134,6 +141,24 @@ func (m *LoadBalancerTemplate) validatePools(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *LoadBalancerTemplate) validateResourceGroup(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ResourceGroup) { // not required
+		return nil
+	}
+
+	if m.ResourceGroup != nil {
+		if err := m.ResourceGroup.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("resource_group")
+			}
+			return err
+		}
 	}
 
 	return nil

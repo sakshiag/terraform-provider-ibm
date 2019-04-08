@@ -34,7 +34,7 @@ func (m *GetFlavorsOKBody) UnmarshalJSON(raw []byte) error {
 
 	// now for regular properties
 	var propsGetFlavorsOKBody struct {
-		Flavors []*Flavor `json:"flavors,omitempty"`
+		Flavors []*Flavor `json:"flavors"`
 	}
 	if err := swag.ReadJSON(raw, &propsGetFlavorsOKBody); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (m GetFlavorsOKBody) MarshalJSON() ([]byte, error) {
 
 	// now for regular properties
 	var propsGetFlavorsOKBody struct {
-		Flavors []*Flavor `json:"flavors,omitempty"`
+		Flavors []*Flavor `json:"flavors"`
 	}
 	propsGetFlavorsOKBody.Flavors = m.Flavors
 

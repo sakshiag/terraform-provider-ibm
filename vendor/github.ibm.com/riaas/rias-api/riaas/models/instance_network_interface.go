@@ -48,6 +48,10 @@ type InstanceNetworkInterface struct {
 	// The primary IPv6 address in compressed notation as specified by RFC 5952
 	PrimaryIPV6Address string `json:"primary_ipv6_address,omitempty"`
 
+	// network interface
+	// Enum: [network-interface]
+	ResourceType string `json:"resource_type,omitempty"`
+
 	// Collection seconary IP addresses
 	SecondaryAddresses []string `json:"secondary_addresses,omitempty"`
 
@@ -90,6 +94,10 @@ func (m *InstanceNetworkInterface) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateResourceType(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -186,6 +194,46 @@ func (m *InstanceNetworkInterface) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("name", "body", string(m.Name), `^[A-Za-z][-A-Za-z0-9_]*$`); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var instanceNetworkInterfaceTypeResourceTypePropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["network-interface"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		instanceNetworkInterfaceTypeResourceTypePropEnum = append(instanceNetworkInterfaceTypeResourceTypePropEnum, v)
+	}
+}
+
+const (
+
+	// InstanceNetworkInterfaceResourceTypeNetworkInterface captures enum value "network-interface"
+	InstanceNetworkInterfaceResourceTypeNetworkInterface string = "network-interface"
+)
+
+// prop value enum
+func (m *InstanceNetworkInterface) validateResourceTypeEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, instanceNetworkInterfaceTypeResourceTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *InstanceNetworkInterface) validateResourceType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ResourceType) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateResourceTypeEnum("resource_type", "body", m.ResourceType); err != nil {
 		return err
 	}
 

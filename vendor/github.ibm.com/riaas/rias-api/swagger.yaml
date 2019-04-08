@@ -441,6 +441,11 @@ definitions:
         type: integer}
       primary_ipv4_address: {description: The primary IPv4 address, example: 10.0.0.5,
         type: string}
+      resource_type:
+        description: network interface
+        enum: [network-interface]
+        example: network-interface
+        type: string
       primary_ipv6_address: {description: The primary IPv6 address in compressed notation
           as specified by RFC 5952, example: '2001:db8:85a3::8a2e:370:7334', type: string}
       secondary_addresses:
@@ -701,6 +706,12 @@ definitions:
         items:
           $ref: "#/definitions/PoolTemplate"
         x-omitempty: true
+      resource_group:
+        description: The resource group for this load balancer
+        properties:
+          id: {description: The unique identifier for this resource group, example: 56969d60-43e9-465c-883c-b9f7363e78e8,
+            format: uuid, pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+            type: string} 
     required:
     - is_public
   SubnetIdentity:
@@ -2038,6 +2049,11 @@ definitions:
       name: {description: The user-defined name for this resource, example: my-snapshot,
         format: name, pattern: '^[A-Za-z][-A-Za-z0-9_]*$', type: string}
       primary_ipv4_address: {description: The primary IPv4 address, type: string}
+      resource_type:
+        description: network interface
+        enum: [network-interface]
+        example: network-interface
+        type: string
       subnet: {$ref: '#/definitions/resource_reference'}
     title: NetworkInterfaceReference
     type: object
@@ -8386,7 +8402,227 @@ paths:
           description: "A load balancer with the specified identifier could not be found."
           schema: {$ref: '#/definitions/riaaserror'}
       tags: [LBaas]
-security:
+  /volumes:
+    get:
+      consumes: [application/json]
+      description: This request retrieves all volumes in the region. Volumes are network-connected
+        block storage devices which may be attached to one or more servers in the
+        same region.
+      parameters:
+      - {description: Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version., in: query, name: version, required: true, format: data, type: string}
+      - {description: A server-supplied token determining what resource to start the
+          page on, in: query, name: start, required: false, type: string}
+      - {default: 50, description: The number of resources to return on a page, format: int32,
+        in: query, maximum: 100, minimum: 1, name: limit, required: false, type: integer}
+      - {description: Filters the collection to resources within the resource group
+          of the specified identifier, in: query, name: resource_group.id, required: false,
+        type: string}
+      - {description: Filters the collection to resources within the specified zone,
+        in: query, name: zone.name, required: false, type: string}
+      produces: [application/json]
+      responses:
+        200:
+          description: dummy
+          schema:
+            properties:
+              first:
+                description: A reference to the first page of resources
+                properties:
+                  href: {description: The URL for the first page of resources, example: 'http://iaas.bluemix.net/v1/volumes?limit=20',
+                    format: url, pattern: '^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$',
+                    type: string}
+                required: [href]
+                type: object
+              limit: {description: The maximum number of resources can be returned
+                  by the request, example: 20, format: int64, maximum: 100, minimum: 1,
+                type: integer}
+              next:
+                description: A reference to the next page of resources; this reference
+                  is included for all pages except the last page
+                properties:
+                  href: {description: The URL for the next page of resources, example: 'http://iaas.bluemix.net/v1/volumes?start=9d5a91a3e2cbd233b5a5b33436855ed1&limit=20',
+                    format: url, pattern: '^http(s)?:\/\/([^\/?#]*)([^?#]*)(\?([^#]*))?(#(.*))?$',
+                    type: string}
+                required: [href]
+                type: object
+              total_count: {description: The total number of resources across all
+                  pages, example: 132, format: int64, minimum: 0, type: integer}
+              volumes:
+                description: Collection of volumes
+                items:
+                  $ref: "#/definitions/volume"
+                type: array
+            required: [volumes]
+            title: VolumeCollection
+            type: object
+        500:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+      summary: Retrieves all volumes
+      tags: [Storage]
+    post:
+      description: This request creates a new volume from a volume template. The volume
+        template object is structured in the same way as a retrieved volume, and contains
+        the information necessary to create the new volume.
+      parameters:
+      - {description: Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version., in: query, name: version, required: true, format: data, type: string}
+      - in: body
+        name: body
+        required: true
+        schema:
+          example:
+            capacity: 100
+            iops: 10000
+            type: data
+            vpc: {id: 4727d842-f94f-4a2d-824a-9bc9b02c523b}
+            zone: {name: us-south-1}
+          properties:
+            auto_delete: {default: false, description: 'If set to true, this volume
+                will be automatically deleted if the only server it is attached to
+                is deleted', type: boolean}
+            encryption_key:
+              properties:
+                crn: {description: The CRN for this key, example: 'crn:v1:bluemix:public:gt::a/123456::key:a6b1a881-2ce8-41a3-80fc-36316a73f803',
+                  format: crn, type: string}
+              title: VolumeEncryptionKey
+              type: object
+            capacity: {default: 100, description: The capacity of the volume in gigabytes,
+              example: 100, minimum: 10, type: integer}
+            iops:
+              description: The bandwidth for the volume
+              enum: [1000, 10000, 100000]
+              type: integer
+            name: {description: The user-defined name for this volume, example: my-volume,
+              format: name, pattern: '^[A-Za-z][-A-Za-z0-9_]*$', type: string}
+            resource_group:
+              properties:
+                id: {description: The unique identifier for this resource, example: 349a61d8-7ab1-420f-a690-5fed76ef9d4f,
+                  format: uuid, pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+                  type: string}
+              title: idreference
+              type: object
+            profile:
+              properties:
+                name: {description: The user-defined name for this resource, example: my-snapshot,
+                  format: name, pattern: '^[A-Za-z][-A-Za-z0-9_]*$', type: string}
+                crn: {description: The CRN for this snapshot, example: 'crn:v1:bluemix:public:gt:us-south-1:a/123456::snapshot:349a61d8-7ab1-420f-a690-5fed76ef9d4f',
+                  format: crn, type: string}
+              title: reference
+              type: object          
+            zone:
+              description: The location of the volume
+              properties:
+                name: {description: The name for this zone, example: us-south-1, format: name,
+                  pattern: '^[A-Za-z][-A-Za-z0-9_]*$', type: string}
+              required: [name]
+              title: ZoneIdentity
+              type: object
+          title: VolumeTemplateFromSnapshot
+          type: object
+      responses:
+        201:
+          description: dummy
+          schema:
+            $ref: "#/definitions/volume"
+        400:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+        500:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+      summary: Creates a volume
+      tags: [Storage]
+  /volumes/{id}:
+    delete:
+      consumes: [application/json]
+      description: This request deletes a volume. This operation cannot be reversed.
+        In order for this request to succeed, the volume must not be attached to any
+        servers.
+      parameters:
+      - {description: Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version., in: query, name: version, required: true, format: data, type: string}
+      - {description: The volume identifier, in: path, name: id, required: true, type: string}
+      produces: [application/json]
+      responses:
+        204:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+        404:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+        500:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+      summary: Deletes specified volume
+      tags: [Storage]
+    get:
+      consumes: [application/json]
+      description: This request retrieves a single volume specified by the identifier
+        in the URL.
+      parameters:
+      - {description: Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version., in: query, name: version, required: true, format: data, type: string}
+      - {description: The volume identifier, in: path, name: id, required: true, type: string}
+      produces: [application/json]
+      responses:
+        200:
+          description: dummy
+          schema:
+            $ref: "#/definitions/volume"
+        404:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+        500:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+      summary: Retrieves specified volume
+      tags: [Storage]
+    patch:
+      consumes: [application/json]
+      description: This request updates a volume with the information in a provided
+        volume patch. The volume patch object is structured in the same way as a retrieved
+        volume and can contain an updated name, IOPS rate, or (increased) capacity
+        for the volume.
+      parameters:
+      - {description: Requests the version of the API as of a date in the format `YYYY-MM-DD`. Any date up to the current date may be provided. Specify the current date to request the latest version., in: query, name: version, required: true, format: data, type: string}
+      - {description: The volume identifier, in: path, name: id, required: true, type: string}
+      - in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            name: {description: The user-defined name for this volume, example: my-volume,
+              format: name, pattern: '^[A-Za-z][-A-Za-z0-9_]*$', type: string}
+            capacity: {default: 100, description: The capacity of the volume in gigabytes,
+              example: 100, maximum: 64000, minimum: 10, type: integer}
+            iops:
+              description: The bandwidth for the volume
+              enum: [1000, 10000, 100000]
+              type: integer
+            profile:
+              properties:
+                name: {description: The user-defined name for this resource, example: my-snapshot,
+                  format: name, pattern: '^[A-Za-z][-A-Za-z0-9_]*$', type: string}
+                crn: {description: The CRN for this snapshot, example: 'crn:v1:bluemix:public:gt:us-south-1:a/123456::snapshot:349a61d8-7ab1-420f-a690-5fed76ef9d4f',
+                  format: crn, type: string}
+              title: reference
+              type: object
+          title: VolumePatch
+      produces: [application/json]
+      responses:
+        200:
+          description: dummy
+          schema:
+            $ref: "#/definitions/volume"
+        400:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+        404:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+        500:
+          description: error
+          schema: {$ref: '#/definitions/riaaserror'}
+      summary: Updates specified volume
+      tags: [Storage]
 security:
 - iamToken: []
 securityDefinitions:

@@ -34,7 +34,7 @@ func (m *GetImagesOKBody) UnmarshalJSON(raw []byte) error {
 
 	// now for regular properties
 	var propsGetImagesOKBody struct {
-		Images []*Image `json:"images,omitempty"`
+		Images []*Image `json:"images"`
 	}
 	if err := swag.ReadJSON(raw, &propsGetImagesOKBody); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (m GetImagesOKBody) MarshalJSON() ([]byte, error) {
 
 	// now for regular properties
 	var propsGetImagesOKBody struct {
-		Images []*Image `json:"images,omitempty"`
+		Images []*Image `json:"images"`
 	}
 	propsGetImagesOKBody.Images = m.Images
 

@@ -26,6 +26,7 @@ const (
 	isLBDeleted          = "done"
 	isLBProvisioning     = "provisioning"
 	isLBProvisioningDone = "done"
+	isLBResourceGroup    = "resource_group"
 )
 
 func resourceIBMISLB() *schema.Resource {
@@ -86,6 +87,13 @@ func resourceIBMISLB() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+
+			isVPNGatewayResourceGroup: {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -115,6 +123,14 @@ func resourceIBMISLBCreate(d *schema.ResourceData, meta interface{}) error {
 		Name:     name,
 		Subnets:  subnetIdentity,
 	}
+
+	if rg, ok := d.GetOk(isLBResourceGroup); ok {
+		rgref := models.LoadBalancerTemplateResourceGroup{
+			ID: strfmt.UUID(rg.(string)),
+		}
+		body.ResourceGroup = &rgref
+	}
+
 	lb, err := client.Create(&l_baas.PostLoadBalancersParams{
 		Body: body,
 	})
@@ -156,6 +172,7 @@ func resourceIBMISLBRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set(isLBPublicIPs, flattenISLBIPs(lb.PublicIps))
 	d.Set(isLBPrivateIPs, flattenISLBIPs(lb.PrivateIps))
 	d.Set(isLBSubnets, flattenISLBSubnets(lb.Subnets))
+	d.Set(isLBResourceGroup, lb.ResourceGroup.ID)
 
 	return nil
 }

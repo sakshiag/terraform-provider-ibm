@@ -34,7 +34,7 @@ func (m *GetKeysOKBody) UnmarshalJSON(raw []byte) error {
 
 	// now for regular properties
 	var propsGetKeysOKBody struct {
-		Keys []*Key `json:"keys,omitempty"`
+		Keys []*Key `json:"keys"`
 	}
 	if err := swag.ReadJSON(raw, &propsGetKeysOKBody); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (m GetKeysOKBody) MarshalJSON() ([]byte, error) {
 
 	// now for regular properties
 	var propsGetKeysOKBody struct {
-		Keys []*Key `json:"keys,omitempty"`
+		Keys []*Key `json:"keys"`
 	}
 	propsGetKeysOKBody.Keys = m.Keys
 

@@ -34,7 +34,7 @@ func (m *GetInstanceProfilesOKBody) UnmarshalJSON(raw []byte) error {
 
 	// now for regular properties
 	var propsGetInstanceProfilesOKBody struct {
-		Profiles []*InstanceProfile `json:"profiles,omitempty"`
+		Profiles []*InstanceProfile `json:"profiles"`
 	}
 	if err := swag.ReadJSON(raw, &propsGetInstanceProfilesOKBody); err != nil {
 		return err
@@ -56,7 +56,7 @@ func (m GetInstanceProfilesOKBody) MarshalJSON() ([]byte, error) {
 
 	// now for regular properties
 	var propsGetInstanceProfilesOKBody struct {
-		Profiles []*InstanceProfile `json:"profiles,omitempty"`
+		Profiles []*InstanceProfile `json:"profiles"`
 	}
 	propsGetInstanceProfilesOKBody.Profiles = m.Profiles
 

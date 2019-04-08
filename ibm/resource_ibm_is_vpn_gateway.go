@@ -54,6 +54,7 @@ func resourceIBMISVPNGateway() *schema.Resource {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
+				Computed: true,
 			},
 
 			isVPNGatewayStatus: {
@@ -78,7 +79,11 @@ func resourceIBMISVPNGatewayCreate(d *schema.ResourceData, meta interface{}) err
 	log.Printf("[DEBUG] VPNGateway create")
 	name := d.Get(isVPNGatewayName).(string)
 	subnetID := d.Get(isVPNGatewaySubnet).(string)
-	rg := d.Get(isVPNGatewayResourceGroup).(string)
+	var rg string
+
+	if grp, ok := d.GetOk(isVPNGatewayResourceGroup); ok {
+		rg = grp.(string)
+	}
 
 	VPNGatewayC := vpn.NewVpnClient(sess)
 
