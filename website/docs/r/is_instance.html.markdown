@@ -111,3 +111,11 @@ Nested `primary_network_interface` blocks have the following structure:
   * `subnet` -  ID of the subnet.
   * `security_groups` -  List of security groups.
   * `primary_ipv4_address` - The primary IPv4 address.
+
+## Import
+
+ibm_is_instance can be imported using instanceID, eg
+
+```
+$ terraform import ibm_is_instance.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

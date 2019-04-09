@@ -39,3 +39,11 @@ The following attributes are exported:
 * `id` - The unique identifier of the VPC.
 * `default_security_group` - The unique identifier of the VPC default security group.
 * `status` - The status of VPC.
+
+## Import
+
+ibm_is_vpc can be imported using ID, eg
+
+```
+$ terraform import ibm_is_vpc.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

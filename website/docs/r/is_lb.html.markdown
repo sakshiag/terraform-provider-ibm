@@ -49,3 +49,11 @@ The following attributes are exported:
 * `status` - The status of load balancer.
 * `operating_status` - The operating status of this load balancer.
 * `hostname` - Fully qualified domain name assigned to this load balancer.
+
+## Import
+
+ibm_is_lb can be imported using lbID, eg
+
+```
+$ terraform import ibm_is_lb.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

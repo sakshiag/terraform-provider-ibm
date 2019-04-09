@@ -37,3 +37,11 @@ The following attributes are exported:
 
 * `id` - The unique identifier of the VPN gateway.
 * `status` - The status of VPN gateway.
+
+## Import
+
+ibm_is_vpn_gateway can be imported using ID, eg
+
+```
+$ terraform import ibm_is_vpn_gateway.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

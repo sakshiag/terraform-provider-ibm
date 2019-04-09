@@ -49,3 +49,11 @@ The following attributes are exported:
 
 * `id` - The unique identifier of the load balancer listener.
 * `status` - The status of load balancer listener.
+
+## Import
+
+ibm_is_lb_listener can be imported using lbID and listenerID, eg
+
+```
+$ terraform import ibm_is_lb_listener.example d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb
+```

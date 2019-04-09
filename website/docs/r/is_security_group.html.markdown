@@ -47,3 +47,10 @@ Nested `rules` blocks have the following structure:
   * `port-max` - The inclusive upper bound of TCP/UDP port range.
   * `port_min` - The inclusive lower bound of TCP/UDP port range. 
    
+## Import
+
+ibm_is_security_group can be imported using lbID, eg
+
+```
+$ terraform import ibm_is_security_group.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

@@ -62,3 +62,11 @@ The following attributes are exported:
 * `ipv6_cidr_block` - The IPv6 range of the subnet.
 * `status` - The status of the subnet.
 * `available_ipv4_address_count` - The total number of available IPv4 addresses.
+
+## Import
+
+ibm_is_subnet can be imported using ID, eg
+
+```
+$ terraform import ibm_is_subnet.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

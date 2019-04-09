@@ -28,7 +28,7 @@ resource "ibm_is_lb_pool_member" "testacc_lb_mem" {
 
 ## Timeouts
 
-ibm_is_lb_listener provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
+ibm_is_lb_pool_member provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
 
 * `create` - (Default 60 minutes) Used for creating Instance.
 * `update` - (Default 60 minutes) Used for updating Instance.
@@ -51,3 +51,11 @@ The following attributes are exported:
 * `id` - The unique identifier of the load balancer pool member.
 * `href` - The member's canonical URL.
 * `health` - Health of the server member in the pool.
+
+## Import
+
+ibm_is_lb_pool_member can be imported using lbID, poolID and poolmemebrID, eg
+
+```
+$ terraform import ibm_is_lb_pool_member.example d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb/gfe6651a-bc0a-5538-8h8a-b0770bbf32cc
+```

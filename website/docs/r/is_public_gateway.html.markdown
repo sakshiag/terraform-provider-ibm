@@ -55,3 +55,11 @@ The following attributes are exported:
 
 * `id` - The id of the gateway.
 * `status` - The status of the gateway.
+
+## Import
+
+ibm_is_public_gateway can be imported using ID, eg
+
+```
+$ terraform import ibm_is_public_gateway.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

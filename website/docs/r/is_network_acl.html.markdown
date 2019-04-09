@@ -77,3 +77,11 @@ Nested `rules` blocks have the following structure:
 	* `id` - The rule id.
 	* `ip_version` - The IP version of the rule.
 	* `subnets` - The subnets for the ACL rule.
+
+## Import
+
+ibm_is_network_acl can be imported using ID, eg
+
+```
+$ terraform import ibm_is_network_acl.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

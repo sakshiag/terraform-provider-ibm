@@ -31,7 +31,7 @@ resource "ibm_is_lb_pool" "testacc_pool" {
 
 ## Timeouts
 
-ibm_is_lb_listener provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
+ibm_is_lb_pool provides the following [Timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) configuration options:
 
 * `create` - (Default 60 minutes) Used for creating Instance.
 * `update` - (Default 60 minutes) Used for updating Instance.
@@ -57,5 +57,13 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The unique identifier of the load balancer pool.
+* `id` - The unique identifier of the load balancer pool.The id is composed of \<lb_id\>/\<pool_id\>.
 * `provisioning_status` - The status of load balancer pool.
+
+## Import
+
+ibm_is_lb_pool can be imported using lbID and poolID, eg
+
+```
+$ terraform import ibm_is_lb_pool.example d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb
+```

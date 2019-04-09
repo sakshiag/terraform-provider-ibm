@@ -90,3 +90,11 @@ The following attributes are exported:
 
 * `id` - The id of the security group rule. The id is composed of \<security_group_id\>/\<security_group_rule_id\>.
 * `rule_id` - The unique identifier of the rule.
+
+## Import
+
+ibm_is_security_group_rule can be imported using security group ID and security group rule ID, eg
+
+```
+$ terraform import ibm_is_security_group_rule.example d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb
+```

@@ -79,3 +79,11 @@ The following attributes are exported:
 
 * `id` - The id of the instance nic.
 * `status` - Status of the instance.
+
+## Import
+
+ibm_is_instance_nic can be imported using instanceID and nicID, eg
+
+```
+$ terraform import ibm_is_instance_nic.example d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb
+```

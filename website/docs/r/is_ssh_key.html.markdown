@@ -35,3 +35,11 @@ The following attributes are exported:
 * `fingerprint` -  The SHA256 fingerprint of the public key.
 * `length` - The length of this key.
 * `type` - The cryptosystem used by this key.
+
+## Import
+
+ibm_is_ssh_key can be imported using ID, eg
+
+```
+$ terraform import ibm_is_ssh_key.example d7bec597-4726-451f-8a63-e62e6f19c32c
+```

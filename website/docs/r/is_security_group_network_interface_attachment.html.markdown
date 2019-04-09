@@ -53,3 +53,11 @@ Nested `floating_ips` blocks have the following structure:
   * `crn` - The CRN of this floating Ip.
   * `name` - The name of this floating Ip.
   * `address` - The globally unique IP address
+
+## Import
+
+ibm_is_security_group_network_interface_attachment can be imported using security group ID and network interface ID, eg
+
+```
+$ terraform import ibm_is_security_group_network_interface_attachment.example d7bec597-4726-451f-8a63-e62e6f19c32c/cea6651a-bc0a-4438-9f8a-a0770bbf3ebb
+```
