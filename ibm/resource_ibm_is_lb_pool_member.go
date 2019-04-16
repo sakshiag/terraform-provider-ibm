@@ -137,6 +137,11 @@ func resourceIBMISLBPoolMemberRead(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
+	if len(parts) < 3 {
+		return fmt.Errorf(
+			"The id should contain loadbalancer Id, loadbalancer pool Id and loadbalancer poolmemebr Id")
+	}
+
 	lbID := parts[0]
 	lbPoolID := parts[1]
 	lbPoolMemID := parts[2]
@@ -242,6 +247,10 @@ func resourceIBMISLBPoolMemberExists(d *schema.ResourceData, meta interface{}) (
 	parts, err := idParts(d.Id())
 	if err != nil {
 		return false, err
+	}
+	if len(parts) < 3 {
+		return false, fmt.Errorf(
+			"The id should contain loadbalancer Id, loadbalancer pool Id and loadbalancer poolmemebr Id")
 	}
 
 	lbID := parts[0]
