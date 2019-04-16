@@ -30,6 +30,8 @@ func TestAccIBMISLB_basic(t *testing.T) {
 					testAccCheckIBMISLBExists("ibm_is_lb.testacc_LB", &lb),
 					resource.TestCheckResourceAttr(
 						"ibm_is_lb.testacc_LB", "name", name),
+					resource.TestCheckResourceAttrSet(
+						"ibm_is_lb.testacc_LB", "hostname"),
 				),
 			},
 

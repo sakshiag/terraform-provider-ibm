@@ -94,6 +94,11 @@ func resourceIBMISLB() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+
+			isLBHostName: {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -173,6 +178,7 @@ func resourceIBMISLBRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set(isLBPrivateIPs, flattenISLBIPs(lb.PrivateIps))
 	d.Set(isLBSubnets, flattenISLBSubnets(lb.Subnets))
 	d.Set(isLBResourceGroup, lb.ResourceGroup.ID)
+	d.Set(isLBHostName, lb.Hostname)
 
 	return nil
 }
