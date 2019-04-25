@@ -1,10 +1,13 @@
 package ibm
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.ibm.com/Bluemix/riaas-go-client/clients/network"
@@ -79,7 +82,7 @@ func resourceIBMISVPC() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
+				Set:      resourceIBMVPCHash,
 			},
 		},
 	}
@@ -285,4 +288,11 @@ func isErrorToString(err error) string {
 		return retmsg
 	}
 	return err.Error()
+}
+
+func resourceIBMVPCHash(v interface{}) int {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%s",
+		strings.ToLower(v.(string))))
+	return hashcode.String(buf.String())
 }

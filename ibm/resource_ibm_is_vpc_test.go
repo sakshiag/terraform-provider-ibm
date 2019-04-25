@@ -94,7 +94,7 @@ func testAccCheckIBMISVPCConfig(name string) string {
 	return fmt.Sprintf(`
 resource "ibm_is_vpc" "testacc_vpc" {
 	name = "%s"
-	tags = ["tag1", "tag2"]
+	tags = ["Tag1", "tag2"]
 }`, name)
 
 }
