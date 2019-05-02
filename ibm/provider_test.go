@@ -275,7 +275,7 @@ func init() {
 
 	instanceProfileName = os.Getenv("SL_INSTANCE_PROFILE")
 	if instanceProfileName == "" {
-		instanceProfileName = "b-2x8"
+		instanceProfileName = "bc1-2x8"
 		fmt.Println("[INFO] Set the environment variable SL_INSTANCE_PROFILE for testing ibm_is_instance resource else it is set to default value 'b-2x8'")
 	}
 
