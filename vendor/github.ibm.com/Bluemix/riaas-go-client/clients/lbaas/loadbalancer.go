@@ -258,13 +258,15 @@ func (f *LoadBalancerClient) GetPool(lbaasId, poolId string) (*models.Pool, erro
 func (f *LoadBalancerClient) UpdatePool(lbaasId, poolId, algorithm, name, protocol string, hmTemplate models.HealthMonitorTemplate, sessionTemplate models.SessionPersistenceTemplate) (*models.Pool, error) {
 
 	var body = models.PoolTemplatePatch{
-		Algorithm:     algorithm,
-		HealthMonitor: &hmTemplate,
-		Name:          name,
-		Protocol:      protocol,
+		Algorithm: algorithm,
+		Name:      name,
+		Protocol:  protocol,
 	}
 	if sessionTemplate.Type != "" {
 		body.SessionPersistence = &sessionTemplate
+	}
+	if hmTemplate.Type != "" {
+		body.HealthMonitor = &hmTemplate
 	}
 	params := l_baas.NewPatchLoadBalancersIDPoolsPoolIDParams().WithID(lbaasId).WithPoolID(poolId).WithBody(&body)
 	params.Version = "2019-01-15"
