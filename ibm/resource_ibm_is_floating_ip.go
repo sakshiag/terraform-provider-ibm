@@ -65,7 +65,7 @@ func resourceIBMISFloatingIP() *schema.Resource {
 
 			isFloatingIPTarget: {
 				Type:          schema.TypeString,
-				ForceNew:      true,
+				ForceNew:      false,
 				Optional:      true,
 				Computed:      true,
 				ConflictsWith: []string{isFloatingIPZone},

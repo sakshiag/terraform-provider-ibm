@@ -36,6 +36,6 @@ The following attributes are exported:
 
 * `status` - The status of VPC.
 * `default_network_acl` - ID of the default network ACL.
-* `is_default` - Is this VPC default for the account.
+* `classic_access` - Indicates whether this VPC is connected to Classic Infrastructure.
 * `resource_group` - The resource group where the VPC created.
 * `tags` - Tags associated with the instance.

@@ -17,7 +17,7 @@ func dataSourceIBMISVPC() *schema.Resource {
 				Computed: true,
 			},
 
-			isVPCIsDefault: {
+			isVPCClassicAccess: {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -65,7 +65,7 @@ func dataSourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId(vpc.ID.String())
 			d.Set("id", vpc.ID.String())
 			d.Set(isVPCName, vpc.Name)
-			d.Set(isVPCIsDefault, vpc.IsDefault)
+			d.Set(isVPCClassicAccess, vpc.ClassicAccess)
 			d.Set(isVPCStatus, vpc.Status)
 			if vpc.DefaultNetworkACL != nil {
 				d.Set(isVPCDefaultNetworkACL, vpc.DefaultNetworkACL.ID)

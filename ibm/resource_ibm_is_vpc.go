@@ -24,6 +24,7 @@ const (
 	isVPCDeleting              = "deleting"
 	isVPCDeleted               = "done"
 	isVPCTags                  = "tags"
+	isVPCClassicAccess         = "classic_access"
 )
 
 func resourceIBMISVPC() *schema.Resource {
@@ -53,6 +54,14 @@ func resourceIBMISVPC() *schema.Resource {
 				ForceNew: true,
 				Default:  false,
 				Optional: true,
+				Removed:  "This field is removed use classic_access",
+			},
+
+			isVPCClassicAccess: {
+				Type:     schema.TypeBool,
+				ForceNew: true,
+				Default:  false,
+				Optional: true,
 			},
 
 			isVPCName: {
@@ -77,7 +86,6 @@ func resourceIBMISVPC() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			isVPCTags: {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -96,7 +104,7 @@ func resourceIBMISVPCCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] VPC create")
 	name := d.Get(isVPCName).(string)
-	isdefault := d.Get(isVPCIsDefault).(bool)
+	isClassic := d.Get(isVPCClassicAccess).(bool)
 	nwacl := d.Get(isVPCDefaultNetworkACL).(string)
 	var rg string
 
@@ -105,7 +113,7 @@ func resourceIBMISVPCCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	vpcC := network.NewVPCClient(sess)
-	vpc, err := vpcC.Create(name, isdefault, nwacl, rg)
+	vpc, err := vpcC.Create(name, isClassic, nwacl, rg)
 	if err != nil {
 		log.Printf("[DEBUG] VPC err %s", isErrorToString(err))
 		return err
@@ -139,7 +147,7 @@ func resourceIBMISVPCRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("id", vpc.ID.String())
 	d.Set(isVPCName, vpc.Name)
-	d.Set(isVPCIsDefault, vpc.IsDefault)
+	d.Set(isVPCClassicAccess, vpc.ClassicAccess)
 	d.Set(isVPCStatus, vpc.Status)
 	if vpc.DefaultNetworkACL != nil {
 		log.Printf("[DEBUG] vpc default network acl is not null :%s", vpc.DefaultNetworkACL.ID)
