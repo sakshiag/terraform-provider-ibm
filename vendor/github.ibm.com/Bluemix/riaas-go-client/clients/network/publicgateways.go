@@ -36,7 +36,7 @@ func (f *PublicGatewayClient) ListWithFilter(tag *string, start string) ([]*mode
 	if start != "" {
 		params = params.WithStart(&start)
 	}
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 
 	resp, err := f.session.Riaas.Network.GetPublicGateways(params, session.Auth(f.session))
 
@@ -50,7 +50,7 @@ func (f *PublicGatewayClient) ListWithFilter(tag *string, start string) ([]*mode
 // Get ...
 func (f *PublicGatewayClient) Get(id string) (*models.PublicGateway, error) {
 	params := network.NewGetPublicGatewaysIDParams().WithID(id)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	resp, err := f.session.Riaas.Network.GetPublicGatewaysID(params, session.Auth(f.session))
 
 	if err != nil {
@@ -85,7 +85,7 @@ func (f *PublicGatewayClient) Create(name, zoneName, vpcID, FloatingIPaddr strin
 	}
 
 	params := network.NewPostPublicGatewaysParams().WithBody(&body)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	resp, err := f.session.Riaas.Network.PostPublicGateways(params, session.Auth(f.session))
 	if err != nil {
 		return nil, riaaserrors.ToError(err)
@@ -97,7 +97,7 @@ func (f *PublicGatewayClient) Create(name, zoneName, vpcID, FloatingIPaddr strin
 // Delete ...
 func (f *PublicGatewayClient) Delete(id string) error {
 	params := network.NewDeletePublicGatewaysIDParams().WithID(id)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	_, err := f.session.Riaas.Network.DeletePublicGatewaysID(params, session.Auth(f.session))
 	return riaaserrors.ToError(err)
 }
@@ -108,7 +108,7 @@ func (f *PublicGatewayClient) Update(id, name string) (*models.PublicGateway, er
 		Name: name,
 	}
 	params := network.NewPatchPublicGatewaysIDParams().WithID(id).WithBody(&body)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	resp, err := f.session.Riaas.Network.PatchPublicGatewaysID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)

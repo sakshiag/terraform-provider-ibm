@@ -22,7 +22,7 @@ func NewStorageClient(sess *session.Session) *StorageClient {
 // Create ...StorageClient
 func (f *StorageClient) Create(storagedef *storage.PostVolumesParams) (*models.Volume, error) {
 	params := storage.NewPostVolumesParams().WithBody(storagedef.Body)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	resp, err := f.session.Riaas.Storage.PostVolumes(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -34,7 +34,7 @@ func (f *StorageClient) Create(storagedef *storage.PostVolumesParams) (*models.V
 // Delete ...
 func (f *StorageClient) Delete(id string) error {
 	params := storage.NewDeleteVolumesIDParams().WithID(id)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	_, err := f.session.Riaas.Storage.DeleteVolumesID(params, session.Auth(f.session))
 	if err != nil {
 		return errors.ToError(err)
@@ -45,7 +45,7 @@ func (f *StorageClient) Delete(id string) error {
 // Get ...
 func (f *StorageClient) Get(id string) (*models.Volume, error) {
 	params := storage.NewGetVolumesIDParams().WithID(id)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	resp, err := f.session.Riaas.Storage.GetVolumesID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
@@ -57,7 +57,7 @@ func (f *StorageClient) Get(id string) (*models.Volume, error) {
 // Update ...
 func (f *StorageClient) Update(id string, patchparms *storage.PatchVolumesIDParams) (*models.Volume, error) {
 	params := storage.NewPatchVolumesIDParams().WithID(id).WithBody(patchparms.Body)
-	params.Version = "2019-01-15"
+	params.Version = "2019-03-26"
 	resp, err := f.session.Riaas.Storage.PatchVolumesID(params, session.Auth(f.session))
 	if err != nil {
 		return nil, errors.ToError(err)
