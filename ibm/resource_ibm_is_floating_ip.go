@@ -125,7 +125,9 @@ func resourceIBMISFloatingIPRead(d *schema.ResourceData, meta interface{}) error
 	d.Set(isFloatingIPAddress, floatingip.Address)
 	d.Set(isFloatingIPStatus, floatingip.Status)
 	d.Set(isFloatingIPZone, floatingip.Zone.Name)
-	d.Set(isFloatingIPTarget, floatingip.Target.ID.String())
+	if floatingip.Target != nil && &floatingip.Target.ID != nil {
+		d.Set(isFloatingIPTarget, floatingip.Target.ID.String())
+	}
 
 	return nil
 }
