@@ -128,6 +128,7 @@ func testAccCheckIBMResourceGroupDestroy(s *terraform.State) error {
 
 func testAccCheckIBMResourceGroup_basic(resourceGroupName string) string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 		data "ibm_resource_quota" "quota" {
 			name = "Pay-as-you-go Quota"
 		  }
@@ -135,12 +136,18 @@ func testAccCheckIBMResourceGroup_basic(resourceGroupName string) string {
 		  resource "ibm_resource_group" "resourceGroup" {
 			name     = "%s"
 			quota_id = "${data.ibm_resource_quota.quota.id}"
+=======
+		  
+		  resource "ibm_resource_group" "resourceGroup" {
+			name     = "%s"
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		  }
 	`, resourceGroupName)
 }
 
 func testAccCheckIBMResourceGroup_with_tags(resourceGroupName string) string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 
 		data "ibm_resource_quota" "quota" {
 			name = "Pay-as-you-go Quota"
@@ -149,6 +156,11 @@ func testAccCheckIBMResourceGroup_with_tags(resourceGroupName string) string {
 		  resource "ibm_resource_group" "resourceGroup" {
 			name     = "%s"
 			quota_id = "${data.ibm_resource_quota.quota.id}"
+=======
+		  
+		  resource "ibm_resource_group" "resourceGroup" {
+			name     = "%s"
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			tags     = ["one"]
 		  }
 	`, resourceGroupName)
@@ -156,6 +168,7 @@ func testAccCheckIBMResourceGroup_with_tags(resourceGroupName string) string {
 
 func testAccCheckIBMResourceGroup_with_updated_tags(resourceGroupName string) string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 		data "ibm_resource_quota" "quota" {
 			name = "Pay-as-you-go Quota"
 		  }
@@ -163,6 +176,11 @@ func testAccCheckIBMResourceGroup_with_updated_tags(resourceGroupName string) st
 		  resource "ibm_resource_group" "resourceGroup" {
 			name     = "%s"
 			quota_id = "${data.ibm_resource_quota.quota.id}"
+=======
+		  
+		  resource "ibm_resource_group" "resourceGroup" {
+			name     = "%s"
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			tags     = ["one", "two"]
 		  }
 	`, resourceGroupName)

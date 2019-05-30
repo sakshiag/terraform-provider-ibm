@@ -1,6 +1,10 @@
 .PHONY : test
 test: test_deps vet
+<<<<<<< HEAD:vendor/github.com/IBM-Cloud/bluemix-go/Makefile
 	go test ./...
+=======
+	go test ./... -timeout 120m
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe:vendor/github.com/IBM-Cloud/bluemix-go/Makefile
 
 .PHONY : test_deps
 test_deps: 

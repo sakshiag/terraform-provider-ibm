@@ -394,6 +394,31 @@ func resourceIBMContainerCluster() *schema.Resource {
 					},
 				},
 			},
+<<<<<<< HEAD
+=======
+			"public_service_endpoint": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
+			"private_service_endpoint": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+			"public_service_endpoint_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"private_service_endpoint_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		},
 	}
 }
@@ -414,6 +439,7 @@ func resourceIBMContainerClusterCreate(d *schema.ResourceData, meta interface{})
 	enableTrusted := d.Get("is_trusted").(bool)
 	diskEncryption := d.Get("disk_encryption").(bool)
 	defaultPoolSize := d.Get("default_pool_size").(int)
+<<<<<<< HEAD
 
 	//Read the hardware and convert it to appropriate
 	var isolation string
@@ -460,11 +486,32 @@ func resourceIBMContainerClusterCreate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
+=======
 
-	cls, err := csClient.Clusters().Create(params, targetEnv)
-	if err != nil {
-		return err
+	//Read the hardware and convert it to appropriate
+	var isolation string
+
+	if v, ok := d.GetOk("hardware"); ok {
+		hardware := v.(string)
+		switch strings.ToLower(hardware) {
+		case "": // do nothing
+		case hardwareDedicated:
+			isolation = isolationPrivate
+		case hardwareShared:
+			isolation = isolationPublic
+		}
 	}
+
+	if v, ok := d.GetOk("isolation"); ok {
+		isolation = v.(string)
+	}
+
+	if isolation == "" {
+		return fmt.Errorf("Please set either the hardware or isolation.")
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+
+	}
+<<<<<<< HEAD
 	d.SetId(cls.ID)
 	//wait for cluster availability
 	_, err = WaitForClusterAvailable(d, meta, targetEnv)
@@ -494,6 +541,126 @@ func resourceIBMContainerClusterRead(d *schema.ResourceData, meta interface{}) e
 	cls, err := csClient.Clusters().Find(clusterID, targetEnv)
 	if err != nil {
 		return fmt.Errorf("Error retrieving armada cluster: %s", err)
+	}
+
+	workerFields, err := wrkAPI.List(clusterID, targetEnv)
+=======
+
+	params := v1.ClusterCreateRequest{
+		Name:           name,
+		Datacenter:     datacenter,
+		WorkerNum:      defaultPoolSize,
+		Billing:        billing,
+		MachineType:    machineType,
+		PublicVlan:     publicVlanID,
+		PrivateVlan:    privateVlanID,
+		NoSubnet:       noSubnet,
+		Isolation:      isolation,
+		DiskEncryption: diskEncryption,
+		EnableTrusted:  enableTrusted,
+	}
+
+	if v, ok := d.GetOk("kube_version"); ok {
+		params.MasterVersion = v.(string)
+	}
+	if v, ok := d.GetOkExists("private_service_endpoint"); ok {
+		params.PrivateEndpointEnabled = v.(bool)
+	}
+	if v, ok := d.GetOkExists("public_service_endpoint"); ok {
+		params.PublicEndpointEnabled = v.(bool)
+	}
+
+	targetEnv, err := getClusterTargetHeader(d, meta)
+	if err != nil {
+		return err
+	}
+
+	cls, err := csClient.Clusters().Create(params, targetEnv)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+	if err != nil {
+		return fmt.Errorf("Error retrieving workers for cluster: %s", err)
+	}
+<<<<<<< HEAD
+	workerCount := 0
+	workers := []map[string]string{}
+	for _, w := range workerFields {
+		var worker = map[string]string{
+			"id":        w.ID,
+			"version":   strings.Split(w.KubeVersion, "_")[0],
+			"pool_name": w.PoolName,
+		}
+		workers = append(workers, worker)
+		if w.PoolID == "" && w.PoolName == "" {
+			workerCount = workerCount + 1
+		}
+	}
+
+	d.Set("worker_num", workerCount)
+=======
+	d.SetId(cls.ID)
+	//wait for cluster availability
+	_, err = WaitForClusterAvailable(d, meta, targetEnv)
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for cluster (%s) to become ready: %s", d.Id(), err)
+	}
+
+	return resourceIBMContainerClusterUpdate(d, meta)
+}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+
+	workerPools, err := workerPoolsAPI.ListWorkerPools(clusterID, targetEnv)
+	if err != nil {
+		return err
+	}
+<<<<<<< HEAD
+	if len(workerPools) > 0 && workerPoolContains(workerPools, defaultWorkerPool) {
+		workersByPool, err := wrkAPI.ListByWorkerPool(clusterID, defaultWorkerPool, false, targetEnv)
+		if err != nil {
+			return fmt.Errorf("Error retrieving workers of default worker pool for cluster: %s", err)
+		}
+
+		if len(workersByPool) > 0 {
+			hardware := workersByPool[0].Isolation
+			switch strings.ToLower(hardware) {
+			case "":
+				hardware = hardwareShared
+			case isolationPrivate:
+				hardware = hardwareDedicated
+			case isolationPublic:
+				hardware = hardwareShared
+			}
+			d.Set("isolation", workersByPool[0].Isolation)
+			d.Set("hardware", hardware)
+		}
+=======
+	wrkAPI := csClient.Workers()
+	workerPoolsAPI := csClient.WorkerPools()
+	albsAPI := csClient.Albs()
+
+	targetEnv, err := getClusterTargetHeader(d, meta)
+	if err != nil {
+		return err
+	}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
+
+		defaultWorkerPool, err := workerPoolsAPI.GetWorkerPool(clusterID, defaultWorkerPool, targetEnv)
+		if err != nil {
+			return err
+		}
+		zones := defaultWorkerPool.Zones
+		for _, zone := range zones {
+			if zone.ID == cls.DataCenter {
+				d.Set("default_pool_size", zone.WorkerCount)
+				break
+			}
+		}
+		d.Set("worker_pools", flattenWorkerPools(workerPools))
+	}
+
+	albs, err := albsAPI.ListClusterALBs(clusterID, targetEnv)
+	if err != nil {
+		return fmt.Errorf("Error retrieving alb's of the cluster %s: %s", clusterID, err)
 	}
 
 	workerFields, err := wrkAPI.List(clusterID, targetEnv)
@@ -555,7 +722,7 @@ func resourceIBMContainerClusterRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	albs, err := albsAPI.ListClusterALBs(clusterID, targetEnv)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "The specified cluster is a lite cluster.") {
 		return fmt.Errorf("Error retrieving alb's of the cluster %s: %s", clusterID, err)
 	}
 
@@ -568,8 +735,17 @@ func resourceIBMContainerClusterRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("workers_info", workers)
 	d.Set("kube_version", strings.Split(cls.MasterKubeVersion, "_")[0])
 	d.Set("is_trusted", cls.IsTrusted)
+<<<<<<< HEAD
 	d.Set("albs", flattenAlbs(albs))
 	d.Set("resource_group_id", cls.ResourceGroupID)
+=======
+	d.Set("albs", flattenAlbs(albs, "all"))
+	d.Set("resource_group_id", cls.ResourceGroupID)
+	d.Set("public_service_endpoint", cls.PublicServiceEndpointEnabled)
+	d.Set("private_service_endpoint", cls.PrivateServiceEndpointEnabled)
+	d.Set("public_service_endpoint_url", cls.PublicServiceEndpointURL)
+	d.Set("private_service_endpoint_url", cls.PrivateServiceEndpointURL)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	return nil
 }
@@ -900,7 +1076,12 @@ func resourceIBMContainerClusterUpdate(d *schema.ResourceData, meta interface{})
 	//TODO put subnet can't deleted in the error message if such case is observed in the chnages
 	var publicSubnetAdded bool
 	noSubnet := d.Get("no_subnet").(bool)
+<<<<<<< HEAD
 	if noSubnet == false {
+=======
+	publicVlanID := d.Get("public_vlan_id").(string)
+	if noSubnet == false && publicVlanID != "" {
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		publicSubnetAdded = true
 	}
 	if d.HasChange("subnet_id") {
@@ -1045,7 +1226,7 @@ func WaitForClusterAvailable(d *schema.ResourceData, meta interface{}, target v1
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"retry", clusterProvisioning},
 		Target:     []string{clusterNormal},
-		Refresh:    clusterStateRefreshFunc(csClient.Clusters(), id, d, target),
+		Refresh:    clusterStateRefreshFunc(csClient.Clusters(), id, target),
 		Timeout:    time.Duration(d.Get("wait_time_minutes").(int)) * time.Minute,
 		Delay:      10 * time.Second,
 		MinTimeout: 10 * time.Second,
@@ -1054,9 +1235,9 @@ func WaitForClusterAvailable(d *schema.ResourceData, meta interface{}, target v1
 	return stateConf.WaitForState()
 }
 
-func clusterStateRefreshFunc(client v1.Clusters, instanceID string, d *schema.ResourceData, target v1.ClusterTargetHeader) resource.StateRefreshFunc {
+func clusterStateRefreshFunc(client v1.Clusters, instanceID string, target v1.ClusterTargetHeader) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		clusterFields, err := client.Find(instanceID, target)
+		clusterFields, err := client.FindWithOutShowResources(instanceID, target)
 		if err != nil {
 			return nil, "", fmt.Errorf("Error retrieving cluster: %s", err)
 		}
@@ -1083,7 +1264,7 @@ func WaitForWorkerAvailable(d *schema.ResourceData, meta interface{}, target v1.
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"retry", workerProvisioning},
 		Target:     []string{workerNormal},
-		Refresh:    workerStateRefreshFunc(csClient.Workers(), id, d, target),
+		Refresh:    workerStateRefreshFunc(csClient.Workers(), id, target),
 		Timeout:    time.Duration(d.Get("wait_time_minutes").(int)) * time.Minute,
 		Delay:      10 * time.Second,
 		MinTimeout: 10 * time.Second,
@@ -1092,7 +1273,7 @@ func WaitForWorkerAvailable(d *schema.ResourceData, meta interface{}, target v1.
 	return stateConf.WaitForState()
 }
 
-func workerStateRefreshFunc(client v1.Workers, instanceID string, d *schema.ResourceData, target v1.ClusterTargetHeader) resource.StateRefreshFunc {
+func workerStateRefreshFunc(client v1.Workers, instanceID string, target v1.ClusterTargetHeader) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		workerFields, err := client.List(instanceID, target)
 		if err != nil {
@@ -1133,7 +1314,7 @@ func WaitForSubnetAvailable(d *schema.ResourceData, meta interface{}, target v1.
 
 func subnetStateRefreshFunc(client v1.Clusters, instanceID string, d *schema.ResourceData, target v1.ClusterTargetHeader) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		cluster, err := client.Find(instanceID, target)
+		cluster, err := client.FindWithOutShowResources(instanceID, target)
 		if err != nil {
 			return nil, "", fmt.Errorf("Error retrieving cluster: %s", err)
 		}
@@ -1167,7 +1348,11 @@ func WaitForClusterVersionUpdate(d *schema.ResourceData, meta interface{}, targe
 
 func clusterVersionRefreshFunc(client v1.Clusters, instanceID string, d *schema.ResourceData, target v1.ClusterTargetHeader) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
+<<<<<<< HEAD
 		clusterFields, err := client.Find(instanceID, target)
+=======
+		clusterFields, err := client.FindWithOutShowResources(instanceID, target)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		if err != nil {
 			return nil, "", fmt.Errorf("Error retrieving cluster: %s", err)
 		}
@@ -1190,7 +1375,7 @@ func resourceIBMContainerClusterExists(d *schema.ResourceData, meta interface{})
 		return false, err
 	}
 	clusterID := d.Id()
-	cls, err := csClient.Clusters().Find(clusterID, targetEnv)
+	cls, err := csClient.Clusters().FindWithOutShowResources(clusterID, targetEnv)
 	if err != nil {
 		if apiErr, ok := err.(bmxerror.RequestFailure); ok {
 			if apiErr.StatusCode() == 404 {

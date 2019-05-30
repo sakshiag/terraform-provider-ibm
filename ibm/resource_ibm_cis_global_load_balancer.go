@@ -3,6 +3,10 @@ package ibm
 import (
 	"log"
 	"reflect"
+<<<<<<< HEAD
+=======
+	"strings"
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	v1 "github.com/IBM-Cloud/bluemix-go/api/cis/cisv1"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -97,7 +101,10 @@ func resourceIBMCISGlb() *schema.Resource {
 
 func resourceCISGlbCreate(d *schema.ResourceData, meta interface{}) error {
 	cisClient, err := meta.(ClientSession).CisAPI()
+<<<<<<< HEAD
 	log.Printf("   client %v\n", cisClient)
+=======
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	if err != nil {
 		return err
 	}
@@ -147,14 +154,25 @@ func resourceCISGlbRead(d *schema.ResourceData, meta interface{}) error {
 	// Extract CIS Ids from TF Id
 	glbId, zoneId, cisId, err := convertTfToCisThreeVar(d.Id())
 	if err != nil {
+<<<<<<< HEAD
 		log.Printf("resourceCISGlbRead %s\n", err)
+=======
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 	var glb *v1.Glb
 
 	glb, err = cisClient.Glbs().GetGlb(cisId, zoneId, glbId)
 	if err != nil {
+<<<<<<< HEAD
 		log.Printf("resourceCIGlbRead - ListGlbs Failed %s\n", err)
+=======
+		if checkCisGlbDeleted(d, meta, err, glb) {
+			d.SetId("")
+			return nil
+		}
+		log.Printf("[WARN] Error getting zone during GlbRead %v\n", err)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 	glbObj := *glb
@@ -184,19 +202,35 @@ func resourceCISGlbDelete(d *schema.ResourceData, meta interface{}) error {
 	var glb *v1.Glb
 	emptyGlb := new(v1.Glb)
 
+<<<<<<< HEAD
 	log.Println("Getting Glb to delete")
 	glb, err = cisClient.Glbs().GetGlb(cisId, zoneId, glbId)
 	if err != nil {
 		log.Printf("GetGlb Failed %s\n", err)
+=======
+	glb, err = cisClient.Glbs().GetGlb(cisId, zoneId, glbId)
+	if err != nil {
+		if checkCisGlbDeleted(d, meta, err, glb) {
+			d.SetId("")
+			return nil
+		}
+		log.Printf("[WARN] Error getting zone during GlbRead %v\n", err)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 
 	glbObj := *glb
 	if !reflect.DeepEqual(emptyGlb, glbObj) {
+<<<<<<< HEAD
 		log.Println("Deleting Glb")
 		err = cisClient.Glbs().DeleteGlb(cisId, zoneId, glbId)
 		if err != nil {
 			log.Printf("DeleteGlb Failed %s\n", err)
+=======
+		err = cisClient.Glbs().DeleteGlb(cisId, zoneId, glbId)
+		if err != nil {
+			log.Printf("[WARN] DeleteGlb Failed %s\n", err)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			return err
 		}
 	}
@@ -204,3 +238,27 @@ func resourceCISGlbDelete(d *schema.ResourceData, meta interface{}) error {
 	d.SetId("")
 	return nil
 }
+<<<<<<< HEAD
+=======
+
+func checkCisGlbDeleted(d *schema.ResourceData, meta interface{}, errCheck error, glb *v1.Glb) bool {
+	// Check if error is due to removal of Cis resource and hence all subresources
+	if strings.Contains(errCheck.Error(), "Object not found") ||
+		strings.Contains(errCheck.Error(), "status code: 404") ||
+		strings.Contains(errCheck.Error(), "Invalid zone identifier") { //code 400
+		log.Printf("[WARN] Removing resource from state because it's not found via the CIS API")
+		return true
+	}
+	_, _, cisId, _ := convertTfToCisThreeVar(d.Id())
+	exists, errNew := rcInstanceExists(cisId, "ibm_cis", meta)
+	if errNew != nil {
+		log.Printf("resourceCISglbRead - Failure validating service exists %s\n", errNew)
+		return false
+	}
+	if !exists {
+		log.Printf("[WARN] Removing glb from state because parent cis instance is in removed state")
+		return true
+	}
+	return false
+}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

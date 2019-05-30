@@ -103,6 +103,11 @@ func dataSourceIBMContainerClusterConfigRead(d *schema.ResourceData, meta interf
 			return fmt.Errorf("Error fetching homedir: %s", err)
 		}
 	}
+<<<<<<< HEAD
+=======
+	configDir, _ = filepath.Abs(configDir)
+
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	var configPath, calicoConfigPath string
 	if !download {
 		log.Println("Skipping download of the cluster config", "Going to check if it already exists")

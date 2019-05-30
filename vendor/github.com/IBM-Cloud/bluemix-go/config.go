@@ -16,28 +16,50 @@ const (
 	AccountService ServiceName = ServiceName("account")
 	//AccountServicev1 ...
 	AccountServicev1 ServiceName = ServiceName("accountv1")
+<<<<<<< HEAD:vendor/github.com/IBM-Cloud/bluemix-go/config.go
 	//MccpService ...
 	MccpService ServiceName = ServiceName("mccp")
+=======
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe:vendor/github.com/IBM-Cloud/bluemix-go/config.go
 	//CisService ...
 	CisService ServiceName = ServiceName("cis")
 	//ContainerService ...
 	ContainerService ServiceName = ServiceName("container")
-	//UAAService ...
-	UAAService ServiceName = ServiceName("uaa")
+	//RegistryService ...
+	ContainerRegistryService ServiceName = ServiceName("container-registry")
+	//GlobalSearchService ...
+	GlobalSearchService ServiceName = ServiceName("global-search")
+	//GlobalTaggingService ...
+	GlobalTaggingService ServiceName = ServiceName("global-tagging")
 	//IAMService ...
 	IAMService ServiceName = ServiceName("iam")
 	//IAMPAPService
 	IAMPAPService ServiceName = ServiceName("iampap")
 	//IAMUUMService ...
 	IAMUUMService ServiceName = ServiceName("iamuum")
+<<<<<<< HEAD:vendor/github.com/IBM-Cloud/bluemix-go/config.go
+=======
+	//ICDService ...
+	ICDService ServiceName = ServiceName("icd")
+	//MccpService ...
+	MccpService ServiceName = ServiceName("mccp")
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe:vendor/github.com/IBM-Cloud/bluemix-go/config.go
 	//resourceManagementService
 	ResourceManagementService ServiceName = ServiceName("resource-management")
 	//resourceControllerService
 	ResourceControllerService ServiceName = ServiceName("resource-controller")
+<<<<<<< HEAD:vendor/github.com/IBM-Cloud/bluemix-go/config.go
 	//resourceCatalogervice
 	ResourceCatalogrService ServiceName = ServiceName("resource-catalog ")
 	//RegistryService ...
 	ContainerRegistryService ServiceName = ServiceName("container-registry")
+=======
+	//resourceCatalogService
+	ResourceCatalogrService ServiceName = ServiceName("resource-catalog ")
+	//UAAService ...
+	UAAService ServiceName = ServiceName("uaa")
+	
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe:vendor/github.com/IBM-Cloud/bluemix-go/config.go
 )
 
 //Config ...

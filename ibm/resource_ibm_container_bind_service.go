@@ -78,6 +78,19 @@ func resourceIBMContainerBindService() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 			},
+<<<<<<< HEAD
+=======
+			"key": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"role": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			"region": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -163,10 +176,32 @@ func resourceIBMContainerBindServiceCreate(d *schema.ResourceData, meta interfac
 	} else {
 		return fmt.Errorf("Please set either service_instance_name or service_instance_id")
 	}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	bindService := v1.ServiceBindRequest{
 		ClusterNameOrID:         clusterNameID,
 		ServiceInstanceNameOrID: serviceInstanceNameID,
 		NamespaceID:             namespaceID,
+	}
+
+<<<<<<< HEAD
+	targetEnv, err := getClusterTargetHeader(d, meta)
+	if err != nil {
+		return err
+	}
+	_, err = csClient.Clusters().BindService(bindService, targetEnv)
+	if err != nil {
+		return err
+	}
+=======
+	if v, ok := d.GetOk("key"); ok {
+		bindService.ServiceKeyGUID = v.(string)
+	}
+
+	if v, ok := d.GetOk("role"); ok {
+		bindService.Role = v.(string)
 	}
 
 	targetEnv, err := getClusterTargetHeader(d, meta)
@@ -177,6 +212,7 @@ func resourceIBMContainerBindServiceCreate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return err
 	}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	d.SetId(fmt.Sprintf("%s/%s/%s", clusterNameID, serviceInstanceNameID, namespaceID))
 
 	return resourceIBMContainerBindServiceRead(d, meta)

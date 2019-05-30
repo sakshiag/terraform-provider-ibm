@@ -639,3 +639,15 @@ func validateRecordName(t string, value string) error {
 
 	return nil
 }
+<<<<<<< HEAD
+=======
+
+func validateVLANName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if len(value) > 20 {
+		errors = append(errors, fmt.Errorf(
+			"Length provided for '%q' is too long. Maximum length is 20 characters", k))
+	}
+	return
+}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

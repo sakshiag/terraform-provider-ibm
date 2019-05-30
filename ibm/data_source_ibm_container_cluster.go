@@ -2,6 +2,10 @@ package ibm
 
 import (
 	"fmt"
+<<<<<<< HEAD
+=======
+	"strings"
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -155,6 +159,15 @@ func dataSourceIBMContainerCluster() *schema.Resource {
 					},
 				},
 			},
+<<<<<<< HEAD
+=======
+			"alb_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "all",
+				ValidateFunc: validateAllowedStringValue([]string{"private", "public", "all"}),
+			},
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			"albs": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -225,6 +238,27 @@ func dataSourceIBMContainerCluster() *schema.Resource {
 				Optional:    true,
 				Description: "ID of the resource group.",
 				Computed:    true,
+<<<<<<< HEAD
+=======
+			},
+			"public_service_endpoint": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+
+			"private_service_endpoint": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"public_service_endpoint_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"private_service_endpoint_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			},
 		},
 	}
@@ -277,9 +311,18 @@ func dataSourceIBMContainerClusterRead(d *schema.ResourceData, meta interface{})
 	}
 
 	albs, err := albsAPI.ListClusterALBs(name, targetEnv)
+<<<<<<< HEAD
 	if err != nil {
 		return fmt.Errorf("Error retrieving alb's of the cluster %s: %s", name, err)
 	}
+=======
+	if err != nil && !strings.Contains(err.Error(), "The specified cluster is a lite cluster.") {
+		return fmt.Errorf("Error retrieving alb's of the cluster %s: %s", name, err)
+	}
+
+	filterType := d.Get("alb_type").(string)
+	filteredAlbs := flattenAlbs(albs, filterType)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	d.SetId(clusterFields.ID)
 	d.Set("worker_count", clusterFields.WorkerCount)
@@ -289,8 +332,17 @@ func dataSourceIBMContainerClusterRead(d *schema.ResourceData, meta interface{})
 	d.Set("vlans", flattenVlans(clusterFields.Vlans))
 	d.Set("is_trusted", clusterFields.IsTrusted)
 	d.Set("worker_pools", flattenWorkerPools(workerPools))
+<<<<<<< HEAD
 	d.Set("albs", flattenAlbs(albs))
 	d.Set("resource_group_id", clusterFields.ResourceGroupID)
+=======
+	d.Set("albs", filteredAlbs)
+	d.Set("resource_group_id", clusterFields.ResourceGroupID)
+	d.Set("public_service_endpoint", clusterFields.PublicServiceEndpointEnabled)
+	d.Set("private_service_endpoint", clusterFields.PrivateServiceEndpointEnabled)
+	d.Set("public_service_endpoint_url", clusterFields.PublicServiceEndpointURL)
+	d.Set("private_service_endpoint_url", clusterFields.PrivateServiceEndpointURL)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	return nil
 }

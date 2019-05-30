@@ -33,10 +33,18 @@ func resourceIBMIAMUserPolicy() *schema.Resource {
 			},
 
 			"resources": {
+<<<<<<< HEAD
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
 				MaxItems: 1,
+=======
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"account_management"},
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"service": {
@@ -78,6 +86,7 @@ func resourceIBMIAMUserPolicy() *schema.Resource {
 				},
 			},
 
+<<<<<<< HEAD
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -89,6 +98,27 @@ func resourceIBMIAMUserPolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+=======
+			"account_management": {
+				Type:          schema.TypeBool,
+				Default:       false,
+				Optional:      true,
+				Description:   "Give access to all account management services",
+				ConflictsWith: []string{"resources"},
+			},
+
+			"tags": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
+
+			"version": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		},
 	}
 }
@@ -172,6 +202,17 @@ func resourceIBMIAMUserPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("roles", roles)
 	d.Set("version", userPolicy.Version)
 	d.Set("resources", flattenPolicyResource(userPolicy.Resources))
+<<<<<<< HEAD
+=======
+	if len(userPolicy.Resources) > 0 {
+		if userPolicy.Resources[0].GetAttribute("serviceType") == "service" {
+			d.Set("account_management", false)
+		}
+		if userPolicy.Resources[0].GetAttribute("serviceType") == "platform_service" {
+			d.Set("account_management", true)
+		}
+	}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	return nil
 }
 
@@ -189,6 +230,8 @@ func resourceIBMIAMUserPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 		userPolicyID := parts[1]
 
 		userDetails, err := meta.(ClientSession).BluemixUserDetails()
+<<<<<<< HEAD
+=======
 		if err != nil {
 			return err
 		}
@@ -197,10 +240,22 @@ func resourceIBMIAMUserPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 		accountID := userDetails.userAccount
 
 		policy, err = generateAccountPolicy(d, meta)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		if err != nil {
 			return err
 		}
 
+<<<<<<< HEAD
+		var policy iampapv1.Policy
+		accountID := userDetails.userAccount
+
+		policy, err = generateAccountPolicy(d, meta)
+		if err != nil {
+			return err
+		}
+
+=======
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		user, err := getAccountUser(accountID, userEmail, meta)
 
 		policy.Resources[0].SetAccountID(accountID)

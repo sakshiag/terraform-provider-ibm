@@ -166,6 +166,32 @@ func TestAccIBMIAMAccessGroupPolicy_import(t *testing.T) {
 	})
 }
 
+<<<<<<< HEAD
+=======
+func TestAccIBMIAMAccessGroupPolicy_account_management(t *testing.T) {
+	var conf iampapv1.Policy
+	name := fmt.Sprintf("terraform_%d", acctest.RandInt())
+	resourceName := "ibm_iam_access_group_policy.policy"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckIBMIAMAccessGroupPolicyDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccCheckIBMIAMAccessGroupPolicy_account_management(name),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckIBMIAMAccessGroupPolicyExists(resourceName, conf),
+					resource.TestCheckResourceAttr("ibm_iam_access_group.accgrp", "name", name),
+					resource.TestCheckResourceAttr("ibm_iam_access_group_policy.policy", "roles.#", "1"),
+					resource.TestCheckResourceAttr("ibm_iam_access_group_policy.policy", "account_management", "true"),
+				),
+			},
+		},
+	})
+}
+
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 func testAccCheckIBMIAMAccessGroupPolicyDestroy(s *terraform.State) error {
 	iampapClient, err := testAccProvider.Meta().(ClientSession).IAMPAPAPI()
 	if err != nil {
@@ -381,3 +407,22 @@ func testAccCheckIBMIAMAccessGroupPolicy_import(name string) string {
 
 	`, name)
 }
+<<<<<<< HEAD
+=======
+
+func testAccCheckIBMIAMAccessGroupPolicy_account_management(name string) string {
+	return fmt.Sprintf(`
+
+		resource "ibm_iam_access_group" "accgrp" {
+			name = "%s"
+		  }
+		  
+		  resource "ibm_iam_access_group_policy" "policy" {
+			access_group_id = "${ibm_iam_access_group.accgrp.id}"
+			roles        = ["Administrator"]
+			account_management = true	
+		  }
+
+	`, name)
+}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

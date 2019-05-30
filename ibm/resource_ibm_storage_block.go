@@ -198,6 +198,15 @@ func resourceIBMStorageBlock() *schema.Resource {
 					},
 				},
 			},
+<<<<<<< HEAD
+=======
+
+			"target_address": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		},
 	}
 }
@@ -383,6 +392,8 @@ func resourceIBMStorageBlockRead(d *schema.ResourceData, meta interface{}) error
 	if storage.BillingItem != nil {
 		d.Set("hourly_billing", storage.BillingItem.HourlyFlag)
 	}
+
+	d.Set("target_address", storage.IscsiTargetIpAddresses)
 
 	return nil
 }

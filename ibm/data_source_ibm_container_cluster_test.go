@@ -125,6 +125,10 @@ data "ibm_container_cluster" "testacc_ds_cluster" {
     account_guid = "${data.ibm_account.testacc_acc.id}"
     cluster_name_id = "${ibm_container_cluster.testacc_cluster.id}"
     region = "%s"
+<<<<<<< HEAD
+=======
+    depends_on = ["ibm_container_bind_service.bind_service"]
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 }
 `, cfOrganization, cfOrganization, cfSpace, clusterName, datacenter, machineType, publicVlanID, privateVlanID, subnetID, serviceName, serviceKeyName, csRegion, csRegion)
 }

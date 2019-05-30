@@ -3,6 +3,10 @@ package ibm
 import (
 	"log"
 	"reflect"
+<<<<<<< HEAD
+=======
+	"strings"
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	v1 "github.com/IBM-Cloud/bluemix-go/api/cis/cisv1"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -123,11 +127,17 @@ func resourceIBMCISHealthCheck() *schema.Resource {
 
 func resourceCIShealthCheckCreate(d *schema.ResourceData, meta interface{}) error {
 	cisClient, err := meta.(ClientSession).CisAPI()
+<<<<<<< HEAD
 	log.Printf("   client %v\n", cisClient)
 	if err != nil {
 		return err
 	}
 
+=======
+	if err != nil {
+		return err
+	}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	cisId := d.Get("cis_id").(string)
 	monitorPath := d.Get("path").(string)
 	expCodes := d.Get("expected_codes").(string)
@@ -182,11 +192,15 @@ func resourceCIShealthCheckRead(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	monitorId, cisId, err := convertTftoCisTwoVar(d.Id())
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 	log.Printf("resourceCIShealthCheckRead - Getting Monitor %v\n", monitorId)
 	var monitor *v1.Monitor
 
@@ -211,6 +225,30 @@ func resourceCIShealthCheckRead(d *schema.ResourceData, meta interface{}) error 
 		d.Set("allow_insecure", monitorObj.AllowInsecure)
 		// }
 	}
+=======
+	var monitor *v1.Monitor
+	monitor, err = cisClient.Monitors().GetMonitor(cisId, monitorId)
+	if err != nil {
+		if checkCisMonitorDeleted(d, meta, err, monitor) {
+			d.SetId("")
+			return nil
+		}
+		log.Printf("[WARN] Error getting zone during MonitorRead %v\n", err)
+		return err
+	}
+	monitorObj := *monitor
+	d.Set("cis_id", cisId)
+	d.Set("path", monitorObj.Path)
+	d.Set("expected_body", monitorObj.ExpBody)
+	d.Set("expected_codes", monitorObj.ExpCodes)
+	d.Set("type", monitorObj.MonType)
+	d.Set("method", monitorObj.Method)
+	d.Set("timeout", monitorObj.Timeout)
+	d.Set("retries", monitorObj.Retries)
+	d.Set("interval", monitorObj.Interval)
+	d.Set("follow_redirects", monitorObj.FollowRedirects)
+	d.Set("allow_insecure", monitorObj.AllowInsecure)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	return nil
 }
 
@@ -229,20 +267,36 @@ func resourceCIShealthCheckDelete(d *schema.ResourceData, meta interface{}) erro
 	}
 	var monitor *v1.Monitor
 	emptyMonitor := new(v1.Monitor)
+<<<<<<< HEAD
 
 	log.Println("Getting Monitor to delete")
 	monitor, err = cisClient.Monitors().GetMonitor(cisId, monitorId)
 	if err != nil {
 		log.Printf("GetMonitor Failed %s\n", err)
+=======
+	monitor, err = cisClient.Monitors().GetMonitor(cisId, monitorId)
+	if err != nil {
+		if checkCisMonitorDeleted(d, meta, err, monitor) {
+			d.SetId("")
+			return nil
+		}
+		log.Printf("[WARN] Error getting zone during MonitorRead %v\n", err)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		return err
 	}
 
 	monitorObj := *monitor
 	if !reflect.DeepEqual(emptyMonitor, monitorObj) {
+<<<<<<< HEAD
 		log.Println("Deleting Monitor")
 		err = cisClient.Monitors().DeleteMonitor(cisId, monitorId)
 		if err != nil {
 			log.Printf("DeleteMonitor Failed %s\n", err)
+=======
+		err = cisClient.Monitors().DeleteMonitor(cisId, monitorId)
+		if err != nil {
+			log.Printf("[WARN] DeleteMonitor Failed %s\n", err)
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 			return err
 		}
 	}
@@ -250,3 +304,27 @@ func resourceCIShealthCheckDelete(d *schema.ResourceData, meta interface{}) erro
 	d.SetId("")
 	return nil
 }
+<<<<<<< HEAD
+=======
+
+func checkCisMonitorDeleted(d *schema.ResourceData, meta interface{}, errCheck error, monitor *v1.Monitor) bool {
+	// Check if error is due to removal of Cis resource and hence all subresources
+	if strings.Contains(errCheck.Error(), "Object not found") ||
+		strings.Contains(errCheck.Error(), "status code: 404") ||
+		strings.Contains(errCheck.Error(), "Invalid zone identifier") { //code 400
+		log.Printf("[WARN] Removing resource from state because it's not found via the CIS API")
+		return true
+	}
+	_, cisId, _ := convertTftoCisTwoVar(d.Id())
+	exists, errNew := rcInstanceExists(cisId, "ibm_cis", meta)
+	if errNew != nil {
+		log.Printf("resourceCISmonitorRead - Failure validating service exists %s\n", errNew)
+		return false
+	}
+	if !exists {
+		log.Printf("[WARN] Removing monitor from state because parent cis instance is in removed state")
+		return true
+	}
+	return false
+}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe

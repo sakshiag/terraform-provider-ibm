@@ -2,6 +2,11 @@ package ibm
 
 import (
 	"fmt"
+<<<<<<< HEAD
+=======
+	"log"
+	"strings"
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	"time"
 
 	"github.com/hashicorp/terraform/flatmap"
@@ -101,7 +106,10 @@ func resourceIBMCISInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	serviceName := "internet-svcs"
 	plan := d.Get("plan").(string)
 	name := d.Get("name").(string)
@@ -198,11 +206,29 @@ func resourceIBMCISInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	instanceID := d.Id()
+<<<<<<< HEAD
 
 	instance, err := rsConClient.ResourceServiceInstance().GetInstance(instanceID)
 	if err != nil {
 		return fmt.Errorf("Error retrieving resource instance: %s", err)
 	}
+=======
+	instance, err := rsConClient.ResourceServiceInstance().GetInstance(instanceID)
+	if err != nil {
+		if strings.Contains(err.Error(), "Object not found") ||
+			strings.Contains(err.Error(), "status code: 404") {
+			log.Printf("[WARN] Removing record from state because it's not found via the API")
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf("Error retrieving resource instance: %s", err)
+	}
+	if strings.Contains(instance.State, "removed") {
+		log.Printf("[WARN] Removing instance from TF state because it's now in removed state")
+		d.SetId("")
+		return nil
+	}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	d.Set("tags", instance.Tags)
 	d.Set("name", instance.Name)
@@ -292,7 +318,19 @@ func resourceIBMCISInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 
 	err = rsConClient.ResourceServiceInstance().DeleteInstance(id, true)
 	if err != nil {
+<<<<<<< HEAD
 		return fmt.Errorf("Error deleting resource instance: %s", err)
+=======
+		// If prior delete occurs, instance is not immediately deleted, but remains in "removed" state"
+		// RC 410 with "Gone" returned as error
+		if strings.Contains(err.Error(), "Gone") ||
+			strings.Contains(err.Error(), "status code: 410") {
+			log.Printf("[WARN] Resource instance already deleted %s\n ", err)
+			err = nil
+		} else {
+			return fmt.Errorf("Error deleting resource instance: %s", err)
+		}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	}
 
 	_, err = waitForCISInstanceDelete(d, meta)
@@ -311,7 +349,10 @@ func resourceIBMCISInstanceExists(d *schema.ResourceData, meta interface{}) (boo
 		return false, err
 	}
 	instanceID := d.Id()
+<<<<<<< HEAD
 
+=======
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	instance, err := rsConClient.ResourceServiceInstance().GetInstance(instanceID)
 	if err != nil {
 		if apiErr, ok := err.(bmxerror.RequestFailure); ok {
@@ -321,6 +362,14 @@ func resourceIBMCISInstanceExists(d *schema.ResourceData, meta interface{}) (boo
 		}
 		return false, fmt.Errorf("Error communicating with the API: %s", err)
 	}
+<<<<<<< HEAD
+=======
+	if strings.Contains(instance.State, "removed") {
+		log.Printf("[WARN] Removing instance from state because it's in removed state")
+		d.SetId("")
+		return false, nil
+	}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 
 	return instance.ID == instanceID, nil
 }

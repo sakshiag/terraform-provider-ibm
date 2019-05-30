@@ -94,6 +94,10 @@ func resourceIBMComputeVmInstance() *schema.Resource {
 				Type:          schema.TypeSet,
 				Optional:      true,
 				ForceNew:      true,
+<<<<<<< HEAD
+=======
+				MinItems:      2,
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 				ConflictsWith: []string{"hostname", "domain"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1007,11 +1011,19 @@ func resourceIBMComputeVmInstanceCreate(d *schema.ResourceData, meta interface{}
 		if err != nil {
 			return err
 		}
+<<<<<<< HEAD
 
 		// wait for machine availability
 
 		_, err = WaitForVirtualGuestAvailable(id, d, meta)
 
+=======
+
+		// wait for machine availability
+
+		_, err = WaitForVirtualGuestAvailable(id, d, meta)
+
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		if err != nil {
 			return fmt.Errorf(
 				"Error waiting for virtual machine (%s) to become ready: %s", d.Id(), err)
@@ -1127,28 +1139,45 @@ func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) 
 	}
 	d.Set("ipv4_address", result.PrimaryIpAddress)
 	d.Set("ipv4_address_private", result.PrimaryBackendIpAddress)
-	if result.PrimaryNetworkComponent.PrimaryIpAddressRecord != nil {
+	if result.PrimaryNetworkComponent != nil && result.PrimaryNetworkComponent.PrimaryIpAddressRecord != nil {
 		d.Set("ip_address_id", *result.PrimaryNetworkComponent.PrimaryIpAddressRecord.GuestNetworkComponentBinding.IpAddressId)
 	}
+<<<<<<< HEAD
 	d.Set("public_interface_id", result.PrimaryNetworkComponent.Id)
 	if result.PrimaryBackendNetworkComponent.PrimaryIpAddressRecord != nil {
 		d.Set("ip_address_id_private",
 			*result.PrimaryBackendNetworkComponent.PrimaryIpAddressRecord.GuestNetworkComponentBinding.IpAddressId)
 	}
 	d.Set("private_interface_id", result.PrimaryBackendNetworkComponent.Id)
+=======
+	if result.PrimaryNetworkComponent != nil {
+		d.Set("public_interface_id", result.PrimaryNetworkComponent.Id)
+	}
+	if result.PrimaryBackendNetworkComponent != nil && result.PrimaryBackendNetworkComponent.PrimaryIpAddressRecord != nil {
+		d.Set("ip_address_id_private",
+			*result.PrimaryBackendNetworkComponent.PrimaryIpAddressRecord.GuestNetworkComponentBinding.IpAddressId)
+	}
+	if result.PrimaryBackendNetworkComponent != nil {
+		d.Set("private_interface_id", result.PrimaryBackendNetworkComponent.Id)
+	}
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 	d.Set("private_network_only", *result.PrivateNetworkOnlyFlag)
 	d.Set("hourly_billing", *result.HourlyBillingFlag)
 	d.Set("local_disk", *result.LocalDiskFlag)
 
-	if result.PrimaryNetworkComponent.NetworkVlan != nil {
+	if result.PrimaryNetworkComponent != nil && result.PrimaryNetworkComponent.NetworkVlan != nil {
 		d.Set("public_vlan_id", *result.PrimaryNetworkComponent.NetworkVlan.Id)
 	}
 
+<<<<<<< HEAD
 	if result.PrimaryBackendNetworkComponent.NetworkVlan != nil {
+=======
+	if result.PrimaryBackendNetworkComponent != nil && result.PrimaryBackendNetworkComponent.NetworkVlan != nil {
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		d.Set("private_vlan_id", *result.PrimaryBackendNetworkComponent.NetworkVlan.Id)
 	}
 
-	if result.PrimaryNetworkComponent.PrimaryIpAddressRecord != nil {
+	if result.PrimaryNetworkComponent != nil && result.PrimaryNetworkComponent.PrimaryIpAddressRecord != nil {
 		publicSubnet := result.PrimaryNetworkComponent.PrimaryIpAddressRecord.Subnet
 		d.Set(
 			"public_subnet",
@@ -1157,7 +1186,7 @@ func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) 
 		d.Set("public_subnet_id", result.PrimaryNetworkComponent.PrimaryIpAddressRecord.SubnetId)
 	}
 
-	if result.PrimaryNetworkComponent.SecurityGroupBindings != nil {
+	if result.PrimaryNetworkComponent != nil && result.PrimaryNetworkComponent.SecurityGroupBindings != nil {
 		var sgs []int
 		for _, sg := range result.PrimaryNetworkComponent.SecurityGroupBindings {
 			sgs = append(sgs, *sg.SecurityGroup.Id)
@@ -1165,7 +1194,11 @@ func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) 
 		d.Set("public_security_group_ids", sgs)
 	}
 
+<<<<<<< HEAD
 	if result.PrimaryBackendNetworkComponent.PrimaryIpAddressRecord != nil {
+=======
+	if result.PrimaryBackendNetworkComponent != nil && result.PrimaryBackendNetworkComponent.PrimaryIpAddressRecord != nil {
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
 		privateSubnet := result.PrimaryBackendNetworkComponent.PrimaryIpAddressRecord.Subnet
 		d.Set(
 			"private_subnet",
@@ -1175,7 +1208,7 @@ func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) 
 
 	}
 
-	if result.PrimaryBackendNetworkComponent.SecurityGroupBindings != nil {
+	if result.PrimaryBackendNetworkComponent != nil && result.PrimaryBackendNetworkComponent.SecurityGroupBindings != nil {
 		var sgs []int
 		for _, sg := range result.PrimaryBackendNetworkComponent.SecurityGroupBindings {
 			sgs = append(sgs, *sg.SecurityGroup.Id)
@@ -1185,7 +1218,7 @@ func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) 
 
 	d.Set("ipv6_enabled", false)
 	d.Set("ipv6_static_enabled", false)
-	if result.PrimaryNetworkComponent.PrimaryVersion6IpAddressRecord != nil {
+	if result.PrimaryNetworkComponent != nil && result.PrimaryNetworkComponent.PrimaryVersion6IpAddressRecord != nil {
 		d.Set("ipv6_enabled", true)
 		d.Set("ipv6_address", *result.PrimaryNetworkComponent.PrimaryVersion6IpAddressRecord.IpAddress)
 		d.Set("ipv6_address_id", *result.PrimaryNetworkComponent.PrimaryVersion6IpAddressRecord.GuestNetworkComponentBinding.IpAddressId)
@@ -1197,9 +1230,11 @@ func resourceIBMComputeVmInstanceRead(d *schema.ResourceData, meta interface{}) 
 		)
 		d.Set("public_ipv6_subnet_id", result.PrimaryNetworkComponent.PrimaryVersion6IpAddressRecord.SubnetId)
 	}
-	for _, subnet := range result.PrimaryNetworkComponent.Subnets {
-		if *subnet.SubnetType == "STATIC_IP_ROUTED_6" {
-			d.Set("ipv6_static_enabled", true)
+	if result.PrimaryNetworkComponent != nil {
+		for _, subnet := range result.PrimaryNetworkComponent.Subnets {
+			if *subnet.SubnetType == "STATIC_IP_ROUTED_6" {
+				d.Set("ipv6_static_enabled", true)
+			}
 		}
 	}
 

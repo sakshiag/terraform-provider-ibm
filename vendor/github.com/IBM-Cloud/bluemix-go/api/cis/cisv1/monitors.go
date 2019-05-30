@@ -8,6 +8,10 @@ import (
 type Monitor struct {
       Id string `json:"id"`
       Path string `json:"path"`
+<<<<<<< HEAD
+=======
+      Description string `json:"description"`
+>>>>>>> 39014884d69db9425c92363e89383b38bba01fbe
       ExpBody string `json:"expected_body"`
       ExpCodes string `json:"expected_codes"`
       // Headers omitted future enhancement
